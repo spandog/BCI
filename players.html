@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Players — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --green-dark:#0f2a1a;--green-mid:#1e4d2e;--gold:#c9a84c;--gold-light:#e8c97e;
+    --cream:#f7f3eb;--cream-dark:#ede8dc;--text-dark:#1a1a1a;--text-muted:#6b7280;--border:#ddd8cc;
+    --serif-display:'Playfair Display',Georgia,serif;
+    --serif-body:'EB Garamond',Georgia,serif;
+  }
+  body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  nav{background:var(--green-dark);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;}
+  .nav-menu-btn span.menu-word{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;}
+  .nav-menu-btn .chevron{color:var(--gold);width:12px;height:12px;transition:transform 0.2s;}
+  .nav-menu-btn.open .chevron{transform:rotate(180deg);}
+  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(201,168,76,0.2);border-top:none;min-width:200px;z-index:199;}
+  .dropdown.open{display:block;}
+  .dropdown a{display:flex;align-items:center;gap:10px;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.15s;}
+  .dropdown a:last-child{border-bottom:none;}
+  .dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.03);padding-left:1.5rem;}
+  .dropdown a.active{color:var(--gold);}
+  .dropdown a.live{color:var(--gold-light);}
+  .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
+  .dropdown a.live .d-icon{color:var(--gold-light);}
+  .page-hero{background:var(--green-dark);padding:3rem 1.5rem;text-align:center;border-bottom:1px solid rgba(201,168,76,0.15);}
+  .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
+  .page-hero h1{font-family:var(--serif-display);font-size:clamp(2rem,8vw,2.8rem);color:white;letter-spacing:3px;font-weight:700;}
+  .page{max-width:1080px;margin:0 auto;padding:3rem 1.5rem;}
+  .filter-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:white;margin-bottom:2.5rem;max-width:400px;}
+  .filter-tab{flex:1;padding:0.65rem 1rem;text-align:center;font-family:var(--serif-display);font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);border-right:1px solid var(--border);transition:all 0.2s;}
+  .filter-tab:last-child{border-right:none;}
+  .filter-tab.active{background:var(--green-dark);color:var(--gold);}
+  .players-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;}
+  .player-card{perspective:1200px;opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease;}
+  .player-card.visible{opacity:1;transform:translateY(0);}
+  .card-inner{display:grid;grid-template-areas:"stack";transform-style:preserve-3d;transition:transform 0.6s cubic-bezier(.4,.2,.2,1);cursor:pointer;}
+  .player-card.flipped .card-inner{transform:rotateY(180deg);}
+  .card-face{grid-area:stack;background:white;border:1px solid var(--border);border-radius:4px;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:box-shadow 0.2s;display:flex;flex-direction:column;}
+  .card-inner:hover .card-face{box-shadow:0 6px 24px rgba(0,0,0,0.09);}
+  .card-back{transform:rotateY(180deg);}
+  .card-back .player-body{background:var(--green-dark);}
+  .card-back .player-team.baber{color:var(--gold-light);}
+  .card-back .player-team.weff{color:#8fb4e0;}
+  .card-back .player-name{color:white;}
+  .flip-hint{font-family:var(--serif-display);font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);text-align:center;margin-top:0.75rem;}
+  .card-back .flip-hint{color:rgba(255,255,255,0.4);}
+  .back-bio{font-family:var(--serif-body);font-size:0.85rem;font-style:italic;color:rgba(255,255,255,0.65);line-height:1.5;margin:0.5rem 0;}
+  .back-trips-label{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:0.6rem;margin-bottom:4px;}
+  .back-trips{font-family:var(--serif-display);font-size:0.85rem;color:var(--gold-light);line-height:1.5;margin-bottom:0.6rem;}
+  .record-stats.dark{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.15);}
+  .record-stats.dark .record-cell{border-color:rgba(255,255,255,0.15);}
+  .record-stats.dark .r-label{color:rgba(255,255,255,0.5);}
+  .record-stats.dark .r-num{color:var(--gold-light);}
+  .player-photo{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--cream-dark);}
+  .player-photo-placeholder{width:100%;aspect-ratio:3/4;background:var(--green-dark);display:flex;align-items:center;justify-content:center;}
+  .player-photo-placeholder .icon{width:40px;height:40px;color:rgba(201,168,76,0.3);stroke-width:1;}
+  .player-body{padding:1.1rem 1rem;}
+  .player-team{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;}
+  .player-team.baber{color:var(--green-mid);}
+  .player-team.weff{color:#3a5f8a;}
+  .player-name{font-family:var(--serif-display);font-size:1.05rem;font-weight:600;color:var(--text-dark);margin-bottom:2px;letter-spacing:0.5px;}
+  .player-role{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;}
+  .player-bio{font-family:var(--serif-body);font-size:0.88rem;color:var(--text-muted);font-style:italic;line-height:1.5;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
+  .player-hcap{display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;}
+  .hcap-label{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
+  .hcap-val{font-family:var(--serif-display);font-size:0.85rem;font-weight:600;color:var(--text-dark);}
+  .record-stats{display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-top:0.75rem;background:#fafaf7;}
+  .record-cell{flex:1;text-align:center;padding:0.5rem 0.25rem;border-right:1px solid var(--border);}
+  .record-cell:last-child{border-right:none;}
+  .record-cell .r-label{font-family:var(--serif-display);font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);display:block;}
+  .record-cell .r-num{font-family:var(--serif-display);font-size:1.05rem;font-weight:700;color:var(--green-dark);display:block;margin-top:2px;}
+  footer{background:#0a1f12;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+  @media(max-width:900px){.players-grid{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:640px){.players-grid{grid-template-columns:repeat(2,1fr);gap:1rem;}}
+  @media(max-width:380px){.players-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h2.2L8.8 4.5h6.4L16.8 6.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5z"/><circle cx="12" cy="12.5" r="3.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.7 5.6 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.6-3.7-9S9.6 5.6 12 3z"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  </defs>
+</svg>
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+  <div style="position:relative;">
+    <div class="nav-menu-btn" id="menu-btn">
+      <span class="menu-word">Menu</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div class="dropdown" id="dropdown">
+      <a href="editions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-trophy"/></svg>Results</a>
+      <a href="gallery.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
+      <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
+      <a href="players.html" class="active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
+      <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+      <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
+      <a href="leaderboard.html" class="live"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-eyebrow">Algarve · 2027</div>
+  <h1>PLAYERS</h1>
+</div>
+
+<div class="page">
+  <div class="filter-tabs">
+    <div class="filter-tab active" data-filter="all">All</div>
+    <div class="filter-tab" data-filter="baber">Team Baber</div>
+    <div class="filter-tab" data-filter="weff">Team Weff</div>
+  </div>
+  <div class="players-grid" id="players-grid"></div>
+</div>
+
+<footer><p><span>Book Club Invitational</span></p></footer>
+
+<script>
+(function(){
+  document.getElementById('menu-btn').addEventListener('click',function(){
+    document.getElementById('menu-btn').classList.toggle('open');
+    document.getElementById('dropdown').classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){
+      document.getElementById('menu-btn').classList.remove('open');
+      document.getElementById('dropdown').classList.remove('open');
+    }
+  });
+
+  /* Records shown = 2026 Marbella baseline below + live results computed
+     automatically from the Algarve 2027 matches in Supabase.
+     Fill in the Marbella wins/losses/ties per player when you have them. */
+  var players=[
+    {name:'James Baber',team:'baber',role:'Captain',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
+    {name:'Kane Bailey',team:'baber',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Mark Brackenridge',team:'baber',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Tony Bryant',team:'weff',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
+    {name:'Aaron Davies',team:'baber',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Will Dodgson',team:'baber',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Matt Higgins',team:'weff',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:0,losses:2,ties:0,bio:'',photo:''},
+    {name:'Brian Hinojosa',team:'weff',role:'Vice Captain',hcap:'10.0',trips:[{location:'Marbella',year:2026},{location:'Algarve',year:2027}],wins:0,losses:2,ties:0,bio:'',photo:'images/players/brian-hinojosa-face.png',actionPhoto:'images/players/brian-hinojosa-action.png'},
+    {name:'Rich Horsley',team:'weff',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Ted Keeling',team:'baber',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
+    {name:'Louis Kelly',team:'baber',role:'Vice Captain',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Sean Mongan',team:'weff',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Dan Simkin',team:'baber',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
+    {name:'Jack Taggart',team:'weff',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Alex Tinawi',team:'weff',role:'Player',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:0,losses:2,ties:0,bio:'',photo:''},
+    {name:'Matt Wreford',team:'weff',role:'Captain',hcap:'TBC',trips:[{location:'Marbella',year:2026}],wins:0,losses:2,ties:0,bio:'',photo:''},
+  ];
+
+  function buildTrips(trips){
+    var sorted=trips.slice().sort(function(a,b){return b.year-a.year;});
+    return sorted.map(function(tr){return '<div>'+tr.location+', '+tr.year+'</div>';}).join('');
+  }
+
+  function buildRecord(w,l,t,dark){
+    var total=w+l+t;
+    var cls='record-stats'+(dark?' dark':'');
+    if(total===0)return '<div style="font-family:var(--serif-body);font-size:0.8rem;font-style:italic;color:'+(dark?'rgba(255,255,255,0.5)':'var(--text-muted)')+';">No matches yet</div>';
+    return '<div class="'+cls+'">'
+      +'<div class="record-cell"><span class="r-label">Wins</span><span class="r-num">'+w+'</span></div>'
+      +'<div class="record-cell"><span class="r-label">Ties</span><span class="r-num">'+t+'</span></div>'
+      +'<div class="record-cell"><span class="r-label">Losses</span><span class="r-num">'+l+'</span></div>'
+    +'</div>';
+  }
+
+  function render(filter){
+    var grid=document.getElementById('players-grid');
+    grid.innerHTML='';
+    var filtered=filter==='all'?players:players.filter(function(p){return p.team===filter;});
+    filtered.forEach(function(p,i){
+      var photoHTML=p.photo
+        ?'<img class="player-photo" src="'+p.photo+'" alt="'+p.name+'">'
+        :'<div class="player-photo-placeholder"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg></div>';
+      var actionPhotoHTML=p.actionPhoto
+        ?'<img class="player-photo" src="'+p.actionPhoto+'" alt="'+p.name+' action shot">'
+        :'<div class="player-photo-placeholder"><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg></div>';
+      var card=document.createElement('div');
+      card.className='player-card';
+      card.dataset.team=p.team;
+      card.innerHTML=
+        '<div class="card-inner">'+
+          '<div class="card-face card-front">'+
+            photoHTML+
+            '<div class="player-body">'+
+              '<div class="player-team '+p.team+'">'+(p.team==='baber'?'Team Baber':'Team Weff')+'</div>'+
+              '<div class="player-name">'+p.name+'</div>'+
+              (p.role!=='Player'?'<div class="player-role">'+p.role+'</div>':'')+
+              '<div class="player-hcap"><span class="hcap-label">Handicap</span><span class="hcap-val">'+p.hcap+'</span></div>'+
+              '<div class="flip-hint">Tap for record &amp; trips</div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="card-face card-back">'+
+            actionPhotoHTML+
+            '<div class="player-body">'+
+              '<div class="player-team '+p.team+'">'+(p.team==='baber'?'Team Baber':'Team Weff')+'</div>'+
+              '<div class="player-name">'+p.name+'</div>'+
+              (p.bio?'<div class="back-bio">'+p.bio+'</div>':'')+
+              '<div class="back-trips-label">Trips</div>'+
+              '<div class="back-trips">'+buildTrips(p.trips)+'</div>'+
+              buildRecord(p.wins,p.losses,p.ties,true)+
+              '<div class="flip-hint">Tap to flip back</div>'+
+            '</div>'+
+          '</div>'+
+        '</div>';
+      card.querySelector('.card-inner').addEventListener('click',function(){
+        card.classList.toggle('flipped');
+      });
+      grid.appendChild(card);
+      setTimeout(function(c){c.classList.add('visible');},i*60,card);
+    });
+  }
+
+  var currentFilter='all';
+
+  document.querySelectorAll('.filter-tab').forEach(function(tab){
+    tab.addEventListener('click',function(){
+      document.querySelectorAll('.filter-tab').forEach(function(t){t.classList.remove('active');});
+      tab.classList.add('active');
+      currentFilter=tab.dataset.filter;
+      render(currentFilter);
+    });
+  });
+
+  render('all');
+
+  /* ---------- live records from the 2027 leaderboard ---------- */
+  var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+
+  fetch(SB_URL+'/rest/v1/bci_matches?select=status,leader,baber_players,weff_players',{
+    headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}
+  })
+  .then(function(r){return r.json();})
+  .then(function(rows){
+    if(!Array.isArray(rows))return;
+    /* Only finished matches count, and placeholder fixtures
+       (e.g. "Baber Pair 1", "Weff Player 4") are ignored. */
+    var finals=rows.filter(function(m){
+      return m.status==='final'&&!/\b(pair|player)\s*\d/i.test(m.baber_players+' '+m.weff_players);
+    });
+    if(!finals.length)return;
+    players.forEach(function(p){
+      var parts=p.name.split(' ');
+      var surname=parts[parts.length-1];
+      var re=new RegExp('\\b'+surname+'\\b','i');
+      finals.forEach(function(m){
+        var side=re.test(m.baber_players)?'baber':(re.test(m.weff_players)?'weff':null);
+        if(!side)return;
+        if(m.leader==='tie')p.ties++;
+        else if(m.leader===side)p.wins++;
+        else p.losses++;
+      });
+    });
+    render(currentFilter);
+  })
+  .catch(function(){/* leaderboard unreachable — baseline records still show */});
+})();
+</script>
+<script src="hero-gallery.js"></script>
+<script src="live-tracker.js"></script>
+</body>
+</html>

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Leaderboard — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --green-dark:#0f2a1a;--green-mid:#1e4d2e;--gold:#c9a84c;--gold-light:#e8c97e;
+    --cream:#f7f3eb;--cream-dark:#ede8dc;--text-dark:#1a1a1a;--text-muted:#6b7280;--border:#ddd8cc;
+    --serif-display:'Playfair Display',Georgia,serif;
+    --serif-body:'EB Garamond',Georgia,serif;
+    --baber-bg:#e5f0e8;--baber-border:#a8c9b3;--baber-text:#1e4d2e;
+    --weff-bg:#e3ebf5;--weff-border:#a9c1de;--weff-text:#3a5f8a;
+    --halve-bg:#f3ead2;--halve-text:#8a6d1f;
+  }
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);min-height:100vh;display:flex;flex-direction:column;}
+  nav{background:var(--green-dark);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;}
+  .nav-menu-btn span.menu-word{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;}
+  .nav-menu-btn .chevron{color:var(--gold);width:12px;height:12px;transition:transform 0.2s;}
+  .nav-menu-btn.open .chevron{transform:rotate(180deg);}
+  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(201,168,76,0.2);border-top:none;min-width:200px;z-index:199;}
+  .dropdown.open{display:block;}
+  .dropdown a{display:flex;align-items:center;gap:10px;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.15s;}
+  .dropdown a:last-child{border-bottom:none;}
+  .dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.03);padding-left:1.5rem;}
+  .dropdown a.active{color:var(--gold);}
+  .dropdown a.live{color:var(--gold-light);}
+  .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
+  .dropdown a.live .d-icon{color:var(--gold-light);}
+  .page-hero{background:var(--green-dark);padding:3rem 1.5rem;text-align:center;border-bottom:1px solid rgba(201,168,76,0.15);}
+  .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
+  .page-hero h1{font-family:var(--serif-display);font-size:clamp(2rem,8vw,2.8rem);color:white;letter-spacing:3px;font-weight:700;}
+  .page{max-width:860px;margin:0 auto;padding:3rem 1.5rem;flex:1;width:100%;}
+
+  .config-warning{background:#fdf6e3;border:1px solid var(--gold);border-radius:6px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.9rem;color:#7a5c1e;display:none;}
+  .config-warning.visible{display:block;}
+
+  .score-banner{display:grid;grid-template-columns:1fr auto 1fr;background:var(--green-dark);border-radius:8px;overflow:hidden;margin-bottom:0.75rem;border:1px solid rgba(201,168,76,0.2);}
+  .score-team{padding:1.5rem 1rem;text-align:center;}
+  .score-team.baber{background:rgba(30,77,46,0.5);}
+  .score-team.weff{background:rgba(26,46,74,0.35);}
+  .score-team .t-label{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:3px;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:4px;}
+  .score-team .t-name{font-family:var(--serif-display);font-size:clamp(1rem,4vw,1.4rem);font-weight:700;color:white;letter-spacing:2px;margin-bottom:6px;}
+  .score-team .t-score{font-family:var(--serif-display);font-size:clamp(2.5rem,10vw,4rem);font-weight:700;color:var(--gold);line-height:1;}
+  .score-team.winning .t-score{color:var(--gold-light);}
+  .score-divider{padding:0.75rem;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .score-divider .vs{font-family:var(--serif-display);font-size:0.75rem;letter-spacing:3px;color:rgba(255,255,255,0.3);text-transform:uppercase;}
+  .win-note{text-align:center;font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);margin-bottom:1.5rem;text-transform:uppercase;}
+
+  .day-tabs{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:white;margin-bottom:1rem;}
+  .day-tab{flex:1;padding:0.75rem;text-align:center;font-family:var(--serif-display);font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);border-right:1px solid var(--border);transition:all 0.2s;}
+  .day-tab:last-child{border-right:none;}
+  .day-tab.active{background:var(--green-dark);color:var(--gold);}
+
+  .hole-legend{display:flex;justify-content:center;gap:1.25rem;margin-bottom:1rem;font-family:var(--serif-display);font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
+  .hole-legend span{display:flex;align-items:center;gap:5px;}
+  .legend-sq{width:11px;height:11px;border-radius:2px;border:1px solid var(--border);display:inline-block;}
+  .legend-sq.b{background:var(--baber-bg);border-color:var(--baber-border);}
+  .legend-sq.w{background:var(--weff-bg);border-color:var(--weff-border);}
+  .legend-sq.h{background:var(--halve-bg);border-color:var(--gold);}
+
+  .match-list{display:flex;flex-direction:column;gap:1rem;margin-bottom:2.5rem;}
+  .match-card{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+  .match-top{display:flex;justify-content:space-between;align-items:center;padding:0.625rem 1rem;border-bottom:1px solid var(--border);background:var(--cream);}
+  .match-label{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .status-pill{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text-muted);}
+  .status-pill.live{background:var(--green-dark);color:var(--gold-light);border-color:var(--green-dark);}
+  .status-pill.final{background:var(--gold);color:var(--green-dark);border-color:var(--gold);}
+  .match-body{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;}
+  .match-side{padding:1rem;display:flex;flex-direction:column;justify-content:center;gap:2px;}
+  .match-side.baber{text-align:right;}
+  .match-side.weff{text-align:left;}
+  .match-side .player{font-size:0.95rem;color:var(--text-dark);}
+  .match-side.leading.baber{background:var(--baber-bg);}
+  .match-side.leading.baber .player{color:var(--baber-text);font-weight:600;}
+  .match-side.leading.weff{background:var(--weff-bg);}
+  .match-side.leading.weff .player{color:var(--weff-text);font-weight:600;}
+  .match-centre{padding:1rem 0.875rem;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:92px;border-left:1px solid var(--border);border-right:1px solid var(--border);}
+  .match-centre .m-score{font-family:var(--serif-display);font-size:1.15rem;font-weight:700;color:var(--green-dark);letter-spacing:1px;white-space:nowrap;}
+  .match-centre .m-thru{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-top:3px;white-space:nowrap;}
+  .match-centre .m-vs{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .hole-strip{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;padding:0.625rem 1rem 0.875rem;border-top:1px solid var(--border);}
+  .hole-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--serif-display);font-size:0.55rem;border:1px solid var(--border);border-radius:3px;color:var(--text-muted);background:white;min-height:16px;}
+  .hole-cell.b{background:var(--baber-bg);border-color:var(--baber-border);color:var(--baber-text);font-weight:700;}
+  .hole-cell.w{background:var(--weff-bg);border-color:var(--weff-border);color:var(--weff-text);font-weight:700;}
+  .hole-cell.h{background:var(--halve-bg);border-color:var(--gold);color:var(--halve-text);font-weight:700;}
+  .match-side .side-score{font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:1px;margin-top:2px;}
+  .match-side.baber .side-score{color:var(--baber-text);}
+  .match-side.weff .side-score{color:var(--weff-text);}
+  .card-actions{border-top:1px solid var(--border);}
+  .enter-score{width:100%;padding:0.7rem;background:var(--cream);border:none;font-family:var(--serif-display);font-size:0.62rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--green-mid);cursor:pointer;transition:all 0.15s;}
+  .enter-score:hover{color:var(--gold);background:var(--cream-dark);}
+  .score-view-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+  .score-view-head .sv-title{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;color:var(--green-dark);text-transform:uppercase;}
+  .back-link{font-family:var(--serif-display);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);cursor:pointer;border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.875rem;background:white;}
+  .back-link:hover{color:var(--gold);border-color:var(--gold);}
+  .empty-note{text-align:center;font-style:italic;color:var(--text-muted);padding:2rem 1rem;}
+
+  .scorer-section{border-top:1px solid var(--border);padding-top:1.5rem;margin-top:1rem;}
+  .scorer-toggle{display:flex;align-items:center;gap:0.75rem;cursor:pointer;padding:0.5rem 0;}
+  .scorer-toggle h3{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .arrow{width:12px;height:12px;color:var(--text-muted);transition:transform 0.2s;}
+  .scorer-toggle.open .arrow{transform:rotate(180deg);}
+  .password-gate{background:white;border:1px solid var(--border);border-radius:6px;padding:1.5rem;text-align:center;max-width:320px;margin:0 auto;}
+  .password-gate h4{font-family:var(--serif-display);font-size:0.9rem;letter-spacing:2px;color:var(--green-dark);margin-bottom:0.75rem;text-transform:uppercase;}
+  .password-gate input{width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:4px;font-size:1rem;margin-bottom:0.625rem;text-align:center;letter-spacing:4px;-webkit-appearance:none;}
+  .password-gate input:focus{outline:none;border-color:var(--gold);}
+  .password-gate button{width:100%;padding:0.875rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;cursor:pointer;text-transform:uppercase;}
+  .pw-error{color:#dc2626;font-size:0.8rem;margin-top:0.5rem;}
+  .scorer-panel{display:none;}
+  .scorer-panel.visible{display:block;}
+
+  .entry-card{background:white;border:1px solid var(--border);border-radius:6px;padding:1.25rem;margin-top:1.25rem;}
+  .entry-card h4{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:2px;color:var(--green-dark);text-transform:uppercase;margin-bottom:1rem;}
+  .entry-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;}
+  .entry-group{display:flex;flex-direction:column;gap:4px;}
+  .entry-group.full{grid-column:1/-1;}
+  .entry-group label{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .entry-group input,.entry-group select{padding:0.625rem 0.75rem;border:1px solid var(--border);border-radius:4px;font-family:var(--serif-body);font-size:0.875rem;background:white;-webkit-appearance:none;}
+  .entry-group input:focus,.entry-group select:focus{outline:none;border-color:var(--gold);}
+  .entry-btn{width:100%;padding:0.75rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.75rem;letter-spacing:2px;cursor:pointer;text-transform:uppercase;margin-top:0.25rem;}
+  .entry-btn:hover{background:var(--green-mid);}
+  .entry-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+  .edit-match{border-top:none;margin-top:1rem;}
+  .score-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;margin:0.25rem 0 0.75rem;border:1px solid var(--border);border-radius:5px;overflow:hidden;background:white;}
+  .sr-side{padding:0.625rem 0.75rem;display:flex;flex-direction:column;gap:2px;justify-content:center;}
+  .sr-side.baber{text-align:right;}
+  .sr-side.weff{text-align:left;}
+  .sr-name{font-size:0.85rem;color:var(--text-dark);}
+  .sr-score{font-family:var(--serif-display);font-size:1.05rem;font-weight:700;letter-spacing:1px;}
+  .sr-side.baber .sr-score{color:var(--baber-text);}
+  .sr-side.weff .sr-score{color:var(--weff-text);}
+  .sr-side.leading.baber{background:var(--baber-bg);}
+  .sr-side.leading.baber .sr-name{color:var(--baber-text);font-weight:600;}
+  .sr-side.leading.weff{background:var(--weff-bg);}
+  .sr-side.leading.weff .sr-name{color:var(--weff-text);font-weight:600;}
+  .sr-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0.375rem 0.625rem;font-family:var(--serif-display);font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);border-left:1px solid var(--border);border-right:1px solid var(--border);min-width:58px;text-align:center;line-height:1.6;}
+  .edit-head{display:flex;justify-content:space-between;align-items:baseline;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.25rem;}
+  .edit-title{font-family:var(--serif-display);font-size:0.72rem;letter-spacing:2px;color:var(--green-dark);text-transform:uppercase;}
+  .edit-state{font-family:var(--serif-display);font-size:0.72rem;letter-spacing:1px;color:var(--gold);}
+  .next-hole{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin:0.625rem 0 0.375rem;}
+  .hole-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-bottom:0.625rem;}
+  .hb{padding:0.875rem 0.375rem;border-radius:5px;border:1px solid;font-family:var(--serif-display);font-size:0.68rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;line-height:1.35;}
+  .hb.baber{background:var(--baber-bg);border-color:var(--baber-border);color:var(--baber-text);}
+  .hb.halve{background:var(--halve-bg);border-color:var(--gold);color:var(--halve-text);}
+  .hb.weff{background:var(--weff-bg);border-color:var(--weff-border);color:var(--weff-text);}
+  .hb:disabled{opacity:0.35;cursor:not-allowed;}
+  .mini-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;}
+  .mini-btns.two{grid-template-columns:1fr 1fr;}
+  .mini-btn{padding:0.55rem 0.375rem;border-radius:4px;border:1px solid var(--border);background:white;font-family:var(--serif-display);font-size:0.6rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);}
+  .mini-btn:hover{border-color:var(--gold);color:var(--text-dark);}
+  .mini-btn.danger{color:#dc2626;border-color:#e8b4af;}
+  .rename-toggle{margin-top:0.75rem;font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;cursor:pointer;display:inline-block;}
+  .rename-toggle:hover{color:var(--gold);}
+  .rename-panel{display:none;margin-top:0.75rem;}
+  .rename-panel.visible{display:block;}
+
+  footer{background:#0a1f12;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+  @media(max-width:640px){
+    .entry-row{grid-template-columns:1fr;}
+    .match-side .player{font-size:0.85rem;}
+    .hole-strip{grid-template-columns:repeat(9,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h2.2L8.8 4.5h6.4L16.8 6.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5z"/><circle cx="12" cy="12.5" r="3.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.7 5.6 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.6-3.7-9S9.6 5.6 12 3z"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  </defs>
+</svg>
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+  <div style="position:relative;">
+    <div class="nav-menu-btn" id="menu-btn">
+      <span class="menu-word">Menu</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div class="dropdown" id="dropdown">
+      <a href="editions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-trophy"/></svg>Results</a>
+      <a href="gallery.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
+      <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
+      <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
+      <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+      <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
+      <a href="leaderboard.html" class="live active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-eyebrow">Algarve · 2027</div>
+  <h1>LIVE LEADERBOARD</h1>
+</div>
+
+<div class="page">
+  <div class="config-warning" id="config-warning">
+    The leaderboard is not connected yet. Paste your Supabase project URL and key into the CONFIG block at the top of the script in this file.
+  </div>
+
+  <div id="board-view">
+  <div class="score-banner">
+    <div class="score-team baber" id="banner-baber">
+      <div class="t-label">Captain: James Baber</div>
+      <div class="t-name">TEAM BABER</div>
+      <div class="t-score" id="score-baber">0</div>
+    </div>
+    <div class="score-divider"><span class="vs">vs</span></div>
+    <div class="score-team weff" id="banner-weff">
+      <div class="t-label">Captain: Matt Wreford</div>
+      <div class="t-name">TEAM WEFF</div>
+      <div class="t-score" id="score-weff">0</div>
+    </div>
+  </div>
+  <div class="win-note" id="win-note"></div>
+
+  <div class="day-tabs">
+    <div class="day-tab active" id="tab-1">Day 1 &middot; Quinta do Vale</div>
+    <div class="day-tab" id="tab-2">Day 2 &middot; Isla Canela</div>
+  </div>
+
+  <div class="hole-legend">
+    <span><span class="legend-sq b"></span>Baber</span>
+    <span><span class="legend-sq h"></span>Halved</span>
+    <span><span class="legend-sq w"></span>Weff</span>
+  </div>
+
+  <div class="match-list" id="match-list">
+    <div class="empty-note">Loading matches...</div>
+  </div>
+
+  <div class="scorer-section">
+    <div class="scorer-toggle" id="scorer-toggle">
+      <h3>Admin Access</h3>
+      <svg class="icon arrow" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div id="password-gate" class="password-gate" style="display:none;">
+      <h4>Admin Password</h4>
+      <input type="password" id="pw-input" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;">
+      <button id="pw-btn">Unlock</button>
+      <div class="pw-error" id="pw-error"></div>
+    </div>
+    <div class="scorer-panel" id="scorer-panel">
+      <div class="entry-card" id="add-card" style="display:none;">
+        <h4>Add Match — <span id="add-day-label">Day 1</span></h4>
+        <div class="entry-row">
+          <div class="entry-group">
+            <label>Format</label>
+            <input type="text" id="add-format-display" value="Better Ball" readonly style="background:#fafaf7;color:var(--text-muted);">
+          </div>
+          <div class="entry-group">
+            <label>Match Number</label>
+            <input type="number" id="add-matchno" min="1" value="1">
+          </div>
+          <div class="entry-group full">
+            <label>Tee Time (e.g. 08:40)</label>
+            <input type="text" id="add-tee" placeholder="e.g. 08:40">
+          </div>
+          <div class="entry-group full">
+            <label>Team Baber Players</label>
+            <input type="text" id="add-baber" placeholder="e.g. J. Baber &amp; K. Bailey">
+          </div>
+          <div class="entry-group full">
+            <label>Team Weff Players</label>
+            <input type="text" id="add-weff" placeholder="e.g. M. Wreford &amp; B. Smith">
+          </div>
+        </div>
+        <button class="entry-btn" id="add-btn">Add Match</button>
+      </div>
+      <div class="entry-card" id="reset-card" style="display:none;">
+        <h4>Reset Scoring</h4>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">Wipes every hole result on both days and sets all matches back to upcoming. Players, tee times and formats are kept. Use this to clear test scores.</p>
+        <button class="entry-btn" id="reset-btn" style="background:#dc2626;">Reset All Scores</button>
+      </div>
+      <div id="edit-list"></div>
+    </div>
+  </div>
+  </div><!-- /board-view -->
+
+  <div id="score-view" style="display:none;"></div>
+</div>
+
+<footer><p><span>Book Club Invitational</span></p></footer>
+
+<script>
+(function(){
+  /* ================= CONFIG ================= */
+  var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+  var ADMIN_PASS='bciadmin2027';
+  var SCORER_PASS='bci2027';
+  var WIN_NOTE='First to 9\u00BD points wins the BCI';
+  var POLL_MS=30000;
+  /* ========================================== */
+
+  var COURSES={1:'Quinta do Vale',2:'Isla Canela'};
+  var state={day:1,role:null,scoringId:null,matches:[],lastData:''};
+  var sb=null;
+
+  var configured=SUPABASE_URL.indexOf('http')===0;
+  if(configured){
+    sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  } else {
+    document.getElementById('config-warning').classList.add('visible');
+  }
+
+  function esc(s){
+    return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  document.getElementById('win-note').textContent=WIN_NOTE;
+
+  /* ---------- match play maths ----------
+     holes is a string like 'bwhb' where each character is one hole:
+     b = Baber won it, w = Weff won it, h = halved. */
+  function calc(m){
+    var holes=m.holes||'';
+    var b=0,w=0,n=holes.length;
+    for(var i=0;i<n;i++){
+      if(holes[i]==='b')b++;
+      else if(holes[i]==='w')w++;
+    }
+    var diff=b-w,rem=18-n,abs=Math.abs(diff);
+    var closed=n>0&&(abs>rem||n===18);
+    var out={
+      played:n,
+      leader:diff>0?'baber':(diff<0?'weff':'tie'),
+      manualFinal:m.status==='final'&&!closed
+    };
+    if(n===0&&m.status!=='final'){
+      out.status='upcoming';out.score='';out.thru='';
+    } else if(closed||m.status==='final'){
+      out.status='final';
+      out.thru=n===18?'F':String(n);
+      if(diff===0)out.score='Halved';
+      else if(n===18||m.status==='final'&&!closed&&abs<=rem)out.score=abs+' UP';
+      else out.score=abs+'&'+rem;
+    } else {
+      out.status='live';
+      out.thru=String(n);
+      out.score=diff===0?'AS':abs+' UP';
+    }
+    return out;
+  }
+
+  /* ---------- nav menu ---------- */
+  document.getElementById('menu-btn').addEventListener('click',function(){
+    document.getElementById('menu-btn').classList.toggle('open');
+    document.getElementById('dropdown').classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){
+      document.getElementById('menu-btn').classList.remove('open');
+      document.getElementById('dropdown').classList.remove('open');
+    }
+  });
+
+  /* ---------- day tabs ---------- */
+  document.getElementById('tab-1').addEventListener('click',function(){switchDay(1);});
+  document.getElementById('tab-2').addEventListener('click',function(){switchDay(2);});
+  function dayFormat(d){return d===1?'Better Ball':'Individual Matchplay';}
+
+  function switchDay(d){
+    state.day=d;
+    document.getElementById('tab-1').classList.toggle('active',d===1);
+    document.getElementById('tab-2').classList.toggle('active',d===2);
+    document.getElementById('add-day-label').textContent='Day '+d;
+    document.getElementById('add-format-display').value=dayFormat(d);
+    renderMatches();
+    renderScorer(true);
+  }
+
+  /* ---------- data ---------- */
+  function loadMatches(){
+    if(!sb)return;
+    sb.from('bci_matches').select('*').order('day').order('match_no').order('created_at')
+      .then(function(res){
+        if(res.error){
+          document.getElementById('match-list').innerHTML='<div class="empty-note">Could not load the leaderboard. Check the connection and refresh.</div>';
+          return;
+        }
+        var fresh=JSON.stringify(res.data);
+        if(fresh===state.lastData)return;
+        state.lastData=fresh;
+        state.matches=res.data||[];
+        renderBanner();
+        renderMatches();
+        renderScorer(true);
+        if(state.scoringId)renderScoreView();
+      });
+  }
+
+  function points(){
+    var b=0,w=0;
+    state.matches.forEach(function(m){
+      var c=calc(m);
+      if(c.status!=='final')return;
+      if(c.leader==='baber')b+=1;
+      else if(c.leader==='weff')w+=1;
+      else {b+=0.5;w+=0.5;}
+    });
+    return {baber:b,weff:w};
+  }
+
+  function fmtPts(n){
+    var whole=Math.floor(n);
+    return (n%1===0.5)?(whole===0?'\u00BD':whole+'\u00BD'):String(n);
+  }
+
+  function renderBanner(){
+    var p=points();
+    document.getElementById('score-baber').textContent=fmtPts(p.baber);
+    document.getElementById('score-weff').textContent=fmtPts(p.weff);
+    document.getElementById('banner-baber').classList.toggle('winning',p.baber>p.weff);
+    document.getElementById('banner-weff').classList.toggle('winning',p.weff>p.baber);
+  }
+
+  function dayMatches(){
+    return state.matches.filter(function(m){return m.day===state.day;});
+  }
+
+  function holeStrip(m){
+    var holes=m.holes||'';
+    if(!holes.length)return '';
+    var cells='';
+    for(var i=0;i<18;i++){
+      var r=holes[i]||'';
+      cells+='<div class="hole-cell'+(r?' '+r:'')+'">'+(i+1)+'</div>';
+    }
+    return '<div class="hole-strip">'+cells+'</div>';
+  }
+
+  function renderMatches(){
+    var list=dayMatches();
+    var el=document.getElementById('match-list');
+    if(!configured){
+      el.innerHTML='<div class="empty-note">Leaderboard not connected yet.</div>';
+      return;
+    }
+    if(list.length===0){
+      el.innerHTML='<div class="empty-note">No matches yet for Day '+state.day+' at '+COURSES[state.day]+'.</div>';
+      return;
+    }
+    el.innerHTML=list.map(function(m){
+      var c=calc(m);
+      var scoreB='',scoreW='',centre;
+      if(c.status==='upcoming'){
+        centre='<div class="m-vs">vs</div>'+(m.tee_time?'<div class="m-thru">Tee '+esc(m.tee_time)+'</div>':'');
+      } else if(c.status==='final'){
+        centre='<div class="m-thru">Final</div>';
+        if(c.leader==='baber')scoreB='<div class="side-score">Won '+esc(c.score)+'</div>';
+        else if(c.leader==='weff')scoreW='<div class="side-score">Won '+esc(c.score)+'</div>';
+        else {scoreB='<div class="side-score">&frac12;</div>';scoreW='<div class="side-score">&frac12;</div>';}
+      } else if(c.leader==='tie'){
+        centre='<div class="m-score">AS</div><div class="m-thru">Thru '+esc(c.thru)+'</div>';
+      } else {
+        centre='<div class="m-thru">Thru '+esc(c.thru)+'</div>';
+        if(c.leader==='baber')scoreB='<div class="side-score">'+esc(c.score)+'</div>';
+        else scoreW='<div class="side-score">'+esc(c.score)+'</div>';
+      }
+      var baberLead=c.status!=='upcoming'&&c.leader==='baber';
+      var weffLead=c.status!=='upcoming'&&c.leader==='weff';
+      return '<div class="match-card">'
+        +'<div class="match-top">'
+          +'<span class="match-label">'+esc(m.format)+' &middot; Match '+esc(m.match_no)+'</span>'
+          +'<span class="status-pill '+c.status+'">'+c.status+'</span>'
+        +'</div>'
+        +'<div class="match-body">'
+          +'<div class="match-side baber'+(baberLead?' leading':'')+'"><div class="player">'+esc(m.baber_players)+'</div>'+scoreB+'</div>'
+          +'<div class="match-centre">'+centre+'</div>'
+          +'<div class="match-side weff'+(weffLead?' leading':'')+'"><div class="player">'+esc(m.weff_players)+'</div>'+scoreW+'</div>'
+        +'</div>'
+        +holeStrip(m)
+        +'<div class="card-actions"><button class="enter-score" data-id="'+esc(m.id)+'">Enter Score</button></div>'
+      +'</div>';
+    }).join('');
+
+    Array.prototype.forEach.call(el.querySelectorAll('.enter-score'),function(btn){
+      btn.addEventListener('click',function(){openScoreView(btn.dataset.id);});
+    });
+  }
+
+  /* ---------- admin panel: match management only ---------- */
+  function renderScorer(force){
+    if(state.role!=='admin')return;
+    var next=dayMatches().length+1;
+    var addNo=document.getElementById('add-matchno');
+    if(force&&document.activeElement!==addNo)addNo.value=next;
+    var el=document.getElementById('edit-list');
+    var list=dayMatches();
+
+    if(!list.length){
+      el.innerHTML='<div class="empty-note">No matches yet for Day '+state.day+'. Add them above.</div>';
+      return;
+    }
+    el.innerHTML=list.map(function(m){
+      return '<div class="entry-card team-edit" data-id="'+esc(m.id)+'">'
+        +'<h4>Match '+esc(m.match_no)+' &middot; '+esc(m.format)+'</h4>'
+        +'<div class="entry-row">'
+          +'<div class="entry-group"><label>Team Baber Players</label><input type="text" data-f="baber" value="'+esc(m.baber_players)+'"></div>'
+          +'<div class="entry-group"><label>Team Weff Players</label><input type="text" data-f="weff" value="'+esc(m.weff_players)+'"></div>'
+          +'<div class="entry-group full"><label>Tee Time (e.g. 08:40)</label><input type="text" data-f="tee" value="'+esc(m.tee_time||'')+'"></div>'
+        +'</div>'
+        +'<button class="mini-btn danger" data-act="delete">Delete Match</button>'
+      +'</div>';
+    }).join('')
+    +'<button class="entry-btn" id="saveall-btn" style="margin-top:1.25rem;">Save All Teams &amp; Times</button>';
+
+    Array.prototype.forEach.call(el.querySelectorAll('.team-edit [data-act="delete"]'),function(btn){
+      btn.addEventListener('click',function(){handleAction(btn.closest('.team-edit').dataset.id,'delete',null,btn);});
+    });
+    document.getElementById('saveall-btn').addEventListener('click',saveAllTeams);
+  }
+
+  function findMatch(id){
+    for(var i=0;i<state.matches.length;i++)if(String(state.matches[i].id)===String(id))return state.matches[i];
+    return null;
+  }
+
+  function pushUpdate(id,upd,btn){
+    if(btn)btn.disabled=true;
+    sb.from('bci_matches').update(upd).eq('id',id).then(function(res){
+      if(btn)btn.disabled=false;
+      if(res.error){alert('Could not save that. Check your connection and try again.');return;}
+      loadMatches();
+    });
+  }
+
+  function derived(m,holes,statusOverride){
+    var c=calc({holes:holes,status:statusOverride||''});
+    return {holes:holes,status:c.status,leader:c.leader,score:c.score,thru:c.thru};
+  }
+
+  function handleAction(id,act,card,btn){
+    var m=findMatch(id);
+    if(!m)return;
+    var holes=m.holes||'';
+
+    if(act==='b'||act==='w'||act==='h'){
+      if(holes.length>=18)return;
+      pushUpdate(id,derived(m,holes+act),btn);
+    }
+    else if(act==='undo'){
+      if(!holes.length)return;
+      pushUpdate(id,derived(m,holes.slice(0,-1)),btn);
+    }
+    else if(act==='concede'){
+      if(!confirm('End this match at its current score? Use this for concessions or matches called early.'))return;
+      var c=calc({holes:holes,status:'final'});
+      pushUpdate(id,{holes:holes,status:'final',leader:c.leader,score:holes.length?c.score:'Conceded',thru:c.thru},btn);
+    }
+    else if(act==='reopen'){
+      pushUpdate(id,derived(m,holes),btn);
+    }
+    else if(act==='delete'){
+      if(state.role!=='admin')return;
+      if(!confirm('Delete this match completely?'))return;
+      sb.from('bci_matches').delete().eq('id',id).then(function(res){
+        if(res.error){alert('Could not delete that match.');return;}
+        loadMatches();
+      });
+    }
+  }
+
+  function saveAllTeams(){
+    if(state.role!=='admin')return;
+    var btn=document.getElementById('saveall-btn');
+    var updates=[];
+    var invalid=false;
+    Array.prototype.forEach.call(document.querySelectorAll('#edit-list .team-edit'),function(card){
+      var m=findMatch(card.dataset.id);
+      if(!m)return;
+      var baber=card.querySelector('[data-f="baber"]').value.trim();
+      var weff=card.querySelector('[data-f="weff"]').value.trim();
+      var tee=card.querySelector('[data-f="tee"]').value.trim();
+      if(!baber||!weff){invalid=true;return;}
+      if(baber!==m.baber_players||weff!==m.weff_players||tee!==(m.tee_time||'')){
+        updates.push(sb.from('bci_matches').update({baber_players:baber,weff_players:weff,tee_time:tee}).eq('id',m.id));
+      }
+    });
+    if(invalid){alert('Every match needs players for both teams. Nothing has been saved yet.');return;}
+    if(!updates.length){
+      btn.textContent='Nothing to save';
+      setTimeout(function(){btn.textContent='Save All Teams & Times';},1500);
+      return;
+    }
+    btn.disabled=true;btn.textContent='Saving...';
+    Promise.all(updates).then(function(results){
+      btn.disabled=false;btn.textContent='Save All Teams & Times';
+      if(results.some(function(r){return r.error;})){
+        alert('Some changes could not be saved. Check your connection and try again.');
+      }
+      loadMatches();
+    });
+  }
+
+  document.getElementById('add-btn').addEventListener('click',function(){
+    if(state.role!=='admin')return;
+    var baber=document.getElementById('add-baber').value.trim();
+    var weff=document.getElementById('add-weff').value.trim();
+    if(!baber||!weff){alert('Please enter players for both teams.');return;}
+    var btn=this;
+    btn.disabled=true;btn.textContent='Adding...';
+    sb.from('bci_matches').insert({
+      day:state.day,
+      match_no:parseInt(document.getElementById('add-matchno').value,10)||1,
+      format:dayFormat(state.day),
+      baber_players:baber,
+      weff_players:weff,
+      tee_time:document.getElementById('add-tee').value.trim(),
+      status:'upcoming',leader:'tie',score:'',thru:'',holes:''
+    }).then(function(res){
+      btn.disabled=false;btn.textContent='Add Match';
+      if(res.error){alert('Could not add that match. Check your connection and try again.');return;}
+      document.getElementById('add-baber').value='';
+      document.getElementById('add-weff').value='';
+      document.getElementById('add-tee').value='';
+      loadMatches();
+    });
+  });
+
+  document.getElementById('reset-btn').addEventListener('click',function(){
+    if(state.role!=='admin')return;
+    if(!confirm('Reset ALL scoring on both days? Every hole result will be wiped and all matches set back to upcoming. Players and tee times are kept.'))return;
+    if(!confirm('Absolutely sure? This cannot be undone.'))return;
+    var btn=this;
+    btn.disabled=true;btn.textContent='Resetting...';
+    sb.from('bci_matches')
+      .update({holes:'',status:'upcoming',leader:'tie',score:'',thru:''})
+      .gte('day',1)
+      .then(function(res){
+        btn.disabled=false;btn.textContent='Reset All Scores';
+        if(res.error){alert('Could not reset. Check your connection and try again.');return;}
+        loadMatches();
+      });
+  });
+
+  /* ---------- per-match scoring page ---------- */
+  function openScoreView(id){
+    state.scoringId=id;
+    document.getElementById('board-view').style.display='none';
+    document.getElementById('score-view').style.display='block';
+    renderScoreView();
+    window.scrollTo(0,0);
+  }
+
+  function closeScoreView(){
+    state.scoringId=null;
+    document.getElementById('score-view').style.display='none';
+    document.getElementById('board-view').style.display='';
+    window.scrollTo(0,0);
+  }
+
+  function scoreRowHTML(m,c){
+    var srB='',srW='',mid='';
+    if(c.status==='upcoming'){
+      mid='vs'+(m.tee_time?'<br>'+esc(m.tee_time):'');
+    } else if(c.status==='final'){
+      mid='Final';
+      if(c.leader==='baber')srB='<span class="sr-score">Won '+esc(c.score)+'</span>';
+      else if(c.leader==='weff')srW='<span class="sr-score">Won '+esc(c.score)+'</span>';
+      else {srB='<span class="sr-score">&frac12;</span>';srW='<span class="sr-score">&frac12;</span>';}
+    } else if(c.leader==='tie'){
+      mid='AS<br>Thru '+c.played;
+    } else {
+      mid='Thru '+c.played;
+      if(c.leader==='baber')srB='<span class="sr-score">'+esc(c.score)+'</span>';
+      else srW='<span class="sr-score">'+esc(c.score)+'</span>';
+    }
+    var baberLead=c.status!=='upcoming'&&c.leader==='baber';
+    var weffLead=c.status!=='upcoming'&&c.leader==='weff';
+    return '<div class="score-row">'
+      +'<div class="sr-side baber'+(baberLead?' leading':'')+'"><span class="sr-name">'+esc(m.baber_players)+'</span>'+srB+'</div>'
+      +'<div class="sr-mid">'+mid+'</div>'
+      +'<div class="sr-side weff'+(weffLead?' leading':'')+'"><span class="sr-name">'+esc(m.weff_players)+'</span>'+srW+'</div>'
+    +'</div>';
+  }
+
+  function renderScoreView(){
+    var m=findMatch(state.scoringId);
+    var el=document.getElementById('score-view');
+    if(!m){closeScoreView();return;}
+    var c=calc(m);
+    var done=c.status==='final';
+    var controls;
+    if(!state.role){
+      controls='<div class="password-gate" style="margin-top:1.25rem;">'
+        +'<h4>Enter Password to Score</h4>'
+        +'<input type="password" id="sv-pw" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;">'
+        +'<button id="sv-pw-btn">Unlock</button>'
+        +'<div class="pw-error" id="sv-pw-error"></div>'
+      +'</div>';
+    } else {
+      controls=(done?'':'<div class="next-hole">Hole '+(c.played+1)+' result</div>')
+        +'<div class="hole-btns">'
+          +'<button class="hb baber" data-act="b"'+(done?' disabled':'')+'>Baber<br>win</button>'
+          +'<button class="hb halve" data-act="h"'+(done?' disabled':'')+'>Halved</button>'
+          +'<button class="hb weff" data-act="w"'+(done?' disabled':'')+'>Weff<br>win</button>'
+        +'</div>'
+        +'<div class="mini-btns two">'
+          +'<button class="mini-btn" data-act="undo"'+(c.played===0?' disabled':'')+'>Undo hole</button>'
+          +'<button class="mini-btn" data-act="'+(c.manualFinal?'reopen':'concede')+'">'+(c.manualFinal?'Reopen':'End match now')+'</button>'
+        +'</div>'
+        +'<button class="entry-btn" id="sv-done" style="margin-top:1rem;">Save &amp; Back to Leaderboard</button>';
+    }
+
+    el.innerHTML='<div class="score-view-head">'
+        +'<span class="sv-title">Match '+esc(m.match_no)+' &middot; '+esc(m.format)+' &middot; Day '+esc(m.day)+'</span>'
+        +'<button class="back-link" id="sv-back">&larr; Leaderboard</button>'
+      +'</div>'
+      +'<div class="entry-card" style="margin-top:0;">'
+        +scoreRowHTML(m,c)
+        +holeStrip(m)
+        +controls
+      +'</div>';
+
+    document.getElementById('sv-back').addEventListener('click',closeScoreView);
+    var doneBtn=document.getElementById('sv-done');
+    if(doneBtn)doneBtn.addEventListener('click',closeScoreView);
+    var pwBtn=document.getElementById('sv-pw-btn');
+    if(pwBtn){
+      pwBtn.addEventListener('click',svUnlock);
+      document.getElementById('sv-pw').addEventListener('keydown',function(e){if(e.key==='Enter')svUnlock();});
+    }
+    Array.prototype.forEach.call(el.querySelectorAll('[data-act]'),function(btn){
+      btn.addEventListener('click',function(){handleAction(state.scoringId,btn.dataset.act,null,btn);});
+    });
+  }
+
+  function svUnlock(){
+    var v=document.getElementById('sv-pw').value;
+    if(v===ADMIN_PASS)state.role='admin';
+    else if(v===SCORER_PASS)state.role='scorer';
+    if(state.role){applyRole();renderScoreView();}
+    else document.getElementById('sv-pw-error').textContent='Incorrect password.';
+  }
+
+  function applyRole(){
+    if(state.role!=='admin')return;
+    document.getElementById('password-gate').style.display='none';
+    document.getElementById('scorer-panel').classList.add('visible');
+    document.getElementById('scorer-toggle').classList.add('open');
+    document.getElementById('add-card').style.display='';
+    document.getElementById('reset-card').style.display='';
+    renderScorer(true);
+  }
+
+  /* ---------- password gate ---------- */
+  document.getElementById('scorer-toggle').addEventListener('click',function(){
+    var toggle=this;
+    if(state.role!=='admin'){
+      var g=document.getElementById('password-gate');
+      var willOpen=g.style.display==='none';
+      g.style.display=willOpen?'block':'none';
+      toggle.classList.toggle('open',willOpen);
+    } else {
+      var panel=document.getElementById('scorer-panel');
+      var willOpen=!panel.classList.contains('visible');
+      panel.classList.toggle('visible',willOpen);
+      toggle.classList.toggle('open',willOpen);
+    }
+  });
+  document.getElementById('pw-btn').addEventListener('click',function(){
+    var v=document.getElementById('pw-input').value;
+    if(v===ADMIN_PASS){
+      state.role='admin';
+      applyRole();
+    } else {
+      document.getElementById('pw-error').textContent='Incorrect password.';
+    }
+  });
+  document.getElementById('pw-input').addEventListener('keydown',function(e){
+    if(e.key==='Enter')document.getElementById('pw-btn').click();
+  });
+
+  /* ---------- live updates ---------- */
+  if(sb){
+    loadMatches();
+    setInterval(loadMatches,POLL_MS);
+    try{
+      sb.channel('bci_matches_changes')
+        .on('postgres_changes',{event:'*',schema:'public',table:'bci_matches'},loadMatches)
+        .subscribe();
+    }catch(e){/* realtime not enabled — polling covers it */}
+  }
+})();
+</script>
+<script src="hero-gallery.js"></script>
+<script src="live-tracker.js"></script>
+</body>
+</html>

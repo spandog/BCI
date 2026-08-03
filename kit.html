@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BCI Shop — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --green-dark:#0f2a1a;--green-mid:#1e4d2e;--gold:#c9a84c;--gold-light:#e8c97e;
+    --cream:#f7f3eb;--cream-dark:#ede8dc;--text-dark:#1a1a1a;--text-muted:#6b7280;--border:#ddd8cc;
+    --serif-display:'Playfair Display',Georgia,serif;
+    --serif-body:'EB Garamond',Georgia,serif;
+  }
+  body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  nav{background:var(--green-dark);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;}
+  .nav-menu-btn span.menu-word{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;}
+  .nav-menu-btn .chevron{color:var(--gold);width:12px;height:12px;transition:transform 0.2s;}
+  .nav-menu-btn.open .chevron{transform:rotate(180deg);}
+  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(201,168,76,0.2);border-top:none;min-width:200px;z-index:199;}
+  .dropdown.open{display:block;}
+  .dropdown a{display:flex;align-items:center;gap:10px;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.15s;}
+  .dropdown a:last-child{border-bottom:none;}
+  .dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.03);padding-left:1.5rem;}
+  .dropdown a.active{color:var(--gold);}
+  .dropdown a.live{color:var(--gold-light);}
+  .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
+  .dropdown a.live .d-icon{color:var(--gold-light);}
+  .page-hero{background:var(--green-dark);padding:3rem 1.5rem;text-align:center;border-bottom:1px solid rgba(201,168,76,0.15);}
+  .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
+  .page-hero h1{font-family:var(--serif-display);font-size:clamp(2rem,8vw,2.8rem);color:white;letter-spacing:3px;font-weight:700;}
+  .page-hero p{font-size:0.85rem;color:rgba(255,255,255,0.4);margin-top:0.5rem;}
+  .page{max-width:960px;margin:0 auto;padding:3rem 1.5rem;}
+  .kit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem;}
+  .kit-card{background:white;border:1px solid var(--border);border-radius:2px;overflow:hidden;transition:border-color 0.2s;position:relative;display:flex;flex-direction:column;}
+  .kit-card.selected{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold);}
+  .kit-img-wrap{width:100%;height:220px;background:var(--cream-dark);position:relative;flex-shrink:0;overflow:hidden;}
+  .kit-photo{width:100%;height:220px;object-fit:cover;display:block;cursor:pointer;}
+  .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:1000;align-items:center;justify-content:center;padding:1.5rem;}
+  .lightbox.open{display:flex;}
+  .lightbox img{max-width:92vw;max-height:88vh;object-fit:contain;border-radius:4px;}
+  .lightbox-close{position:absolute;top:1rem;right:1rem;color:white;cursor:pointer;opacity:0.7;background:rgba(255,255,255,0.1);padding:8px;border-radius:4px;line-height:0;}
+  .lightbox-close .icon{width:20px;height:20px;}
+  .lightbox-close:hover{opacity:1;}
+  .kit-img-placeholder{width:100%;height:220px;background:var(--cream-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;position:absolute;inset:0;}
+  .kit-img-placeholder .kit-ph-icon{width:48px;height:48px;color:var(--gold);opacity:0.55;stroke-width:1;margin-bottom:0.5rem;}
+  .kit-img-placeholder .coming{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .selected-tick{position:absolute;top:10px;right:10px;background:var(--gold);color:var(--green-dark);width:22px;height:22px;border-radius:50%;display:none;align-items:center;justify-content:center;z-index:2;}
+  .selected-tick .icon{width:13px;height:13px;stroke-width:2.5;}
+  .kit-card.selected .selected-tick{display:flex;}
+  .kit-info{padding:0.875rem 1rem 0.5rem;min-height:64px;}
+  .kit-name{font-family:var(--serif-display);font-size:0.95rem;letter-spacing:1px;color:var(--green-dark);text-transform:uppercase;margin-bottom:2px;line-height:1.3;}
+  .kit-price{font-family:var(--serif-display);font-size:1.05rem;color:var(--gold);font-weight:600;}
+  .size-wrap{padding:0 1rem 0.5rem;}
+  .size-label{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.4rem;display:block;}
+  .size-btns{display:flex;gap:3px;flex-wrap:wrap;}
+  .size-btn{padding:4px 8px;border:1px solid var(--border);border-radius:3px;font-family:var(--serif-display);font-size:0.72rem;cursor:pointer;background:white;color:var(--text-dark);transition:all 0.15s;}
+  .size-btn:hover{border-color:var(--gold);}
+  .size-btn.selected{background:var(--green-dark);color:var(--gold);border-color:var(--green-dark);}
+  .qty-wrap{padding:0 1rem 1rem;display:flex;align-items:center;gap:0.75rem;}
+  .qty-label{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .qty-btns{display:flex;align-items:center;gap:6px;}
+  .qty-btn{width:28px;height:28px;border:1px solid var(--border);border-radius:3px;background:white;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .qty-btn:hover{border-color:var(--gold);}
+  .qty-btn:disabled{opacity:0.35;cursor:not-allowed;}
+  .qty-val{font-family:var(--serif-display);font-size:0.95rem;min-width:18px;text-align:center;}
+  .prizes-card{grid-column:1/-1;background:white;border:1px solid var(--gold);border-radius:2px;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+  .prizes-left{display:flex;align-items:center;gap:1rem;}
+  .prizes-icon{width:36px;height:36px;color:var(--gold);flex-shrink:0;stroke-width:1.25;}
+  .prizes-title{font-family:var(--serif-display);font-size:0.95rem;letter-spacing:1px;color:var(--green-dark);text-transform:uppercase;margin-bottom:2px;}
+  .prizes-desc{font-size:0.82rem;color:var(--text-muted);}
+  .prizes-right{display:flex;align-items:center;gap:0.75rem;}
+  .prizes-price{font-family:var(--serif-display);font-size:1.15rem;color:var(--gold);font-weight:600;}
+  .prizes-tag{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;background:var(--green-dark);color:var(--gold);padding:4px 10px;border-radius:2px;}
+  .order-section{background:white;border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:2rem;}
+  .order-section h3{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:3px;color:var(--green-dark);text-transform:uppercase;margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);}
+  .order-item{display:flex;justify-content:space-between;align-items:baseline;padding:0.5rem 0;font-size:0.95rem;gap:0.5rem;border-bottom:1px dotted var(--border);}
+  .order-item:last-of-type{border-bottom:none;}
+  .order-item .item-price{font-family:var(--serif-display);color:var(--green-mid);font-weight:600;}
+  .order-total{display:flex;justify-content:space-between;align-items:center;padding-top:1rem;margin-top:0.5rem;border-top:2px solid var(--border);}
+  .order-total .label{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;}
+  .order-total .total{font-family:var(--serif-display);font-size:1.5rem;color:var(--gold);font-weight:700;}
+  .form-section{background:white;border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:2rem;}
+  .form-section h3{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:3px;color:var(--green-dark);text-transform:uppercase;margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+  .form-group{display:flex;flex-direction:column;gap:4px;}
+  .form-group.full{grid-column:1/-1;}
+  .form-group label{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .form-group input,.form-group textarea{padding:0.75rem;border:1px solid var(--border);border-radius:4px;font-family:var(--serif-body);font-size:0.9rem;-webkit-appearance:none;}
+  .form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--gold);}
+  .form-group textarea{resize:vertical;min-height:80px;}
+  .submit-btn{width:100%;padding:1rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.9rem;letter-spacing:3px;cursor:pointer;text-transform:uppercase;}
+  .submit-btn:hover{background:var(--green-mid);}
+  .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .submit-error{display:none;background:#fdf0ef;border:1px solid #e8b4af;border-radius:6px;padding:1rem 1.1rem;margin-top:1rem;}
+  .submit-error.visible{display:block;}
+  .submit-error p{font-size:0.85rem;color:#8a2e26;line-height:1.55;margin-bottom:0.6rem;}
+  .submit-error p:last-child{margin-bottom:0;}
+  .submit-error a{color:var(--green-dark);font-weight:600;text-decoration:underline;}
+  .confirmation{display:none;background:white;border:1px solid var(--border);border-radius:8px;padding:2rem;text-align:center;}
+  .confirmation.visible{display:block;}
+  .confirmation .tick{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold);color:var(--gold);margin-bottom:1rem;}
+  .confirmation .tick .icon{width:30px;height:30px;stroke-width:1.5;}
+  .confirmation h3{font-family:var(--serif-display);font-size:1.2rem;letter-spacing:2px;color:var(--green-dark);text-transform:uppercase;margin-bottom:0.75rem;}
+  .confirmation p{font-size:0.875rem;color:var(--text-muted);line-height:1.6;max-width:400px;margin:0 auto;}
+  .confirmation .total-conf{font-family:var(--serif-display);font-size:1.5rem;color:var(--gold);margin:1rem 0;}
+  footer{background:#0a1f12;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+  @media(max-width:768px){
+    .kit-grid{grid-template-columns:repeat(2,1fr);}
+    .form-row{grid-template-columns:1fr;}
+  }
+  @media(max-width:400px){.kit-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h2.2L8.8 4.5h6.4L16.8 6.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5z"/><circle cx="12" cy="12.5" r="3.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.7 5.6 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.6-3.7-9S9.6 5.6 12 3z"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
+    <symbol id="i-cap" viewBox="0 0 24 24"><path d="M3.5 15.5c0-5 3.8-9 8.5-9s8.5 4 8.5 9"/><path d="M3.5 15.5c2 .9 5 1.4 8.5 1.4s6.5-.5 8.5-1.4"/><path d="M12 6.5V4.2"/><path d="M20.5 15.5l2.2 .6a1 1 0 0 1 .3 1.8c-1 .7-2 1.1-3 1.1"/></symbol>
+    <symbol id="i-jumper" viewBox="0 0 24 24"><path d="M8 4h8l4 3.5-2.5 3L16 9v11H8V9l-1.5 1.5L4 7.5 8 4z"/><path d="M9.5 4c.4 1.4 1.4 2.2 2.5 2.2S14.1 5.4 14.5 4"/></symbol>
+    <symbol id="i-driver" viewBox="0 0 24 24"><path d="M5 4l11 11"/><path d="M15 14.2c1.3-.2 2.6.2 3.5 1.1 1.3 1.3 1.3 3.1 .3 4.1s-2.8 1-4.1-.3c-.9-.9-1.3-2.2-1.1-3.5z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4 4 10-11"/></symbol>
+  </defs>
+</svg>
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+  <div style="position:relative;">
+    <div class="nav-menu-btn" id="menu-btn">
+      <span class="menu-word">Menu</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div class="dropdown" id="dropdown">
+      <a href="editions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-trophy"/></svg>Results</a>
+      <a href="gallery.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
+      <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
+      <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
+      <a href="kit.html" class="active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+      <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
+      <a href="leaderboard.html" class="live"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-eyebrow">Algarve · 2027</div>
+  <h1>BCI SHOP</h1>
+  <p>Select your items, choose your size and submit your order.</p>
+</div>
+
+<div class="page">
+  <div class="kit-grid">
+    <div class="kit-card" id="card-baber_polo">
+      <div class="selected-tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
+      <div class="kit-img-wrap">
+        <img class="kit-photo" src="images/blue_polo.jpeg" alt="Baber Polo" onclick="openLightbox(this.src,this.alt)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="kit-img-placeholder" style="display:none;"><svg class="icon kit-ph-icon" aria-hidden="true"><use href="#i-shirt"/></svg><div class="coming">Image coming soon</div></div>
+      </div>
+      <div class="kit-info"><div class="kit-name">Polo — Baber</div><div class="kit-price">£55.00</div></div>
+      <div class="size-wrap">
+        <span class="size-label">Size</span>
+        <div class="size-btns" id="sizes-baber_polo">
+          <button class="size-btn" data-item="baber_polo" data-size="S">S</button>
+          <button class="size-btn" data-item="baber_polo" data-size="M">M</button>
+          <button class="size-btn" data-item="baber_polo" data-size="L">L</button>
+          <button class="size-btn" data-item="baber_polo" data-size="XL">XL</button>
+          <button class="size-btn" data-item="baber_polo" data-size="XXL">XXL</button>
+        </div>
+      </div>
+      <div class="qty-wrap">
+        <span class="qty-label">Qty</span>
+        <div class="qty-btns">
+          <button class="qty-btn" data-item="baber_polo" data-dir="-1">−</button>
+          <span class="qty-val" id="qty-baber_polo">0</span>
+          <button class="qty-btn" data-item="baber_polo" data-dir="1">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="kit-card" id="card-weff_polo">
+      <div class="selected-tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
+      <div class="kit-img-wrap">
+        <img class="kit-photo" src="images/green_polo.jpeg" alt="Weff Polo" onclick="openLightbox(this.src,this.alt)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="kit-img-placeholder" style="display:none;"><svg class="icon kit-ph-icon" aria-hidden="true"><use href="#i-shirt"/></svg><div class="coming">Image coming soon</div></div>
+      </div>
+      <div class="kit-info"><div class="kit-name">Polo — Weff</div><div class="kit-price">£55.00</div></div>
+      <div class="size-wrap">
+        <span class="size-label">Size</span>
+        <div class="size-btns" id="sizes-weff_polo">
+          <button class="size-btn" data-item="weff_polo" data-size="S">S</button>
+          <button class="size-btn" data-item="weff_polo" data-size="M">M</button>
+          <button class="size-btn" data-item="weff_polo" data-size="L">L</button>
+          <button class="size-btn" data-item="weff_polo" data-size="XL">XL</button>
+          <button class="size-btn" data-item="weff_polo" data-size="XXL">XXL</button>
+        </div>
+      </div>
+      <div class="qty-wrap">
+        <span class="qty-label">Qty</span>
+        <div class="qty-btns">
+          <button class="qty-btn" data-item="weff_polo" data-dir="-1">−</button>
+          <span class="qty-val" id="qty-weff_polo">0</span>
+          <button class="qty-btn" data-item="weff_polo" data-dir="1">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="kit-card" id="card-cap">
+      <div class="selected-tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
+      <div class="kit-img-wrap">
+        <img class="kit-photo" src="images/hat.jpeg" alt="Cap" onclick="openLightbox(this.src,this.alt)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="kit-img-placeholder" style="display:none;"><svg class="icon kit-ph-icon" aria-hidden="true"><use href="#i-cap"/></svg><div class="coming">Image coming soon</div></div>
+      </div>
+      <div class="kit-info"><div class="kit-name">Cap</div><div class="kit-price">£25.00</div></div>
+      <div class="size-wrap">
+        <span class="size-label">Size</span>
+        <div class="size-btns" id="sizes-cap">
+          <button class="size-btn" data-item="cap" data-size="S">S</button>
+          <button class="size-btn" data-item="cap" data-size="M">M</button>
+          <button class="size-btn" data-item="cap" data-size="L">L</button>
+          <button class="size-btn" data-item="cap" data-size="XL">XL</button>
+          <button class="size-btn" data-item="cap" data-size="XXL">XXL</button>
+        </div>
+      </div>
+      <div class="qty-wrap">
+        <span class="qty-label">Qty</span>
+        <div class="qty-btns">
+          <button class="qty-btn" data-item="cap" data-dir="-1">−</button>
+          <span class="qty-val" id="qty-cap">0</span>
+          <button class="qty-btn" data-item="cap" data-dir="1">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="kit-card" id="card-gilet">
+      <div class="selected-tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
+      <div class="kit-img-wrap">
+        <img class="kit-photo" src="images/jumper.jpeg" alt="Gilet" onclick="openLightbox(this.src,this.alt)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="kit-img-placeholder" style="display:none;"><svg class="icon kit-ph-icon" aria-hidden="true"><use href="#i-jumper"/></svg><div class="coming">Image coming soon</div></div>
+      </div>
+      <div class="kit-info"><div class="kit-name">Gilet</div><div class="kit-price">£60.00</div></div>
+      <div class="size-wrap">
+        <span class="size-label">Size</span>
+        <div class="size-btns" id="sizes-gilet">
+          <button class="size-btn" data-item="gilet" data-size="S">S</button>
+          <button class="size-btn" data-item="gilet" data-size="M">M</button>
+          <button class="size-btn" data-item="gilet" data-size="L">L</button>
+          <button class="size-btn" data-item="gilet" data-size="XL">XL</button>
+          <button class="size-btn" data-item="gilet" data-size="XXL">XXL</button>
+        </div>
+      </div>
+      <div class="qty-wrap">
+        <span class="qty-label">Qty</span>
+        <div class="qty-btns">
+          <button class="qty-btn" data-item="gilet" data-dir="-1">−</button>
+          <span class="qty-val" id="qty-gilet">0</span>
+          <button class="qty-btn" data-item="gilet" data-dir="1">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="prizes-card">
+      <div class="prizes-left">
+        <svg class="icon prizes-icon" aria-hidden="true"><use href="#i-trophy"/></svg>
+        <div>
+          <div class="prizes-title">Prize Fund</div>
+          <div class="prizes-desc">Contribution towards the prize fund. Included in every order.</div>
+        </div>
+      </div>
+      <div class="prizes-right">
+        <span class="prizes-price">£35.00</span>
+        <span class="prizes-tag">Required</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="order-section">
+    <h3>Order Summary</h3>
+    <div id="order-items"></div>
+    <div class="order-total" id="order-total">
+      <span class="label">Total</span>
+      <span class="total" id="total-amount">£0.00</span>
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-close" id="lightbox-close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></div>
+    <img id="lightbox-img" src="" alt="">
+  </div>
+
+  <div class="form-section" id="form-section">
+    <h3>Your Details</h3>
+    <div class="form-row">
+      <div class="form-group"><label>First Name</label><input type="text" id="fname" placeholder="James"></div>
+      <div class="form-group"><label>Last Name</label><input type="text" id="lname" placeholder="Baber"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group full"><label>Notes (optional)</label><textarea id="notes" placeholder="Any questions or special requests..."></textarea></div>
+    </div>
+    <button class="submit-btn" id="submit-btn">Submit Order</button>
+    <div class="submit-error" id="submit-error">
+      <p>Something went wrong submitting your order through the form. This can happen if the order form needs re-verifying — it doesn't mean your order details are lost.</p>
+      <p>Please <a href="#" id="mailto-fallback">email your order to the team directly</a> instead, and they'll confirm receipt and send a payment link.</p>
+    </div>
+  </div>
+
+  <div class="confirmation" id="confirmation">
+    <div class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
+    <h3>Order Received</h3>
+    <div class="total-conf" id="conf-total"></div>
+    <p>Your order has now been submitted. The team will be in touch soon.</p>
+  </div>
+</div>
+
+<footer><p><span>Book Club Invitational</span> &nbsp;&middot;&nbsp; Est. MMXXVI</p></footer>
+
+<script>
+(function(){
+  var ORGANISER_EMAIL='replace-with-james-email@example.com';
+  var WORKER_URL='https://bci-checkout.brian-hinojosa.workers.dev'; // paste your deployed Worker URL here
+  var prices={baber_polo:55,weff_polo:55,cap:25,gilet:60};
+  var PRIZE_FUND=35;
+  var selected={baber_polo:false,weff_polo:false,cap:false,gilet:false};
+  var sizes={baber_polo:null,weff_polo:null,cap:null,gilet:null};
+  var qtys={baber_polo:0,weff_polo:0,cap:0,gilet:0};
+
+  document.getElementById('menu-btn').addEventListener('click',function(){
+    document.getElementById('menu-btn').classList.toggle('open');
+    document.getElementById('dropdown').classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){
+      document.getElementById('menu-btn').classList.remove('open');
+      document.getElementById('dropdown').classList.remove('open');
+    }
+  });
+
+  function setQty(item,next){
+    qtys[item]=Math.max(0,next);
+    document.getElementById('qty-'+item).textContent=qtys[item];
+    selected[item]=qtys[item]>0;
+    document.getElementById('card-'+item).classList.toggle('selected',selected[item]);
+    document.querySelector('#card-'+item+' .qty-btn[data-dir="-1"]').disabled=qtys[item]===0;
+    updateSummary();
+  }
+
+  document.querySelectorAll('.size-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var item=btn.dataset.item, size=btn.dataset.size;
+      sizes[item]=size;
+      document.querySelectorAll('#sizes-'+item+' .size-btn').forEach(function(b){b.classList.toggle('selected',b.dataset.size===size);});
+      if(qtys[item]===0)setQty(item,1);
+      else updateSummary();
+    });
+  });
+
+  document.querySelectorAll('.qty-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var item=btn.dataset.item, dir=parseInt(btn.dataset.dir);
+      setQty(item,qtys[item]+dir);
+    });
+    if(btn.dataset.dir==='-1')btn.disabled=true;
+  });
+
+  document.getElementById('submit-btn').addEventListener('click',function(){
+    document.getElementById('submit-error').classList.remove('visible');
+    var fname=document.getElementById('fname').value.trim();
+    var lname=document.getElementById('lname').value.trim();
+    var notes=document.getElementById('notes').value.trim();
+    if(!fname||!lname){alert('Please enter your name.');return;}
+    var items=Object.keys(selected).filter(function(k){return selected[k];});
+    var missingSizes=items.filter(function(k){return !sizes[k];});
+    if(missingSizes.length>0){alert('Please select a size for: '+missingSizes.join(', '));return;}
+
+    var total=PRIZE_FUND;
+    var orderLines=['Prize Fund — £'+PRIZE_FUND.toFixed(2)];
+    items.forEach(function(k){
+      var sub=prices[k]*qtys[k]; total+=sub;
+      var name=k.charAt(0).toUpperCase()+k.slice(1).replace('_',' ');
+      orderLines.push(name+' ('+sizes[k]+') x'+qtys[k]+' — £'+sub.toFixed(2));
+    });
+
+    var btn=document.getElementById('submit-btn');
+    btn.disabled=true; btn.textContent='Submitting...';
+
+    var payload={name:fname+' '+lname,order:orderLines.join('\n'),total:'£'+total.toFixed(2),notes:notes||'None'};
+
+    // Log the order for your own records — this doesn't need to succeed for payment to work.
+    fetch('https://formspree.io/f/xaqzygea',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(payload)
+    }).catch(function(){/* order record is best-effort, don't block payment on it */});
+
+    // Create a Stripe Checkout Session for this exact total and send the buyer to pay.
+    fetch(WORKER_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        amount:total,
+        description:'BCI Shop — '+payload.name+' — '+orderLines.join('; '),
+        name:payload.name
+      })
+    }).then(function(res){return res.json();})
+      .then(function(data){
+        if(data.url){
+          window.location.href=data.url;
+        } else {
+          showSubmitError(payload);
+          btn.disabled=false; btn.textContent='Submit Order';
+        }
+      }).catch(function(){
+        showSubmitError(payload);
+        btn.disabled=false; btn.textContent='Submit Order';
+      });
+  });
+
+  function showSubmitError(payload){
+    var subject=encodeURIComponent('BCI Shop Order — '+payload.name);
+    var body=encodeURIComponent('Name: '+payload.name+'\n\nOrder:\n'+payload.order+'\n\nTotal: '+payload.total+'\n\nNotes: '+payload.notes);
+    document.getElementById('mailto-fallback').href='mailto:'+ORGANISER_EMAIL+'?subject='+subject+'&body='+body;
+    document.getElementById('submit-error').classList.add('visible');
+    document.getElementById('submit-error').scrollIntoView({behavior:'smooth',block:'center'});
+  }
+
+  function updateSummary(){
+    var container=document.getElementById('order-items');
+    var items=Object.keys(selected).filter(function(k){return selected[k];});
+    var total=PRIZE_FUND;
+    var html='<div class="order-item"><span class="item-name">Prize Fund</span><span class="item-price">£'+PRIZE_FUND.toFixed(2)+'</span></div>';
+    items.forEach(function(k){
+      var sub=prices[k]*qtys[k]; total+=sub;
+      var name=k.charAt(0).toUpperCase()+k.slice(1).replace('_',' ');
+      var sizeStr=' — '+(sizes[k]||'No size selected');
+      var qtyStr=' × '+qtys[k];
+      html+='<div class="order-item"><span class="item-name">'+name+sizeStr+qtyStr+'</span><span class="item-price">£'+sub.toFixed(2)+'</span></div>';
+    });
+    container.innerHTML=html;
+    document.getElementById('total-amount').textContent='£'+total.toFixed(2);
+  }
+
+  updateSummary();
+
+  // If we've just been redirected back from a successful Stripe payment, show the confirmation screen.
+  if(new URLSearchParams(window.location.search).get('paid')==='1'){
+    document.getElementById('form-section').style.display='none';
+    document.querySelector('.kit-grid').style.display='none';
+    document.querySelector('.order-section').style.display='none';
+    document.getElementById('confirmation').classList.add('visible');
+  }
+
+  window.openLightbox=function(src,alt){
+    document.getElementById('lightbox-img').src=src;
+    document.getElementById('lightbox-img').alt=alt;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow='hidden';
+  };
+  function closeLightbox(){
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow='';
+  }
+  document.getElementById('lightbox-close').addEventListener('click',closeLightbox);
+  document.getElementById('lightbox').addEventListener('click',function(e){if(e.target===e.currentTarget)closeLightbox();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLightbox();});
+})();
+</script>
+<script src="hero-gallery.js"></script>
+<script src="live-tracker.js"></script>
+</body>
+</html>

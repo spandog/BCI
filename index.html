@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BCI &middot; Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<meta property="og:title" content="BCI &middot; Book Club Invitational">
+<meta property="og:description" content="Annual golf trip &middot; Ryder Cup format. Next edition: Algarve, April 2027.">
+<meta property="og:image" content="https://www.bcinvitational.com/images/logo.jpeg">
+<meta property="og:url" content="https://www.bcinvitational.com">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --green-dark:#0f2a1a;--green-mid:#1e4d2e;--gold:#c9a84c;--gold-light:#e8c97e;
+    --cream:#f7f3eb;--cream-dark:#ede8dc;--text-dark:#1a1a1a;--text-muted:#6b7280;--border:#ddd8cc;
+    --serif-display:'Playfair Display',Georgia,serif;
+    --serif-body:'EB Garamond',Georgia,serif;
+  }
+  html{scroll-behavior:smooth;}
+  body{font-family:var(--serif-body);color:var(--text-dark);overflow-x:hidden;background-color:var(--cream);background-image:linear-gradient(rgba(247,243,235,0.90),rgba(247,243,235,0.90)),url('BCI_club_pic.jpg');background-size:cover;background-position:center top;background-repeat:no-repeat;background-attachment:fixed;}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  nav{background:var(--green-dark);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 14px;border:1px solid rgba(201,168,76,0.3);border-radius:2px;transition:border-color 0.2s;}
+  .nav-menu-btn:hover{border-color:var(--gold);}
+  .nav-menu-btn span.menu-word{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;}
+  .nav-menu-btn .chevron{color:var(--gold);width:12px;height:12px;transition:transform 0.2s;}
+  .nav-menu-btn.open .chevron{transform:rotate(180deg);}
+  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(201,168,76,0.2);border-top:none;min-width:210px;z-index:199;}
+  .dropdown.open{display:block;}
+  .dropdown a{display:flex;align-items:center;gap:12px;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.75);text-decoration:none;font-family:var(--serif-body);font-size:0.88rem;letter-spacing:2.5px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.15s;}
+  .dropdown a:last-child{border-bottom:none;}
+  .dropdown a:hover{color:var(--gold-light);background:rgba(255,255,255,0.03);padding-left:1.5rem;}
+  .dropdown a.active{color:var(--gold);}
+  .dropdown a.live{color:var(--gold-light);}
+  .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
+  .dropdown a.live .d-icon{color:var(--gold-light);}
+  .hero{background-color:var(--green-dark);background-image:linear-gradient(rgba(15,42,26,0.82),rgba(15,42,26,0.88)),url('BCI_club_pic.jpg');background-size:cover;background-position:center center;background-repeat:no-repeat;color:white;text-align:center;padding:5rem 1.5rem 4rem;position:relative;overflow:hidden;}
+  .hero-bg-pattern{position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(201,168,76,0.03) 0px,rgba(201,168,76,0.03) 1px,transparent 1px,transparent 50%);background-size:30px 30px;}
+  .hero-inner{position:relative;z-index:1;}
+  .hero-eyebrow{font-family:var(--serif-body);font-size:0.75rem;letter-spacing:5px;color:var(--gold);margin-bottom:1.25rem;text-transform:uppercase;}
+  .hero h1{font-family:var(--serif-display);font-size:clamp(2.4rem,9vw,4.25rem);color:white;letter-spacing:2px;font-weight:700;line-height:1.05;margin-bottom:0.4rem;}
+  .hero h1 span{color:var(--gold);}
+  .hero-divider{display:flex;align-items:center;justify-content:center;gap:0.75rem;width:180px;margin:1.75rem auto;}
+  .hero-divider::before,.hero-divider::after{content:'';flex:1;height:1px;}
+  .hero-divider::before{background:linear-gradient(to right,transparent,var(--gold));}
+  .hero-divider::after{background:linear-gradient(to right,var(--gold),transparent);}
+  .divider-gem{width:7px;height:7px;background:var(--gold);transform:rotate(45deg);flex-shrink:0;}
+  .countdown-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:0.75rem;}
+  .countdown-label{font-family:var(--serif-body);font-size:0.72rem;letter-spacing:4px;color:rgba(255,255,255,0.45);text-transform:uppercase;}
+  .countdown-box{display:inline-flex;border:1px solid rgba(201,168,76,0.25);border-radius:2px;overflow:hidden;}
+  .countdown-box .unit{text-align:center;padding:1rem 1.25rem;border-right:1px solid rgba(201,168,76,0.15);}
+  .countdown-box .unit:last-child{border-right:none;}
+  .countdown-box .num{font-size:clamp(1.6rem,6vw,2.5rem);font-weight:600;color:var(--gold);display:block;font-family:var(--serif-display);line-height:1;}
+  .countdown-box .lbl{font-size:0.62rem;color:rgba(255,255,255,0.4);font-family:var(--serif-body);letter-spacing:2.5px;text-transform:uppercase;margin-top:5px;display:block;}
+  .hero-location{font-family:var(--serif-body);font-size:0.78rem;letter-spacing:3px;color:rgba(255,255,255,0.35);margin-top:1.25rem;text-transform:uppercase;}
+  .nav-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:1000px;margin:3rem auto;padding:0 1.5rem;}
+  .nav-card{background:white;border:1px solid var(--border);border-radius:2px;padding:1.75rem 1.25rem;text-align:center;text-decoration:none;color:var(--text-dark);transition:transform 0.2s,box-shadow 0.2s;}
+  .nav-card:active{transform:scale(0.98);}
+  .nav-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.08);}
+  .nav-card .card-icon{margin-bottom:0.85rem;}
+  .nav-card .card-icon .icon{width:30px;height:30px;color:var(--gold);stroke-width:1.25;}
+  .nav-card h3{font-family:var(--serif-display);font-size:0.95rem;letter-spacing:2px;font-weight:600;color:var(--green-dark);text-transform:uppercase;margin-bottom:0.35rem;}
+  .nav-card p{font-size:0.85rem;color:var(--text-muted);line-height:1.5;font-family:var(--serif-body);}
+  .live-strip{display:none;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;background:#0a1f12;border-bottom:1px solid rgba(201,168,76,0.25);padding:0.75rem 1.25rem;text-decoration:none;transition:background 0.2s;}
+  .live-strip:hover{background:#0d2517;}
+  .live-strip.visible{display:flex;}
+  .ls-status{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:3px;color:var(--green-dark);background:var(--gold);padding:3px 10px;border-radius:2px;text-transform:uppercase;font-weight:700;}
+  .ls-status.pulsing{animation:ls-pulse 1.6s ease-in-out infinite;}
+  @keyframes ls-pulse{0%,100%{opacity:1;}50%{opacity:0.55;}}
+  .ls-score{font-family:var(--serif-display);font-size:0.95rem;letter-spacing:2px;color:var(--gold-light);font-weight:700;text-transform:uppercase;}
+  .ls-detail{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:1px;color:rgba(255,255,255,0.55);font-style:italic;}
+  footer{background:#0a1f12;color:rgba(255,255,255,0.3);text-align:center;padding:1.5rem;font-family:var(--serif-body);font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+  @media(max-width:640px){
+    .nav-cards{grid-template-columns:1fr 1fr;}
+    .nav-card p{display:none;}
+  }
+  @media(max-width:400px){.nav-cards{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h2.2L8.8 4.5h6.4L16.8 6.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5z"/><circle cx="12" cy="12.5" r="3.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.7 5.6 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.6-3.7-9S9.6 5.6 12 3z"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  </defs>
+</svg>
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+  <div style="position:relative;">
+    <div class="nav-menu-btn" id="menu-btn">
+      <span class="menu-word">Menu</span>
+      <svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div class="dropdown" id="dropdown">
+      <a href="editions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-trophy"/></svg>Results</a>
+      <a href="gallery.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
+      <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
+      <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
+      <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+      <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
+      <a href="leaderboard.html" class="live"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-bg-pattern"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Book Club Invitational</div>
+    <h1>BOOK CLUB<br><span>INVITATIONAL</span></h1>
+    <div class="hero-divider"><span class="divider-gem"></span></div>
+    <div class="countdown-wrap">
+      <div class="countdown-label">Next edition</div>
+      <div class="countdown-box" id="countdown">
+        <div class="unit"><span class="num" id="cd-days">--</span><span class="lbl">Days</span></div>
+        <div class="unit"><span class="num" id="cd-hrs">--</span><span class="lbl">Hours</span></div>
+        <div class="unit"><span class="num" id="cd-min">--</span><span class="lbl">Mins</span></div>
+        <div class="unit"><span class="num" id="cd-sec">--</span><span class="lbl">Secs</span></div>
+      </div>
+      <div class="hero-location">Algarve, Portugal &nbsp;&middot;&nbsp; April 2027</div>
+    </div>
+  </div>
+</div>
+
+<a href="leaderboard.html" class="live-strip" id="live-strip">
+  <span class="ls-status" id="ls-status">Live</span>
+  <span class="ls-score" id="ls-score"></span>
+  <span class="ls-detail" id="ls-detail"></span>
+</a>
+
+<div class="nav-cards">
+  <a href="editions.html" class="nav-card">
+    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg></div>
+    <div><h3>Results</h3><p>Past results, teams and courses</p></div>
+  </a>
+  <a href="gallery.html" class="nav-card">
+    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg></div>
+    <div><h3>Gallery</h3><p>Photos from Marbella 2026</p></div>
+  </a>
+  <a href="2027.html" class="nav-card">
+    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg></div>
+    <div><h3>Algarve · 2027</h3><p>Algarve &middot; next edition details</p></div>
+  </a>
+  <a href="kit.html" class="nav-card">
+    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-shirt"/></svg></div>
+    <div><h3>BCI Shop</h3><p>Order your kit for Algarve · 2027</p></div>
+  </a>
+  <a href="competitions.html" class="nav-card">
+    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-target"/></svg></div>
+    <div><h3>Competitions</h3><p>Longest drive &amp; nearest to pin</p></div>
+  </a>
+  <a href="leaderboard.html" class="nav-card">
+    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg></div>
+    <div><h3>Leaderboard</h3><p>Live scoring &middot; Algarve · 2027</p></div>
+  </a>
+</div>
+
+<footer><p><span>Book Club Invitational</span></p></footer>
+
+<script>
+(function(){
+  const btn=document.getElementById('menu-btn');
+  const dd=document.getElementById('dropdown');
+  btn.addEventListener('click',function(){btn.classList.toggle('open');dd.classList.toggle('open');});
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){btn.classList.remove('open');dd.classList.remove('open');}
+  });
+  function updateCountdown(){
+    const target=new Date('2027-04-23T08:00:00');
+    const now=new Date();
+    const diff=target-now;
+    if(diff<=0){document.getElementById('countdown').innerHTML='<p style="color:var(--gold);font-family:var(--serif-display);font-size:1.2rem;letter-spacing:2px;">Trip time!</p>';return;}
+    const d=Math.floor(diff/86400000);
+    const h=Math.floor((diff%86400000)/3600000);
+    const m=Math.floor((diff%3600000)/60000);
+    const s=Math.floor((diff%60000)/1000);
+    document.getElementById('cd-days').textContent=d;
+    document.getElementById('cd-hrs').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-min').textContent=String(m).padStart(2,'0');
+    document.getElementById('cd-sec').textContent=String(s).padStart(2,'0');
+  }
+  updateCountdown();
+  setInterval(updateCountdown,1000);
+
+  /* ---------- live score strip (driven by the 2027 leaderboard) ---------- */
+  const SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  const SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+  let liveLines=[],lineIdx=0,rotateTimer=null;
+
+  function fmtPts(n){
+    const whole=Math.floor(n);
+    return (n%1===0.5)?(whole===0?'\u00BD':whole+'\u00BD'):String(n);
+  }
+
+  function refreshStrip(){
+    fetch(SB_URL+'/rest/v1/bci_matches?select=match_no,day,status,leader,score,thru,baber_players,weff_players',{
+      headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}
+    })
+    .then(r=>r.json())
+    .then(rows=>{
+      if(!Array.isArray(rows)||!rows.length)return;
+      const strip=document.getElementById('live-strip');
+      const finals=rows.filter(m=>m.status==='final');
+      const lives=rows.filter(m=>m.status==='live');
+      let b=0,w=0;
+      finals.forEach(m=>{
+        if(m.leader==='baber')b+=1;
+        else if(m.leader==='weff')w+=1;
+        else{b+=0.5;w+=0.5;}
+      });
+      const scoreText='Baber '+fmtPts(b)+' \u2013 '+fmtPts(w)+' Weff';
+      const status=document.getElementById('ls-status');
+      const detail=document.getElementById('ls-detail');
+
+      if(lives.length){
+        status.textContent='Live';
+        status.classList.add('pulsing');
+        document.getElementById('ls-score').textContent=scoreText;
+        liveLines=lives.map(m=>{
+          if(m.leader==='tie')return 'Match '+m.match_no+' \u00B7 All square thru '+m.thru;
+          const names=m.leader==='baber'?m.baber_players:m.weff_players;
+          return 'Match '+m.match_no+' \u00B7 '+names+' '+m.score+' thru '+m.thru;
+        });
+        lineIdx=0;
+        detail.textContent=liveLines[0]||'';
+        strip.classList.add('visible');
+      } else if(finals.length===rows.length){
+        status.textContent='Final';
+        status.classList.remove('pulsing');
+        document.getElementById('ls-score').textContent=scoreText;
+        detail.textContent=b>w?'Team Baber win the 2027 BCI':(w>b?'Team Weff win the 2027 BCI':'The 2027 BCI is halved');
+        liveLines=[];
+        strip.classList.add('visible');
+      } else if(finals.length){
+        status.textContent='Score';
+        status.classList.remove('pulsing');
+        document.getElementById('ls-score').textContent=scoreText;
+        detail.textContent=finals.length+' of '+rows.length+' matches completed';
+        liveLines=[];
+        strip.classList.add('visible');
+      } else {
+        strip.classList.remove('visible');
+      }
+    })
+    .catch(()=>{/* strip stays hidden if the leaderboard is unreachable */});
+  }
+
+  rotateTimer=setInterval(function(){
+    if(liveLines.length>1){
+      lineIdx=(lineIdx+1)%liveLines.length;
+      document.getElementById('ls-detail').textContent=liveLines[lineIdx];
+    }
+  },5000);
+
+  refreshStrip();
+  setInterval(refreshStrip,60000);
+})();
+</script>
+<script src="live-tracker.js"></script>
+</body>
+</html>

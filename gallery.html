@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --green-dark:#0f2a1a;--green-mid:#1e4d2e;--gold:#c9a84c;--gold-light:#e8c97e;
+    --cream-dark:#ede8dc;--text-dark:#1a1a1a;--text-muted:#6b7280;--border:#ddd8cc;
+    --serif-display:'Playfair Display',Georgia,serif;
+    --serif-body:'EB Garamond',Georgia,serif;
+  }
+  body{font-family:var(--serif-body);background:var(--cream-dark);color:var(--text-dark);}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  nav{background:var(--green-dark);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;transition:border-color 0.2s;}
+  .nav-menu-btn:hover{border-color:var(--gold);}
+  .nav-menu-btn span.menu-word{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;}
+  .nav-menu-btn .chevron{color:var(--gold);width:12px;height:12px;transition:transform 0.2s;}
+  .nav-menu-btn.open .chevron{transform:rotate(180deg);}
+  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(201,168,76,0.2);border-top:none;min-width:200px;z-index:199;}
+  .dropdown.open{display:block;}
+  .dropdown a{display:flex;align-items:center;gap:10px;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.15s;}
+  .dropdown a:last-child{border-bottom:none;}
+  .dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.03);padding-left:1.5rem;}
+  .dropdown a.active{color:var(--gold);}
+  .dropdown a.live{color:var(--gold-light);}
+  .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
+  .dropdown a.live .d-icon{color:var(--gold-light);}
+
+  .page-hero{background:var(--green-dark);padding:3rem 1.5rem;text-align:center;border-bottom:1px solid rgba(201,168,76,0.15);}
+  .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
+  .page-hero h1{font-family:var(--serif-display);font-size:clamp(2rem,8vw,2.8rem);color:white;letter-spacing:3px;font-weight:700;}
+
+  .page{max-width:1080px;margin:0 auto;padding:2.5rem 1.5rem;}
+  .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+  .submit-photo-wrap{text-align:center;margin-bottom:2.5rem;}
+  .submit-photo-btn{display:inline-flex;align-items:center;gap:0.5rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;padding:0.75rem 1.5rem;font-family:var(--serif-display);font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background 0.2s;}
+  .submit-photo-btn:hover{background:var(--green-mid);}
+  .submit-photo-btn .icon{width:16px;height:16px;}
+  .gallery-section-title{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:1.5rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);}
+  .gallery-section{margin-bottom:3rem;}
+  figure.plate{opacity:0;transform:translateY(24px);transition:opacity 0.5s ease,transform 0.5s ease;}
+  figure.plate.visible{opacity:1;transform:translateY(0);}
+  .frame{background:#fff;padding:8px;border:1px solid var(--gold);box-shadow:0 2px 14px rgba(0,0,0,0.10);transition:box-shadow 0.3s;}
+  figure.plate:hover .frame{box-shadow:0 8px 28px rgba(0,0,0,0.20);}
+  .gallery-img{aspect-ratio:4/3;object-fit:cover;width:100%;display:block;cursor:pointer;}
+  .gallery-vid{aspect-ratio:4/3;object-fit:cover;width:100%;display:block;background:#000;cursor:pointer;}
+  .video-tile{position:relative;}
+  .video-play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:rgba(15,42,26,0.8);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+  .video-play-btn .icon{width:18px;height:18px;color:var(--gold);margin-left:2px;}
+  .plate-caption{font-size:0.72rem;color:var(--text-muted);font-style:italic;text-align:center;padding-top:0.4rem;}
+  .empty-note{font-size:0.85rem;color:var(--text-muted);font-style:italic;grid-column:1/-1;text-align:center;padding:1rem 0;}
+
+  .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.94);z-index:1000;align-items:center;justify-content:center;touch-action:none;}
+  .lightbox.open{display:flex;}
+  .lightbox-img-wrap{max-width:92vw;max-height:82vh;display:flex;align-items:center;justify-content:center;}
+  .lightbox img{max-width:100%;max-height:82vh;object-fit:contain;border-radius:4px;}
+  .lightbox video{max-width:100%;max-height:82vh;border-radius:4px;}
+  .lightbox-close{position:absolute;top:1rem;right:1rem;color:white;cursor:pointer;opacity:0.6;background:rgba(0,0,0,0.4);padding:8px;border-radius:4px;line-height:0;}
+  .lightbox-close .icon{width:20px;height:20px;}
+  .lightbox-close:hover{opacity:1;}
+  .lightbox-prev,.lightbox-next{position:absolute;top:50%;transform:translateY(-50%);color:white;cursor:pointer;opacity:0.5;padding:1rem;line-height:0;}
+  .lightbox-prev .icon,.lightbox-next .icon{width:30px;height:30px;}
+  .lightbox-prev{left:0.25rem;}
+  .lightbox-next{right:0.25rem;}
+  .lightbox-prev:hover,.lightbox-next:hover{opacity:1;}
+  .lightbox-counter{position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.4);font-family:var(--serif-display);font-size:0.7rem;letter-spacing:3px;}
+  .lightbox-caption{position:absolute;bottom:2.75rem;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.6);font-family:var(--serif-body);font-size:0.85rem;font-style:italic;}
+
+  footer{background:#0a1f12;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+
+  @media(max-width:640px){
+    .gallery-grid{grid-template-columns:repeat(2,1fr);gap:1rem;}
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h2.2L8.8 4.5h6.4L16.8 6.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5z"/><circle cx="12" cy="12.5" r="3.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.7 5.6 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.6-3.7-9S9.6 5.6 12 3z"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l14-8z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+  </defs>
+</svg>
+
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+  <div style="position:relative;">
+    <div class="nav-menu-btn" id="menu-btn">
+      <span class="menu-word">Menu</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div class="dropdown" id="dropdown">
+      <a href="editions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-trophy"/></svg>Results</a>
+      <a href="gallery.html" class="active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
+      <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
+      <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
+      <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+      <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
+      <a href="leaderboard.html" class="live"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-eyebrow">Book Club Invitational</div>
+  <h1>GALLERY</h1>
+</div>
+
+<div class="page">
+
+  <div class="submit-photo-wrap">
+    <a href="upload.html" class="submit-photo-btn">
+      <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
+      Submit a Photo/Video
+    </a>
+  </div>
+
+  <div class="gallery-section">
+    <div class="gallery-section-title">Algarve · 2027</div>
+    <div class="gallery-grid" id="grid-algarve-2027"><p class="empty-note">Loading...</p></div>
+  </div>
+
+  <div class="gallery-section">
+    <div class="gallery-section-title">Marbella 2026</div>
+    <div class="gallery-grid" id="grid-marbella-2026"><p class="empty-note">Loading...</p></div>
+  </div>
+
+</div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-close" id="lightbox-close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></div>
+  <div class="lightbox-prev" id="lightbox-prev"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg></div>
+  <div class="lightbox-img-wrap">
+    <img id="lightbox-img" src="" alt="">
+    <video id="lightbox-video" controls style="display:none;"></video>
+  </div>
+  <div class="lightbox-next" id="lightbox-next"><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></div>
+  <div class="lightbox-caption" id="lightbox-caption"></div>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
+</div>
+
+<footer><p><span>Book Club Invitational</span></p></footer>
+
+<script>
+(function(){
+  var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co'; // confirmed project URL
+  var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui'; // publishable key
+  var BUCKET='bci-images';
+  var EDITIONS=[
+    {slug:'algarve-2027',gridId:'grid-algarve-2027'},
+    {slug:'marbella-2026',gridId:'grid-marbella-2026'}
+  ];
+  // The original photos from before live uploads existed — always shown first, alongside anything submitted since.
+  var STATIC_IMAGES={
+    'algarve-2027':[
+      {url:'images/course1.jpg',caption:'Quinta do Vale'},
+      {url:'images/course2.jpg',caption:'Quinta do Vale'},
+      {url:'images/course3.jpg',caption:'Isla Canela'},
+      {url:'images/course4.jpg',caption:'Isla Canela'},
+      {url:'images/hotel1.jpg',caption:'Vila Gale Tavira'}
+    ],
+    'marbella-2026':[
+      {url:'images/photo1.jpeg',submittedBy:'Admin'},
+      {url:'images/photo2.jpeg',submittedBy:'Admin'},
+      {url:'images/photo3.jpeg',submittedBy:'Admin'},
+      {url:'images/photo4.jpeg',submittedBy:'Admin'},
+      {url:'images/photo5.jpeg',submittedBy:'Admin'},
+      {url:'images/photo6.jpeg',submittedBy:'Admin'},
+      {url:'images/photo7.jpeg',submittedBy:'Admin'}
+    ]
+  };
+  var allImages=[]; // flattened, in the order rendered, for the lightbox to page through
+  var current=0,touchStartX=0;
+
+  document.getElementById('menu-btn').addEventListener('click',function(){
+    document.getElementById('menu-btn').classList.toggle('open');
+    document.getElementById('dropdown').classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){
+      document.getElementById('menu-btn').classList.remove('open');
+      document.getElementById('dropdown').classList.remove('open');
+    }
+  });
+
+  var observer=new IntersectionObserver(function(entries){
+    entries.forEach(function(e,i){if(e.isIntersecting)setTimeout(function(){e.target.classList.add('visible');},i*80);});
+  },{threshold:0.1});
+
+  function fetchEdition(edition){
+    return fetch(SUPABASE_URL+'/storage/v1/object/list/'+BUCKET,{
+      method:'POST',
+      headers:{
+        'apikey':SUPABASE_ANON_KEY,
+        'Authorization':'Bearer '+SUPABASE_ANON_KEY,
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({prefix:edition.slug+'/',limit:200,sortBy:{column:'created_at',order:'desc'}})
+    }).then(function(res){return res.json();})
+      .then(function(data){
+        var items=Array.isArray(data)?data.filter(function(o){return o.name && o.name.indexOf('.')!==0 && o.name!=='.emptyFolderPlaceholder';}):[];
+        return items.map(function(o){
+          var mimetype=(o.metadata&&o.metadata.mimetype)||'';
+          var isVideo=mimetype.indexOf('video')===0 || /\.(mp4|mov|webm|m4v)$/i.test(o.name);
+          return {
+            url:SUPABASE_URL+'/storage/v1/object/public/'+BUCKET+'/'+edition.slug+'/'+o.name,
+            isVideo:isVideo
+          };
+        });
+      })
+      .catch(function(){return null;});
+  }
+
+  function loadAllEditions(){
+    var loaders=EDITIONS.map(function(ed){
+      return fetchEdition(ed).then(function(fetched){
+        var staticImgs=STATIC_IMAGES[ed.slug]||[];
+        var combined = fetched===null
+          ? (staticImgs.length ? staticImgs.slice() : null)
+          : staticImgs.concat(fetched);
+        return {edition:ed,images:combined};
+      });
+    });
+    Promise.all(loaders).then(function(results){
+      results.forEach(function(r){renderSection(r.edition,r.images);});
+      wireUpImages();
+    });
+  }
+
+  function renderSection(edition,images){
+    var grid=document.getElementById(edition.gridId);
+    if(images===null){
+      grid.innerHTML='<p class="empty-note">Could not load images right now.</p>';
+      return;
+    }
+    if(images.length===0){
+      grid.innerHTML='<p class="empty-note">No photos uploaded yet for this edition.</p>';
+      return;
+    }
+    grid.innerHTML=images.map(function(img){
+      var hasCaption=!!img.caption;
+      var altText=img.caption||'BCI photo';
+      var media=img.isVideo
+        ? '<div class="video-tile"><video class="gallery-vid" src="'+img.url+'#t=0.5" preload="metadata" muted playsinline webkit-playsinline></video><div class="video-play-btn"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg></div></div>'
+        : '<img class="gallery-img" src="'+img.url+'" alt="'+altText+'"'+(hasCaption?' data-caption="'+img.caption+'"':'')+'>';
+      return '<figure class="plate">'+
+        '<div class="frame">'+media+'</div>'+
+        (hasCaption?'<div class="plate-caption">'+img.caption+'</div>':'')+
+      '</figure>';
+    }).join('');
+  }
+
+  function wireUpImages(){
+    var mediaEls=Array.from(document.querySelectorAll('.gallery-img, .video-tile'));
+    var plates=Array.from(document.querySelectorAll('figure.plate'));
+
+    allImages=mediaEls.map(function(el){
+      if(el.classList.contains('video-tile')){
+        var vid=el.querySelector('video');
+        return {src:vid.src.replace(/#t=[\d.]+$/,''),caption:'',isVideo:true};
+      }
+      return {src:el.src,caption:el.dataset.caption,isVideo:false};
+    });
+
+    plates.forEach(function(el){observer.observe(el);});
+    mediaEls.forEach(function(el,i){el.addEventListener('click',function(){openLightbox(i);});});
+  }
+
+  function openLightbox(i){
+    current=i;
+    updateLightboxImage();
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeLightbox(){
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow='';
+    var video=document.getElementById('lightbox-video');
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+  }
+  function updateLightboxImage(){
+    var item=allImages[current];
+    var imgEl=document.getElementById('lightbox-img');
+    var videoEl=document.getElementById('lightbox-video');
+    if(item.isVideo){
+      imgEl.style.display='none';
+      videoEl.style.display='block';
+      videoEl.src=item.src;
+      videoEl.currentTime=0;
+      videoEl.play().catch(function(){});
+    } else {
+      videoEl.pause();
+      videoEl.removeAttribute('src');
+      videoEl.load();
+      videoEl.style.display='none';
+      imgEl.style.display='block';
+      imgEl.src=item.src;
+    }
+    document.getElementById('lightbox-caption').textContent=item.caption||'';
+    document.getElementById('lightbox-counter').textContent=(current+1)+' / '+allImages.length;
+  }
+  function changePhoto(dir){
+    current=(current+dir+allImages.length)%allImages.length;
+    updateLightboxImage();
+  }
+
+  document.getElementById('lightbox-close').addEventListener('click',closeLightbox);
+  document.getElementById('lightbox-prev').addEventListener('click',function(){changePhoto(-1);});
+  document.getElementById('lightbox-next').addEventListener('click',function(){changePhoto(1);});
+  document.getElementById('lightbox').addEventListener('click',function(e){if(e.target===e.currentTarget)closeLightbox();});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape')closeLightbox();
+    if(e.key==='ArrowLeft')changePhoto(-1);
+    if(e.key==='ArrowRight')changePhoto(1);
+  });
+  document.getElementById('lightbox').addEventListener('touchstart',function(e){touchStartX=e.touches[0].clientX;},{passive:true});
+  document.getElementById('lightbox').addEventListener('touchend',function(e){
+    var diff=touchStartX-e.changedTouches[0].clientX;
+    if(Math.abs(diff)>50)changePhoto(diff>0?1:-1);
+  },{passive:true});
+
+  loadAllEditions();
+})();
+</script>
+<script src="hero-gallery.js"></script>
+<script src="live-tracker.js"></script>
+</body>
+</html>

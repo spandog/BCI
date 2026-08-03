@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Competitions — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --green-dark:#0f2a1a;--green-mid:#1e4d2e;--gold:#c9a84c;--gold-light:#e8c97e;
+    --cream:#f7f3eb;--cream-dark:#ede8dc;--text-dark:#1a1a1a;--text-muted:#6b7280;--border:#ddd8cc;
+    --serif-display:'Playfair Display',Georgia,serif;
+    --serif-body:'EB Garamond',Georgia,serif;
+  }
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);min-height:100vh;display:flex;flex-direction:column;}
+  nav{background:var(--green-dark);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;}
+  .nav-menu-btn span.menu-word{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;}
+  .nav-menu-btn .chevron{color:var(--gold);width:12px;height:12px;transition:transform 0.2s;}
+  .nav-menu-btn.open .chevron{transform:rotate(180deg);}
+  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(201,168,76,0.2);border-top:none;min-width:200px;z-index:199;}
+  .dropdown.open{display:block;}
+  .dropdown a{display:flex;align-items:center;gap:10px;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.15s;}
+  .dropdown a:last-child{border-bottom:none;}
+  .dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.03);padding-left:1.5rem;}
+  .dropdown a.active{color:var(--gold);}
+  .dropdown a.live{color:var(--gold-light);}
+  .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
+  .dropdown a.live .d-icon{color:var(--gold-light);}
+  .page-hero{background:var(--green-dark);padding:3rem 1.5rem;text-align:center;border-bottom:1px solid rgba(201,168,76,0.15);}
+  .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
+  .page-hero h1{font-family:var(--serif-display);font-size:clamp(2rem,8vw,2.8rem);color:white;letter-spacing:3px;font-weight:700;}
+  .page{max-width:860px;margin:0 auto;padding:3rem 1.5rem;flex:1;}
+  .day-tabs{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:white;margin-bottom:2rem;}
+  .day-tab{flex:1;padding:0.75rem;text-align:center;font-family:var(--serif-display);font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);border-right:1px solid var(--border);transition:all 0.2s;}
+  .day-tab:last-child{border-right:none;}
+  .day-tab.active{background:var(--green-dark);color:var(--gold);}
+  .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2.5rem;}
+  .comp-card{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+  .comp-card-header{background:var(--green-dark);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:0.75rem;}
+  .comp-card-header .comp-icon{line-height:0;}
+  .comp-svg{width:22px;height:22px;color:var(--gold);}
+  .crown-svg{width:28px;height:28px;color:var(--gold);}
+  .eh-svg{width:16px;height:16px;color:var(--green-dark);vertical-align:middle;}
+  .comp-card-header h3{font-family:var(--serif-display);font-size:1rem;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
+  .comp-card-header .comp-course{font-size:0.7rem;color:rgba(255,255,255,0.4);font-family:var(--serif-display);letter-spacing:1px;margin-top:2px;}
+  .comp-result{padding:1.5rem;text-align:center;border-bottom:1px solid var(--border);min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .comp-result .winner-name{font-family:var(--serif-display);font-size:1.4rem;color:var(--green-mid);letter-spacing:2px;font-weight:600;margin-bottom:4px;}
+  .comp-result .winner-detail{font-size:0.8rem;color:var(--text-muted);font-family:var(--serif-display);letter-spacing:1px;}
+  .comp-result .tbd{font-family:var(--serif-body);font-size:1rem;color:var(--text-muted);font-style:italic;}
+  .comp-result .crown{margin-bottom:0.5rem;line-height:0;}
+  .comp-history{padding:0.75rem 1.5rem;}
+  .comp-history-title{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.5rem;}
+  .history-item{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:0.8rem;}
+  .history-item:last-child{border-bottom:none;}
+  .history-item .pos{font-family:var(--serif-display);color:var(--text-muted);min-width:20px;}
+  .history-item .h-name{color:var(--text-dark);}
+  .history-item .h-detail{font-family:var(--serif-display);font-size:0.75rem;color:var(--gold);}
+  .scorer-section{border-top:1px solid var(--border);padding-top:1.5rem;margin-top:1rem;}
+  .scorer-toggle{display:flex;align-items:center;gap:0.75rem;cursor:pointer;padding:0.5rem 0;}
+  .scorer-toggle h3{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .arrow{width:12px;height:12px;color:var(--text-muted);transition:transform 0.2s;}
+  .scorer-toggle.open .arrow{width:12px;height:12px;color:var(--text-muted);transition:transform 0.2s;}
+  .password-gate{background:white;border:1px solid var(--border);border-radius:6px;padding:1.5rem;text-align:center;max-width:320px;margin:0 auto;}
+  .password-gate h4{font-family:var(--serif-display);font-size:0.9rem;letter-spacing:2px;color:var(--green-dark);margin-bottom:0.75rem;text-transform:uppercase;}
+  .password-gate input{width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:4px;font-size:1rem;margin-bottom:0.625rem;text-align:center;letter-spacing:4px;-webkit-appearance:none;}
+  .password-gate input:focus{outline:none;border-color:var(--gold);}
+  .password-gate button{width:100%;padding:0.875rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;cursor:pointer;text-transform:uppercase;}
+  .pw-error{color:#dc2626;font-size:0.8rem;margin-top:0.5rem;}
+  .scorer-panel{display:none;}
+  .scorer-panel.visible{display:block;}
+  .entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:1.25rem;}
+  .entry-card{background:white;border:1px solid var(--border);border-radius:6px;padding:1.25rem;}
+  .entry-card h4{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:2px;color:var(--green-dark);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;}
+  .entry-group{display:flex;flex-direction:column;gap:4px;margin-bottom:0.75rem;}
+  .entry-group label{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .entry-group input{padding:0.625rem 0.75rem;border:1px solid var(--border);border-radius:4px;font-family:var(--serif-body);font-size:0.875rem;-webkit-appearance:none;}
+  .entry-group input:focus{outline:none;border-color:var(--gold);}
+  .entry-btn{width:100%;padding:0.75rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.75rem;letter-spacing:2px;cursor:pointer;text-transform:uppercase;margin-top:0.25rem;}
+  .entry-btn:hover{background:var(--green-mid);}
+  footer{background:#0a1f12;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+  @media(max-width:640px){
+    .comp-grid{grid-template-columns:1fr;}
+    .entry-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h2.2L8.8 4.5h6.4L16.8 6.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5z"/><circle cx="12" cy="12.5" r="3.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.7 5.6 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.6-3.7-9S9.6 5.6 12 3z"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
+    <symbol id="i-cap" viewBox="0 0 24 24"><path d="M3.5 15.5c0-5 3.8-9 8.5-9s8.5 4 8.5 9"/><path d="M3.5 15.5c2 .9 5 1.4 8.5 1.4s6.5-.5 8.5-1.4"/><path d="M12 6.5V4.2"/><path d="M20.5 15.5l2.2 .6a1 1 0 0 1 .3 1.8c-1 .7-2 1.1-3 1.1"/></symbol>
+    <symbol id="i-jumper" viewBox="0 0 24 24"><path d="M8 4h8l4 3.5-2.5 3L16 9v11H8V9l-1.5 1.5L4 7.5 8 4z"/><path d="M9.5 4c.4 1.4 1.4 2.2 2.5 2.2S14.1 5.4 14.5 4"/></symbol>
+    <symbol id="i-driver" viewBox="0 0 24 24"><path d="M5 4l11 11"/><path d="M15 14.2c1.3-.2 2.6.2 3.5 1.1 1.3 1.3 1.3 3.1 .3 4.1s-2.8 1-4.1-.3c-.9-.9-1.3-2.2-1.1-3.5z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4 4 10-11"/></symbol>
+  </defs>
+</svg>
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+  <div style="position:relative;">
+    <div class="nav-menu-btn" id="menu-btn">
+      <span class="menu-word">Menu</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div class="dropdown" id="dropdown">
+      <a href="editions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-trophy"/></svg>Results</a>
+      <a href="gallery.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
+      <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
+      <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
+      <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+      <a href="competitions.html" class="active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
+      <a href="leaderboard.html" class="live"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-eyebrow">Algarve · 2027</div>
+  <h1>COMPETITIONS</h1>
+</div>
+
+<div class="page">
+  <div class="day-tabs">
+    <div class="day-tab active" id="tab-1">Day 1 &middot; Quinta do Vale</div>
+    <div class="day-tab" id="tab-2">Day 2 &middot; Isla Canela</div>
+  </div>
+  <div id="comp-display"></div>
+  <div class="scorer-section">
+    <div class="scorer-toggle" id="scorer-toggle">
+      <h3>Scorer Access</h3>
+      <svg class="icon arrow" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div id="password-gate" class="password-gate" style="display:none;">
+      <h4>Enter Password</h4>
+      <input type="password" id="pw-input" placeholder="••••••">
+      <button id="pw-btn">Unlock</button>
+      <div class="pw-error" id="pw-error"></div>
+    </div>
+    <div class="scorer-panel" id="scorer-panel">
+      <div class="entry-grid" id="entry-fields"></div>
+    </div>
+  </div>
+</div>
+
+<footer><p><span>Book Club Invitational</span> &nbsp;&middot;&nbsp; Est. MMXXVI</p></footer>
+
+<script>
+(function(){
+  var PASS='bci2027';
+  var COURSES={1:'Quinta do Vale',2:'Isla Canela'};
+  var state={day:1,unlocked:false,data:{1:{ld:{entries:[]},ntp:{entries:[]}},2:{ld:{entries:[]},ntp:{entries:[]}}}};
+
+  function saveState(){try{localStorage.setItem('bci_comps',JSON.stringify(state.data));}catch(e){}}
+  function loadState(){try{var s=localStorage.getItem('bci_comps');if(s)state.data=JSON.parse(s);}catch(e){}}
+
+  function timeNow(){
+    return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  document.getElementById('menu-btn').addEventListener('click',function(){
+    document.getElementById('menu-btn').classList.toggle('open');
+    document.getElementById('dropdown').classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){
+      document.getElementById('menu-btn').classList.remove('open');
+      document.getElementById('dropdown').classList.remove('open');
+    }
+  });
+
+  document.getElementById('tab-1').addEventListener('click',function(){switchDay(1);});
+  document.getElementById('tab-2').addEventListener('click',function(){switchDay(2);});
+
+  function switchDay(d){
+    state.day=d;
+    document.getElementById('tab-1').classList.toggle('active',d===1);
+    document.getElementById('tab-2').classList.toggle('active',d===2);
+    renderDisplay();
+    renderScorer();
+  }
+
+  function compCard(type,icon,title,course){
+    var entries=state.data[state.day][type].entries;
+    var w=entries.length>0?entries[0]:null;
+    var winner=w
+      ?'<div class="crown"><svg class="icon crown-svg" aria-hidden="true"><use href="#i-trophy"/></svg></div><div class="winner-name">'+w.name+'</div>'
+        +(w.time?'<div class="winner-detail">Logged '+w.time+'</div>':'')
+      :'<div class="tbd">No entry yet</div>';
+    var history=entries.length>1
+      ?'<div class="comp-history"><div class="comp-history-title">All entries</div>'
+        +entries.map(function(e,i){
+          return '<div class="history-item"><span class="pos">'+(i+1)+'.</span><span class="h-name">'+e.name+'</span><span class="h-detail">'+(e.time||'')+'</span></div>';
+        }).join('')+'</div>'
+      :'';
+    return '<div class="comp-card"><div class="comp-card-header"><div class="comp-icon"><svg class="icon comp-svg" aria-hidden="true"><use href="#'+icon+'"/></svg></div><div><h3>'+title+'</h3><div class="comp-course">'+course+'</div></div></div><div class="comp-result">'+winner+'</div>'+history+'</div>';
+  }
+
+  function renderDisplay(){
+    var course=COURSES[state.day];
+    document.getElementById('comp-display').innerHTML='<div class="comp-grid">'
+      +compCard('ld','i-driver','Longest Drive',course)
+      +compCard('ntp','i-target','Nearest to Pin',course)
+      +'</div>';
+  }
+
+  function entryCard(type,icon,title,d,placeholder){
+    return '<div class="entry-card"><h4><span class="eh"><svg class="icon eh-svg" aria-hidden="true"><use href="#'+icon+'"/></svg></span> '+title+' — Day '+d+'</h4>'
+      +'<div class="entry-group"><label>Player Name</label><input type="text" id="'+type+'-name" placeholder="'+placeholder+'"></div>'
+      +'<button class="entry-btn" id="'+type+'-add-btn">Add Entry</button>'
+      +(state.data[d][type].entries.length>0?'<button class="entry-btn" id="'+type+'-clear-btn" style="background:#dc2626;margin-top:6px;">Clear All</button>':'')
+      +'</div>';
+  }
+
+  function renderScorer(){
+    if(!state.unlocked)return;
+    var d=state.day;
+    document.getElementById('entry-fields').innerHTML=
+      entryCard('ld','i-driver','Longest Drive',d,'e.g. James Baber')+
+      entryCard('ntp','i-target','Nearest to Pin',d,'e.g. Kane Bailey');
+
+    ['ld','ntp'].forEach(function(type){
+      document.getElementById(type+'-add-btn').addEventListener('click',function(){addEntry(type);});
+      var clear=document.getElementById(type+'-clear-btn');
+      if(clear)clear.addEventListener('click',function(){clearEntries(type);});
+      document.getElementById(type+'-name').addEventListener('keydown',function(e){
+        if(e.key==='Enter')addEntry(type);
+      });
+    });
+  }
+
+  function addEntry(type){
+    var name=document.getElementById(type+'-name').value.trim();
+    if(!name){alert('Please enter a player name.');return;}
+    state.data[state.day][type].entries.push({name:name,time:timeNow()});
+    saveState();renderDisplay();renderScorer();
+  }
+
+  function clearEntries(type){
+    if(!confirm('Clear all entries for this competition?'))return;
+    state.data[state.day][type].entries=[];
+    saveState();renderDisplay();renderScorer();
+  }
+
+  document.getElementById('scorer-toggle').addEventListener('click',function(){
+    this.classList.toggle('open');
+    var g=document.getElementById('password-gate');
+    if(!state.unlocked)g.style.display=g.style.display==='none'?'block':'none';
+  });
+
+  document.getElementById('pw-btn').addEventListener('click',function(){
+    if(document.getElementById('pw-input').value===PASS){
+      state.unlocked=true;
+      document.getElementById('password-gate').style.display='none';
+      document.getElementById('scorer-panel').classList.add('visible');
+      renderScorer();
+    } else {
+      document.getElementById('pw-error').textContent='Incorrect password.';
+    }
+  });
+
+  document.getElementById('pw-input').addEventListener('keydown',function(e){
+    if(e.key==='Enter')document.getElementById('pw-btn').click();
+  });
+
+  loadState();
+  renderDisplay();
+  setInterval(function(){loadState();renderDisplay();},30000);
+})();
+</script>
+<script src="hero-gallery.js"></script>
+<script src="live-tracker.js"></script>
+</body>
+</html>

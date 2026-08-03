@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algarve · 2027 — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --green-dark:#0f2a1a;--green-mid:#1e4d2e;--gold:#c9a84c;--gold-light:#e8c97e;
+    --cream:#f7f3eb;--text-dark:#1a1a1a;--text-muted:#6b7280;--border:#ddd8cc;
+    --serif-display:'Playfair Display',Georgia,serif;
+    --serif-body:'EB Garamond',Georgia,serif;
+  }
+  body{font-family:var(--serif-body);background:var(--green-dark);color:white;}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  nav{background:var(--green-dark);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;}
+  .nav-menu-btn span.menu-word{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;}
+  .nav-menu-btn .chevron{color:var(--gold);width:12px;height:12px;transition:transform 0.2s;}
+  .nav-menu-btn.open .chevron{transform:rotate(180deg);}
+  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(201,168,76,0.2);border-top:none;min-width:200px;z-index:199;}
+  .dropdown.open{display:block;}
+  .dropdown a{display:flex;align-items:center;gap:10px;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.15s;}
+  .dropdown a:last-child{border-bottom:none;}
+  .dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.03);padding-left:1.5rem;}
+  .dropdown a.active{color:var(--gold);}
+  .dropdown a.live{color:var(--gold-light);}
+  .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
+  .dropdown a.live .d-icon{color:var(--gold-light);}
+  .bg-pattern{position:fixed;inset:0;background-image:repeating-linear-gradient(45deg,rgba(201,168,76,0.03) 0px,rgba(201,168,76,0.03) 1px,transparent 1px,transparent 50%);background-size:30px 30px;pointer-events:none;z-index:0;}
+  .page{max-width:900px;margin:0 auto;padding:3rem 1.5rem;position:relative;z-index:1;}
+  .trip-header{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start;margin-bottom:3rem;padding:2rem;border-radius:8px;background-color:var(--green-dark);background-image:linear-gradient(rgba(15,42,26,0.82),rgba(15,42,26,0.88)),url('https://images.unsplash.com/photo-1742498626135-67a7d3501eff?fm=jpg&q=80&w=2000&auto=format&fit=crop');background-size:cover;background-position:center;border:1px solid rgba(201,168,76,0.15);}
+  .trip-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
+  h1{font-family:var(--serif-display);font-size:clamp(2.5rem,10vw,3.5rem);color:white;letter-spacing:3px;font-weight:700;line-height:1;margin-bottom:0.4rem;}
+  h1 span{color:var(--gold);}
+  .trip-sub{font-family:var(--serif-body);font-size:1rem;color:rgba(255,255,255,0.4);font-style:italic;margin-top:0.75rem;}
+  .trip-logo{width:clamp(120px,20vw,180px);height:auto;border-radius:8px;}
+  .details-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.15);border-radius:4px;overflow:hidden;margin-bottom:3rem;}
+  .detail-box{background:rgba(255,255,255,0.04);padding:1.25rem 0.75rem;text-align:center;}
+  .detail-box .label{font-size:0.58rem;color:rgba(255,255,255,0.35);letter-spacing:2px;font-family:var(--serif-display);text-transform:uppercase;margin-bottom:0.4rem;display:block;}
+  .detail-box .value{font-size:0.95rem;color:var(--gold-light);font-family:var(--serif-display);letter-spacing:1px;}
+  .section-title{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .itinerary{margin-bottom:3rem;}
+  .itin-day{margin-bottom:1.75rem;}
+  .itin-day-title{font-family:var(--serif-display);font-size:0.95rem;color:white;letter-spacing:2px;margin-bottom:0.75rem;}
+  .itin-item{display:flex;align-items:flex-start;gap:1rem;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .itin-item:last-child{border-bottom:none;}
+  .itin-time{font-family:var(--serif-display);font-size:0.8rem;color:var(--gold);letter-spacing:1px;min-width:42px;flex-shrink:0;padding-top:1px;}
+  .itin-desc{font-size:0.875rem;color:rgba(255,255,255,0.65);line-height:1.4;}
+  .weather{margin-bottom:3rem;border:1px solid rgba(201,168,76,0.2);border-radius:4px;overflow:hidden;}
+  .weather-header{background:rgba(255,255,255,0.05);padding:0.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,0.1);}
+  .weather-title{font-family:var(--serif-display);font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);}
+  .weather-location{font-family:var(--serif-body);font-size:0.8rem;color:rgba(255,255,255,0.35);font-style:italic;}
+  .weather-body{padding:1.25rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+  .weather-main{display:flex;align-items:center;gap:1rem;}
+  .weather-icon-img{width:52px;height:52px;}
+  .weather-temp{font-family:var(--serif-display);font-size:2.5rem;font-weight:700;color:white;line-height:1;}
+  .weather-desc{font-family:var(--serif-body);font-size:0.9rem;color:rgba(255,255,255,0.5);font-style:italic;margin-top:2px;text-transform:capitalize;}
+  .weather-details{display:flex;gap:1.5rem;flex-wrap:wrap;}
+  .weather-detail{display:flex;flex-direction:column;gap:2px;}
+  .weather-detail .wd-label{font-family:var(--serif-display);font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);}
+  .weather-detail .wd-val{font-family:var(--serif-display);font-size:0.9rem;color:rgba(255,255,255,0.7);}
+  .weather-loading{padding:1.25rem;font-family:var(--serif-body);font-size:0.9rem;color:rgba(255,255,255,0.3);font-style:italic;}
+  .forecast-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(201,168,76,0.1);border-top:1px solid rgba(201,168,76,0.1);}
+  .forecast-day{background:rgba(255,255,255,0.03);padding:1rem;text-align:center;}
+  .forecast-date{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;}
+  .forecast-icon{width:40px;height:40px;margin:0 auto;}
+  .forecast-temp{font-family:var(--serif-display);font-size:1.1rem;font-weight:600;color:white;margin-top:4px;}
+  .forecast-temp span{font-size:0.8rem;color:rgba(255,255,255,0.4);font-weight:400;margin-left:4px;}
+  .forecast-desc{font-family:var(--serif-body);font-size:0.78rem;color:rgba(255,255,255,0.4);font-style:italic;text-transform:capitalize;margin-top:2px;}
+  .scoring-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--serif-display);font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);text-decoration:none;border:1px solid rgba(201,168,76,0.2);padding:0.5rem 1rem;border-radius:2px;transition:all 0.2s;margin-top:1rem;}
+  .scoring-link:hover{color:var(--gold);border-color:rgba(201,168,76,0.5);}
+  .scoring-link .icon{width:14px;height:14px;}
+  .fade-up{opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease;}
+  .fade-up.visible{opacity:1;transform:translateY(0);}
+  .fade-up-delay-1{transition-delay:0.1s;}
+  .fade-up-delay-2{transition-delay:0.2s;}
+  .fade-up-delay-3{transition-delay:0.3s;}
+  .payment-banner{margin-bottom:2rem;padding:1.1rem 1.25rem;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.3);border-radius:3px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;}
+  .payment-banner-left{display:flex;align-items:center;gap:0.75rem;}
+  .payment-banner-left .icon{width:20px;height:20px;color:var(--gold);flex-shrink:0;}
+  .payment-banner-title{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:1px;color:white;}
+  .payment-banner-sub{font-family:var(--serif-body);font-size:0.8rem;font-style:italic;color:rgba(255,255,255,0.45);}
+  .payment-banner-btn{font-family:var(--serif-display);font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--green-dark);background:var(--gold);text-decoration:none;padding:0.55rem 1.1rem;border-radius:3px;font-weight:700;transition:background 0.2s;flex-shrink:0;}
+  .payment-banner-btn:hover{background:var(--gold-light);}
+  .teams-coming{margin-bottom:3rem;padding:1rem 1.25rem;border:1px solid rgba(201,168,76,0.15);border-radius:3px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;}
+  .teams-coming-left{display:flex;align-items:center;gap:0.75rem;}
+  .teams-coming-title{font-family:var(--serif-display);font-size:0.75rem;letter-spacing:3px;color:rgba(255,255,255,0.6);text-transform:uppercase;font-weight:600;}
+  .teams-coming-soon{font-family:var(--serif-body);font-size:0.75rem;font-style:italic;color:var(--gold);opacity:0.7;}
+  .teams-coming-chips{display:flex;align-items:center;gap:0.875rem;}
+  .team-chip{font-family:var(--serif-body);font-size:0.95rem;font-style:italic;color:rgba(255,255,255,0.5);letter-spacing:0.5px;}
+  .team-chip-vs{color:rgba(255,255,255,0.2);font-family:var(--serif-body);font-size:0.8rem;font-style:normal;}
+  footer{background:#0a1f12;color:rgba(255,255,255,0.2);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;position:relative;z-index:1;}
+  footer span{color:var(--gold);}
+  @media(max-width:640px){
+    .details-grid{grid-template-columns:repeat(2,1fr);}
+    .trip-header{grid-template-columns:1fr;gap:1.5rem;}
+    .trip-logo{width:120px;}
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h2.2L8.8 4.5h6.4L16.8 6.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5z"/><circle cx="12" cy="12.5" r="3.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.7 5.6 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.6-3.7-9S9.6 5.6 12 3z"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  </defs>
+</svg>
+<div class="bg-pattern"></div>
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+  <div style="position:relative;">
+    <div class="nav-menu-btn" id="menu-btn">
+      <span class="menu-word">Menu</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div class="dropdown" id="dropdown">
+      <a href="editions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-trophy"/></svg>Results</a>
+      <a href="gallery.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
+      <a href="2027.html" class="active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
+      <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
+      <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+      <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
+      <a href="leaderboard.html" class="live"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="trip-header fade-up">
+    <div>
+      <div class="trip-eyebrow">Algarve · 2027</div>
+      <h1>ALGARVE<br><span>2027</span></h1>
+      <div class="trip-sub">Book Club Invitational</div>
+    </div>
+    <img src="images/logo.jpeg" alt="BCI Algarve 2027" class="trip-logo">
+  </div>
+  <div class="details-grid fade-up fade-up-delay-1">
+    <div class="detail-box"><span class="label">Date</span><span class="value">23 April 2027</span></div>
+    <div class="detail-box"><span class="label">Destination</span><span class="value">Algarve, Portugal</span></div>
+    <div class="detail-box"><span class="label">Format</span><span class="value">Ryder Cup</span></div>
+    <div class="detail-box"><span class="label">Players</span><span class="value">24</span></div>
+  </div>
+  <div class="payment-banner fade-up fade-up-delay-1">
+    <div class="payment-banner-left">
+      <svg class="icon" aria-hidden="true"><use href="#i-card"/></svg>
+      <div>
+        <div class="payment-banner-title">Trip Balance</div>
+        <div class="payment-banner-sub">Outstanding payment for the trip</div>
+      </div>
+    </div>
+    <a href="payment.html" class="payment-banner-btn">Make Payment</a>
+  </div>
+
+  <div class="teams-coming fade-up fade-up-delay-2">
+    <div class="teams-coming-left">
+      <span class="teams-coming-title">Team Announcements</span>
+      <span class="teams-coming-soon">Coming soon</span>
+    </div>
+    <div class="teams-coming-chips">
+      <span class="team-chip">Team Baber</span>
+      <span class="team-chip-vs">vs</span>
+      <span class="team-chip">Team Weff</span>
+    </div>
+  </div>
+
+  <div class="itinerary fade-up fade-up-delay-3">
+    <div class="section-title">Itinerary</div>
+    <div class="itin-day">
+      <div class="itin-day-title">Day 1 &nbsp;&middot;&nbsp; Fri 23 April</div>
+      <div class="itin-item"><span class="itin-time">12:30</span><span class="itin-desc">Transfer to Quinta do Vale Golf Course</span></div>
+      <div class="itin-item"><span class="itin-time">14:00</span><span class="itin-desc">Golf &middot; <a href="https://www.quintadovalegolf.com/" target="_blank" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.4);">Quinta do Vale Golf Course</a></span></div>
+      <div class="itin-item"><span class="itin-time">15:00</span><span class="itin-desc">Check in &middot; Vila Gale Tavira</span></div>
+    </div>
+    <div class="itin-day">
+      <div class="itin-day-title">Day 2 &nbsp;&middot;&nbsp; Sat 24 April</div>
+      <div class="itin-item"><span class="itin-time">10:30</span><span class="itin-desc">Transfer to Isla Canela Links Course</span></div>
+      <div class="itin-item"><span class="itin-time">12:00</span><span class="itin-desc">Golf &middot; <a href="https://www.islacanela.es/en/golf" target="_blank" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.4);">Isla Canela Links Course</a></span></div>
+    </div>
+    <div class="itin-day">
+      <div class="itin-day-title">Day 3 &nbsp;&middot;&nbsp; Sun 25 April</div>
+      <div class="itin-item"><span class="itin-time">12:00</span><span class="itin-desc">Check out &middot; Vila Gale Tavira</span></div>
+    </div>
+  </div>
+  <div class="defending fade-up fade-up-delay-3">Defending Champions &nbsp;&middot;&nbsp; Team Baber</div>
+
+  <div class="weather fade-up fade-up-delay-3" style="margin-top:2rem;">
+    <div class="weather-header">
+      <span class="weather-title">Weather &middot; Tavira, Algarve</span>
+      <span class="weather-location" id="weather-updated"></span>
+    </div>
+    <div id="weather-body"><div class="weather-loading">Loading weather...</div></div>
+    <div id="forecast-body"></div>
+    <div id="tee-forecast"></div>
+  </div>
+
+  <a href="scoring_rules.html" class="scoring-link fade-up">
+    <svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg>
+    Scoring Rules &amp; Format
+    <svg class="icon" aria-hidden="true" style="transform:rotate(180deg);"><use href="#i-arrow-left"/></svg>
+  </a>
+</div>
+
+<footer><p><span>Book Club Invitational</span></p></footer>
+<script>
+(function(){
+  document.getElementById('menu-btn').addEventListener('click',function(){
+    document.getElementById('menu-btn').classList.toggle('open');
+    document.getElementById('dropdown').classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){
+      document.getElementById('menu-btn').classList.remove('open');
+      document.getElementById('dropdown').classList.remove('open');
+    }
+  });
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
+  document.querySelectorAll('.fade-up').forEach(function(el){obs.observe(el);});
+
+  fetch('https://api.openweathermap.org/data/2.5/weather?q=Tavira,PT&units=metric&appid=e2381274526d59f34c7c09e3d4a3ebb7')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var temp=Math.round(d.main.temp);
+      var feels=Math.round(d.main.feels_like);
+      var desc=d.weather[0].description;
+      var icon='https://openweathermap.org/img/wn/'+d.weather[0].icon+'@2x.png';
+      var wind=Math.round(d.wind.speed*3.6);
+      var humidity=d.main.humidity;
+      var now=new Date();
+      document.getElementById('weather-updated').textContent='Updated '+now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+      document.getElementById('weather-body').innerHTML=
+        '<div class="weather-body">'+
+          '<div class="weather-main">'+
+            '<img class="weather-icon-img" src="'+icon+'" alt="'+desc+'">'+
+            '<div><div class="weather-temp">'+temp+'°C</div><div class="weather-desc">'+desc+'</div></div>'+
+          '</div>'+
+          '<div class="weather-details">'+
+            '<div class="weather-detail"><span class="wd-label">Feels like</span><span class="wd-val">'+feels+'°C</span></div>'+
+            '<div class="weather-detail"><span class="wd-label">Wind</span><span class="wd-val">'+wind+' km/h</span></div>'+
+            '<div class="weather-detail"><span class="wd-label">Humidity</span><span class="wd-val">'+humidity+'%</span></div>'+
+          '</div>'+
+        '</div>';
+    })
+    .catch(function(){
+      document.getElementById('weather-body').innerHTML='<div class="weather-loading">Weather unavailable</div>';
+    });
+
+  fetch('https://api.openweathermap.org/data/2.5/forecast?q=Tavira,PT&units=metric&appid=e2381274526d59f34c7c09e3d4a3ebb7')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var tripDates=['2027-04-23','2027-04-24','2027-04-25'];
+      var dayLabels=['Fri 23 Apr','Sat 24 Apr','Sun 25 Apr'];
+      var forecasts={};
+      d.list.forEach(function(item){
+        var date=item.dt_txt.split(' ')[0];
+        var hour=parseInt(item.dt_txt.split(' ')[1]);
+        if(tripDates.indexOf(date)>-1 && !forecasts[date]){
+          forecasts[date]=item;
+        } else if(tripDates.indexOf(date)>-1 && hour===12){
+          forecasts[date]=item;
+        }
+      });
+      var html='<div class="forecast-grid">';
+      tripDates.forEach(function(date,i){
+        var f=forecasts[date];
+        if(f){
+          var max=Math.round(f.main.temp_max);
+          var min=Math.round(f.main.temp_min);
+          var fdesc=f.weather[0].description;
+          var ficon='https://openweathermap.org/img/wn/'+f.weather[0].icon+'@2x.png';
+          html+='<div class="forecast-day">'+
+            '<div class="forecast-date">'+dayLabels[i]+'</div>'+
+            '<img class="forecast-icon" src="'+ficon+'" alt="'+fdesc+'">'+
+            '<div class="forecast-temp">'+max+'°<span>/ '+min+'°</span></div>'+
+            '<div class="forecast-desc">'+fdesc+'</div>'+
+          '</div>';
+        } else {
+          html+='<div class="forecast-day">'+
+            '<div class="forecast-date">'+dayLabels[i]+'</div>'+
+            '<div style="font-family:var(--serif-body);font-size:0.8rem;font-style:italic;color:rgba(255,255,255,0.3);margin-top:1rem;">Available closer to the trip</div>'+
+          '</div>';
+        }
+      });
+      html+='</div>';
+      document.getElementById('forecast-body').innerHTML=html;
+    })
+    .catch(function(){
+      document.getElementById('forecast-body').innerHTML='';
+    });
+
+  /* Tee time forecast at each course, appears once the trip is inside
+     the forecast window (roughly the final five days before play). */
+  var OWM_KEY='e2381274526d59f34c7c09e3d4a3ebb7';
+  var tees=[
+    {label:'Quinta do Vale',day:'Day 1 \u00B7 Fri 23 Apr',date:'2027-04-23',hour:14,time:'14:00',lat:37.235,lon:-7.435},
+    {label:'Isla Canela',day:'Day 2 \u00B7 Sat 24 Apr',date:'2027-04-24',hour:12,time:'12:00',lat:37.19,lon:-7.34}
+  ];
+  Promise.all(tees.map(function(t){
+    return fetch('https://api.openweathermap.org/data/2.5/forecast?lat='+t.lat+'&lon='+t.lon+'&units=metric&appid='+OWM_KEY)
+      .then(function(r){return r.json();})
+      .catch(function(){return null;});
+  })).then(function(results){
+    var cards='';
+    results.forEach(function(d,i){
+      var t=tees[i];
+      if(!d||!d.list)return;
+      var best=null,bestDiff=99;
+      d.list.forEach(function(item){
+        var date=item.dt_txt.split(' ')[0];
+        if(date!==t.date)return;
+        var diff=Math.abs(parseInt(item.dt_txt.split(' ')[1],10)-t.hour);
+        if(diff<bestDiff){bestDiff=diff;best=item;}
+      });
+      if(!best)return;
+      var temp=Math.round(best.main.temp);
+      var desc=best.weather[0].description;
+      var icon='https://openweathermap.org/img/wn/'+best.weather[0].icon+'@2x.png';
+      var wind=Math.round(best.wind.speed*3.6);
+      cards+='<div class="forecast-day">'
+        +'<div class="forecast-date">'+t.day+'</div>'
+        +'<div style="font-family:var(--serif-display);font-size:0.72rem;letter-spacing:1px;color:var(--gold);margin-top:2px;">'+t.label+' \u00B7 Tee '+t.time+'</div>'
+        +'<img class="forecast-icon" src="'+icon+'" alt="'+desc+'">'
+        +'<div class="forecast-temp">'+temp+'\u00B0</div>'
+        +'<div class="forecast-desc">'+desc+' \u00B7 wind '+wind+' km/h</div>'
+      +'</div>';
+    });
+    if(cards){
+      document.getElementById('tee-forecast').innerHTML=
+        '<div class="weather-header" style="border-top:1px solid rgba(201,168,76,0.15);"><span class="weather-title">Tee Time Forecast</span></div>'
+        +'<div class="forecast-grid" style="grid-template-columns:1fr 1fr;">'+cards+'</div>';
+    }
+  });
+})();
+</script>
+<script src="live-tracker.js"></script>
+</body>
+</html>

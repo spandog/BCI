@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Photos &amp; Videos — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --green-dark:#0f2a1a;--green-mid:#1e4d2e;--gold:#c9a84c;--gold-light:#e8c97e;
+    --cream:#f7f3eb;--cream-dark:#ede8dc;--text-dark:#1a1a1a;--text-muted:#6b7280;--border:#ddd8cc;
+    --serif-display:'Playfair Display',Georgia,serif;
+    --serif-body:'EB Garamond',Georgia,serif;
+  }
+  body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  nav{background:var(--green-dark);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .page-hero{background:var(--green-dark);padding:3rem 1.5rem;text-align:center;border-bottom:1px solid rgba(201,168,76,0.15);}
+  .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
+  .page-hero h1{font-family:var(--serif-display);font-size:clamp(2rem,8vw,2.8rem);color:white;letter-spacing:3px;font-weight:700;}
+  .page{max-width:760px;margin:0 auto;padding:3rem 1.5rem;}
+
+  .upload-panel{display:block;}
+
+  .edition-picker{margin-bottom:1.5rem;}
+  .edition-label{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:0.5rem;}
+  .edition-tabs{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:white;}
+  .edition-tab{flex:1;padding:0.75rem;text-align:center;font-family:var(--serif-display);font-size:0.8rem;letter-spacing:1px;cursor:pointer;color:var(--text-muted);border-right:1px solid var(--border);transition:all 0.2s;}
+  .edition-tab:last-child{border-right:none;}
+  .edition-tab.active{background:var(--green-dark);color:var(--gold);}
+
+  .drop-zone{background:white;border:2px dashed var(--border);border-radius:8px;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:border-color 0.2s,background 0.2s;margin-bottom:1.5rem;}
+  .drop-zone:hover,.drop-zone.dragover{border-color:var(--gold);background:#fffdf7;}
+  .drop-zone .icon{width:36px;height:36px;color:var(--gold);margin-bottom:0.75rem;}
+  .drop-zone p{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;}
+  .drop-zone span{font-size:0.8rem;color:var(--text-muted);display:block;margin-top:0.4rem;}
+  #file-input{display:none;}
+
+  .upload-status{display:none;background:white;border:1px solid var(--border);border-radius:8px;padding:1.25rem;align-items:center;gap:1rem;}
+  .upload-status.visible{display:flex;}
+  .upload-status img,.upload-status video{width:64px;height:64px;object-fit:cover;border-radius:4px;flex-shrink:0;}
+  .upload-status-text{flex:1;}
+  .upload-status-text .fname{font-family:var(--serif-display);font-size:0.9rem;color:var(--green-dark);margin-bottom:2px;}
+  .upload-status-text .fstate{font-size:0.82rem;color:var(--text-muted);}
+
+  footer{background:#0a1f12;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4 4 10-11"/></symbol>
+  </defs>
+</svg>
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+</nav>
+
+<div class="page-hero">
+  <div class="page-eyebrow">Behind the scenes</div>
+  <h1>UPLOAD PHOTOS &amp; VIDEOS</h1>
+</div>
+
+<div class="page">
+  <div class="upload-panel" id="upload-panel">
+    <div class="edition-picker">
+      <span class="edition-label">Uploading for</span>
+      <div class="edition-tabs" id="edition-tabs">
+        <div class="edition-tab active" data-edition="marbella-2026">Marbella 2026</div>
+        <div class="edition-tab" data-edition="algarve-2027">Algarve · 2027</div>
+      </div>
+    </div>
+
+    <div class="drop-zone" id="drop-zone">
+      <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
+      <p>Click or drop a photo or video here</p>
+      <span>JPG, PNG or MP4/MOV — up to 100MB — goes live immediately</span>
+      <input type="file" id="file-input" accept="image/*,video/*">
+    </div>
+
+    <div class="upload-status" id="upload-status">
+      <div id="status-preview-wrap"></div>
+      <div class="upload-status-text">
+        <div class="fname" id="status-name"></div>
+        <div class="fstate" id="status-state">Uploading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer><p><span>Book Club Invitational</span></p></footer>
+
+<script>
+(function(){
+  var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co'; // confirmed project URL
+  var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui'; // publishable key
+  var BUCKET='bci-images';
+  var currentEdition='marbella-2026';
+  var editionLabels={'marbella-2026':'Marbella 2026','algarve-2027':'Algarve · 2027'};
+
+  document.querySelectorAll('.edition-tab').forEach(function(tab){
+    tab.addEventListener('click',function(){
+      document.querySelectorAll('.edition-tab').forEach(function(t){t.classList.remove('active');});
+      tab.classList.add('active');
+      currentEdition=tab.dataset.edition;
+    });
+  });
+
+  var dropZone=document.getElementById('drop-zone');
+  var fileInput=document.getElementById('file-input');
+
+  dropZone.addEventListener('click',function(){fileInput.click();});
+  fileInput.addEventListener('change',function(){
+    if(fileInput.files[0])handleFile(fileInput.files[0]);
+  });
+  dropZone.addEventListener('dragover',function(e){e.preventDefault();dropZone.classList.add('dragover');});
+  dropZone.addEventListener('dragleave',function(){dropZone.classList.remove('dragover');});
+  dropZone.addEventListener('drop',function(e){
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);
+  });
+
+  function sanitize(str){
+    return str.replace(/[^a-zA-Z0-9.\-]/g,'_').replace(/_{2,}/g,'_');
+  }
+
+  function handleFile(file){
+    var isImage=file.type.startsWith('image/');
+    var isVideo=file.type.startsWith('video/');
+    if(!isImage&&!isVideo){alert('Please choose a photo or video file.');return;}
+
+    var maxBytes=100*1024*1024;
+    if(file.size>maxBytes){alert('That file is larger than 100MB. Please choose a smaller file.');return;}
+
+    var statusBox=document.getElementById('upload-status');
+    statusBox.classList.add('visible');
+    document.getElementById('status-name').textContent=file.name+' — '+(editionLabels[currentEdition]||currentEdition);
+    document.getElementById('status-state').textContent='Uploading...';
+
+    var previewWrap=document.getElementById('status-preview-wrap');
+    var objectUrl=URL.createObjectURL(file);
+    if(isVideo){
+      previewWrap.innerHTML='<video src="'+objectUrl+'" muted></video>';
+    } else {
+      previewWrap.innerHTML='<img src="'+objectUrl+'" alt="">';
+    }
+
+    var safeName=sanitize(file.name);
+    var key=currentEdition+'/'+Date.now()+'-'+safeName;
+
+    fetch(SUPABASE_URL+'/storage/v1/object/'+BUCKET+'/'+key,{
+      method:'POST',
+      headers:{
+        'apikey':SUPABASE_ANON_KEY,
+        'Authorization':'Bearer '+SUPABASE_ANON_KEY,
+        'Content-Type':file.type||'application/octet-stream'
+      },
+      body:file
+    }).then(function(res){return res.json().then(function(data){return {ok:res.ok,data:data};});})
+      .then(function(result){
+        if(result.ok){
+          document.getElementById('status-name').textContent='';
+          document.getElementById('status-state').textContent=(isVideo?'Video':'Photo')+' submitted, thanks!';
+          setTimeout(function(){
+            window.location.href='gallery.html';
+          },1500);
+        } else {
+          document.getElementById('status-state').textContent='Failed: '+(result.data.message||result.data.error||'unknown error');
+        }
+      })
+      .catch(function(){
+        document.getElementById('status-state').textContent='Failed: could not reach Supabase.';
+      });
+  }
+})();
+</script>
+<script src="hero-gallery.js"></script>
+<script src="live-tracker.js"></script>
+</body>
+</html>

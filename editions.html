@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Results — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --green-dark:#0f2a1a;--green-mid:#1e4d2e;--gold:#c9a84c;--gold-light:#e8c97e;
+    --cream:#f7f3eb;--cream-dark:#ede8dc;--text-dark:#1a1a1a;--text-muted:#6b7280;--border:#ddd8cc;
+    --serif-display:'Playfair Display',Georgia,serif;
+    --serif-body:'EB Garamond',Georgia,serif;
+  }
+  body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  nav{background:var(--green-dark);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;}
+  .nav-menu-btn span.menu-word{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;}
+  .nav-menu-btn .chevron{color:var(--gold);width:12px;height:12px;transition:transform 0.2s;}
+  .nav-menu-btn.open .chevron{transform:rotate(180deg);}
+  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(201,168,76,0.2);border-top:none;min-width:200px;z-index:199;}
+  .dropdown.open{display:block;}
+  .dropdown a{display:flex;align-items:center;gap:10px;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.15s;}
+  .dropdown a:last-child{border-bottom:none;}
+  .dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.03);padding-left:1.5rem;}
+  .dropdown a.active{color:var(--gold);}
+  .dropdown a.live{color:var(--gold-light);}
+  .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
+  .dropdown a.live .d-icon{color:var(--gold-light);}
+  .page-hero{background:var(--green-dark);padding:3rem 1.5rem;text-align:center;border-bottom:1px solid rgba(201,168,76,0.15);}
+  .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
+  .page-hero h1{font-family:var(--serif-display);font-size:clamp(2rem,8vw,2.8rem);color:white;letter-spacing:3px;font-weight:700;}
+  .page{max-width:1000px;margin:0 auto;padding:3rem 1.5rem;}
+  .stat-banner{display:flex;gap:0;margin-bottom:3rem;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:white;}
+  .stat-pill{flex:1;text-align:center;padding:1.25rem 0.5rem;border-right:1px solid var(--border);}
+  .stat-pill:last-child{border-right:none;}
+  .stat-pill .n{font-size:1.75rem;font-weight:700;color:var(--green-mid);font-family:var(--serif-display);display:block;}
+  .stat-pill .l{font-size:0.6rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:var(--serif-display);margin-top:3px;}
+  .edition-card{background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.06);}
+  .card-header{background:var(--green-dark);padding:1.5rem;display:flex;justify-content:space-between;align-items:flex-start;}
+  .card-header-left .year{font-family:var(--serif-display);font-size:1.4rem;color:var(--gold);font-weight:600;letter-spacing:2px;}
+  .card-header-left .location{font-family:var(--serif-display);font-size:0.7rem;color:rgba(255,255,255,0.5);letter-spacing:2px;margin-top:4px;text-transform:uppercase;}
+  .card-header-left .format{font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:6px;line-height:1.5;}
+  .card-trophy{color:var(--gold);}
+  .card-trophy .icon{width:28px;height:28px;stroke-width:1.25;}
+  .result-banner{display:flex;align-items:center;justify-content:center;gap:1.5rem;padding:2rem 1.5rem;border-bottom:1px solid var(--border);background:linear-gradient(to bottom,#fafaf7,white);flex-wrap:wrap;}
+  .result-team{text-align:center;flex:1;min-width:120px;}
+  .result-team .team-name{font-family:var(--serif-display);font-size:1.4rem;font-weight:600;letter-spacing:2px;margin-bottom:4px;color:var(--text-dark);}
+  .result-team .captain{font-size:0.68rem;color:var(--text-muted);font-family:var(--serif-display);letter-spacing:1px;text-transform:uppercase;}
+  .result-team.winner .team-name{color:var(--green-mid);}
+  .winner-badge{display:inline-block;background:var(--gold);color:var(--green-dark);font-size:0.58rem;font-family:var(--serif-display);font-weight:700;padding:3px 10px;border-radius:2px;letter-spacing:2px;margin-top:7px;text-transform:uppercase;}
+  .result-vs{font-family:var(--serif-body);font-size:1rem;color:var(--text-muted);font-style:italic;}
+  .teams-grid{display:grid;grid-template-columns:1fr 1fr;}
+  .team-col{padding:1.5rem;}
+  .team-col:first-child{border-right:1px solid var(--border);}
+  .team-col-head{margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);}
+  .team-col-head h4{font-family:var(--serif-display);font-size:0.9rem;letter-spacing:2px;color:var(--green-dark);text-transform:uppercase;}
+  .captain-badge{font-size:0.55rem;font-family:var(--serif-display);background:var(--green-dark);color:var(--gold);padding:3px 6px;border-radius:2px;letter-spacing:1px;text-transform:uppercase;}
+  .player-list{list-style:none;}
+  .player-list li{font-size:0.85rem;padding:6px 0;border-bottom:1px solid var(--border);color:var(--text-dark);display:flex;align-items:center;gap:6px;}
+  .player-list li:last-child{border-bottom:none;}
+  .courses-row{display:flex;gap:0.75rem;padding:1.25rem 1.5rem;border-top:1px solid var(--border);background:#fafaf7;flex-wrap:wrap;}
+  .course-tag{background:white;border:1px solid var(--border);border-radius:4px;padding:0.625rem 1rem;}
+  .course-tag .day{font-size:0.58rem;color:var(--text-muted);display:block;margin-bottom:2px;letter-spacing:2px;text-transform:uppercase;font-family:var(--serif-display);}
+  .course-tag .name{font-family:var(--serif-display);letter-spacing:1px;font-size:0.82rem;color:var(--green-mid);}
+  .fade-up{opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease;}
+  .fade-up.visible{opacity:1;transform:translateY(0);}
+  .fade-up-delay-1{transition-delay:0.1s;}
+  footer{background:#0a1f12;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+  @media(max-width:640px){
+    .teams-grid{grid-template-columns:1fr;}
+    .team-col:first-child{border-right:none;border-bottom:1px solid var(--border);}
+    .result-banner{gap:1rem;padding:1.5rem 1rem;}
+    .result-team .team-name{font-size:1.1rem;}
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h2.2L8.8 4.5h6.4L16.8 6.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5z"/><circle cx="12" cy="12.5" r="3.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.7 5.6 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.6-3.7-9S9.6 5.6 12 3z"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  </defs>
+</svg>
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+  <div style="position:relative;">
+    <div class="nav-menu-btn" id="menu-btn">
+      <span class="menu-word">Menu</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div class="dropdown" id="dropdown">
+      <a href="editions.html" class="active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-trophy"/></svg>Results</a>
+      <a href="gallery.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
+      <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
+      <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
+      <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+      <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
+      <a href="leaderboard.html" class="live"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-eyebrow">History</div>
+  <h1>RESULTS</h1>
+</div>
+
+<div class="page">
+  <div class="stat-banner fade-up">
+    <div class="stat-pill"><span class="n">1</span><span class="l">Edition</span></div>
+    <div class="stat-pill"><span class="n">2</span><span class="l">Courses</span></div>
+    <div class="stat-pill"><span class="n">16</span><span class="l">Players</span></div>
+    <div class="stat-pill"><span class="n">2</span><span class="l">Teams</span></div>
+  </div>
+  <div class="edition-card fade-up fade-up-delay-1">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="year">2026 &mdash; Marbella</div>
+        <div class="location">Costa del Sol, Spain</div>
+        <div class="format">Ryder Cup Format &nbsp;&middot;&nbsp; Pairs Matchplay (Day 1) &nbsp;&middot;&nbsp; Individual Matchplay (Day 2)</div>
+      </div>
+      <div class="card-trophy"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg></div>
+    </div>
+    <div class="result-banner">
+      <div class="result-team winner">
+        <div class="team-name">Team Baber</div>
+        <div class="captain">Captain: James Baber</div>
+        <div><span class="winner-badge">Winners</span></div>
+      </div>
+      <div><span class="result-vs">versus</span></div>
+      <div class="result-team">
+        <div class="team-name">Team Weff</div>
+        <div class="captain">Captain: Matt Wreford</div>
+      </div>
+    </div>
+    <div class="teams-grid">
+      <div class="team-col">
+        <div class="team-col-head"><h4>Team Baber</h4></div>
+        <ul class="player-list">
+          <li><span class="captain-badge">Captain</span> James Baber</li>
+          <li><span class="captain-badge" style="background:#4a7c59;">VC</span> Louis Kelly</li>
+          <li>Kane Bailey</li><li>Aaron Davies</li><li>Ted Keeling</li>
+          <li>Mark Brackenridge</li><li>Dan Simkin</li><li>Will Dodgson</li>
+        </ul>
+      </div>
+      <div class="team-col">
+        <div class="team-col-head"><h4>Team Weff</h4></div>
+        <ul class="player-list">
+          <li><span class="captain-badge">Captain</span> Matt Wreford</li>
+          <li><span class="captain-badge" style="background:#4a7c59;">VC</span> Brian Hinojosa</li>
+          <li>Alex Tinawi</li><li>Jack Taggart</li>
+          <li>Tony Bryant</li><li>Rich Horsley</li><li>Sean Mongan</li><li>Matt Higgins</li>
+        </ul>
+      </div>
+    </div>
+    <div class="courses-row">
+      <div class="course-tag"><span class="day">Day 1</span><span class="name">Marbella Golf &amp; Country Club</span></div>
+      <div class="course-tag"><span class="day">Day 2</span><span class="name">Santa Maria Golf Course</span></div>
+    </div>
+  </div>
+</div>
+
+<footer><p><span>Book Club Invitational</span></p></footer>
+<script>
+(function(){
+  document.getElementById('menu-btn').addEventListener('click',function(){
+    document.getElementById('menu-btn').classList.toggle('open');
+    document.getElementById('dropdown').classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){
+      document.getElementById('menu-btn').classList.remove('open');
+      document.getElementById('dropdown').classList.remove('open');
+    }
+  });
+  var counted=false;
+  function animateCounters(){
+    document.querySelectorAll('.stat-pill .n').forEach(function(el){
+      var target=parseInt(el.textContent,10);
+      if(isNaN(target))return;
+      el.textContent='0';
+      var start=null;
+      function step(ts){
+        if(!start)start=ts;
+        var p=Math.min((ts-start)/900,1);
+        el.textContent=Math.round(target*(1-Math.pow(1-p,3)));
+        if(p<1)requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      if(e.target.classList.contains('stat-banner')&&!counted){counted=true;animateCounters();}
+    }
+  });},{threshold:0.1});
+  document.querySelectorAll('.fade-up').forEach(function(el){obs.observe(el);});
+})();
+</script>
+<script src="hero-gallery.js"></script>
+<script src="live-tracker.js"></script>
+</body>
+</html>

@@ -223,7 +223,12 @@
     if(key===scrollState.lastKey)return; // content unchanged — leave the scroll running untouched
     scrollState.lastKey=key;
 
-    var htmlOne=items.map(function(t){
+    // a short list (e.g. one placeholder message) makes too narrow a belt for the
+    // loop trick below to look smooth — pad it out with repeats first
+    var padded=items;
+    while(padded.length<12)padded=padded.concat(items);
+
+    var htmlOne=padded.map(function(t){
       return '<span class="bt-item"><span class="dot">\u25C6</span>'+t+'</span>';
     }).join('');
     var prevX=scrollState.x;

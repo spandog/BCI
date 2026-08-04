@@ -14,6 +14,8 @@
   var MAX_EVENTS=14;          // how many "newsflash" events to keep in the log
   var DAY_COUNTS={1:6,2:12};  // fixed fixture list, shown even before rows exist
   var DAY2_REVEAL=new Date('2027-04-24T00:00:00'); // Day 2 fixtures hidden until this local time
+  var TRIP_START=new Date('2027-04-23T00:00:00');  // before this: show a placeholder, don't even poll
+  var TRIP_END=new Date('2027-04-25T00:00:00');     // from this point on: show the final winner banner
 
   var prevById={};           // last-seen row per match id, for diffing
   var haveBaseline=false;    // suppress event-log spam on the very first fetch
@@ -251,6 +253,15 @@
 
   /* ---------- fetch + diff ---------- */
   function refresh(){
+    var now=new Date();
+
+    if(now<TRIP_START){
+      showBar();
+      document.getElementById('bt-status').textContent='';
+      renderTicker(['<span class="gold">SCORES WILL BE DISPLAYED HERE</span>']);
+      return; // nothing to poll for yet — no point hitting Supabase before the trip starts
+    }
+
     fetch(SB_URL+'/rest/v1/bci_matches?select='+SELECT,{
       headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}
     }).then(function(r){return r.json();}).then(function(rows){
@@ -262,6 +273,22 @@
       rows.forEach(function(row){byId[row.id]=row;});
       prevById=byId;
       haveBaseline=true;
+
+      if(new Date()>=TRIP_END){
+        var b=0,w=0;
+        rows.filter(function(r){return r.status==='final';}).forEach(function(r){
+          if(r.leader==='baber')b+=1;
+          else if(r.leader==='weff')w+=1;
+          else{b+=0.5;w+=0.5;}
+        });
+        var line=b>w?'TEAM BABER WINS THE BCI INVITATIONAL'
+          :(w>b?'TEAM WEFF WINS THE BCI INVITATIONAL':'THE BCI INVITATIONAL IS HALVED');
+        showBar();
+        document.getElementById('bt-status').textContent='Final';
+        renderTicker(['<span class="gold">\uD83C\uDFC6 '+line+'</span>']);
+        return;
+      }
+
       render(rows);
     }).catch(function(){/* stay on last known state if the fetch fails */});
   }

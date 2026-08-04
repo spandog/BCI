@@ -14,7 +14,7 @@
   var BUCKET='bci-images';
   var FOLDERS=['algarve-2027','marbella-2026'];
 
-  var hero=document.querySelector('.page-hero, .hero');
+  var hero=document.querySelector('.page-hero');
   if(!hero)return;
 
   function listFolder(folder){

@@ -50,7 +50,18 @@
       'text-transform:uppercase;color:rgba(255,255,255,0.5);white-space:nowrap;}'+
     '#bci-tracker-bar a.bt-link:hover{color:#c9a84c;}'+
     'body.bci-tracker-padded{padding-bottom:42px;}'+
-    '@media(max-width:640px){#bci-tracker-bar a.bt-link{display:none;}}';
+    '@media(max-width:640px){#bci-tracker-bar a.bt-link{display:none;}}'+
+    '#bci-toast-stack{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:600;'+
+      'display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;'+
+      'width:100%;padding:0 1rem;box-sizing:border-box;}'+
+    '.bci-toast{background:#0f2a1a;border:1px solid rgba(201,168,76,0.4);border-radius:6px;'+
+      'padding:0.7rem 1.1rem;font-family:"EB Garamond",Georgia,serif;font-size:0.85rem;'+
+      'color:rgba(255,255,255,0.9);box-shadow:0 8px 24px rgba(0,0,0,0.28);'+
+      'opacity:0;transform:translateY(-14px);transition:opacity 0.35s ease,transform 0.35s ease;'+
+      'max-width:400px;margin:0 auto;text-align:center;}'+
+    '.bci-toast.show{opacity:1;transform:translateY(0);}'+
+    '.bci-toast .gold{color:#e8c97e;font-weight:600;font-family:"Playfair Display",Georgia,serif;'+
+      'letter-spacing:1px;}';
   document.head.appendChild(style);
 
   /* ---------- bar markup ---------- */
@@ -62,6 +73,37 @@
     '<a class="bt-link" href="leaderboard.html">Full Leaderboard \u2192</a>';
   document.body.appendChild(bar);
   var track=document.getElementById('bt-track');
+
+  /* ---------- toast markup ---------- */
+  var toastStack=document.createElement('div');
+  toastStack.id='bci-toast-stack';
+  document.body.appendChild(toastStack);
+  var toastQueue=[];
+  var toastShowing=false;
+
+  function pushToast(html){
+    toastQueue.push(html);
+    processToastQueue();
+  }
+
+  function processToastQueue(){
+    if(toastShowing||!toastQueue.length)return;
+    toastShowing=true;
+    var html=toastQueue.shift();
+    var el=document.createElement('div');
+    el.className='bci-toast';
+    el.innerHTML=html;
+    toastStack.appendChild(el);
+    requestAnimationFrame(function(){el.classList.add('show');});
+    setTimeout(function(){
+      el.classList.remove('show');
+      setTimeout(function(){
+        el.remove();
+        toastShowing=false;
+        processToastQueue();
+      },350);
+    },4000);
+  }
 
   function showBar(){
     bar.classList.add('visible');
@@ -98,11 +140,14 @@
         var holeNo=oldHoles.length+i+1;
         var ch=added[i];
         var label=ordinal(holeNo)+' hole';
+        var matchLabel='Day '+esc(row.day)+', Match '+esc(row.match_no);
         if(ch==='h'){
           pushEvent('<span class="gold">D'+esc(row.day)+' M'+esc(row.match_no)+'</span>&nbsp; the '+label+' is halved');
+          pushToast('<span class="gold">'+matchLabel+'</span><br>the '+label+' is halved');
         } else {
           var winner=ch==='b'?'TEAM BABER':'TEAM WEFF';
           pushEvent('<span class="gold">D'+esc(row.day)+' M'+esc(row.match_no)+'</span>&nbsp; '+winner+' win the '+label);
+          pushToast('<span class="gold">'+winner+'</span> win the '+label+'<br>'+matchLabel);
         }
       }
     }
@@ -111,6 +156,11 @@
         ? 'D'+esc(row.day)+' M'+esc(row.match_no)+' IS HALVED'
         : (row.leader==='baber'?'TEAM BABER':'TEAM WEFF')+' WIN D'+esc(row.day)+' M'+esc(row.match_no)+' '+esc(row.score).toUpperCase();
       pushEvent('<span class="gold">RESULT</span>&nbsp; '+line);
+      var finalMatchLabel='Day '+esc(row.day)+', Match '+esc(row.match_no);
+      var toastLine=row.leader==='tie'
+        ? finalMatchLabel+' is halved'
+        : '<span class="gold">'+(row.leader==='baber'?'TEAM BABER':'TEAM WEFF')+'</span> win '+finalMatchLabel+' '+esc(row.score).toUpperCase();
+      pushToast(toastLine);
     }
   }
 

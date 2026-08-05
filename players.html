@@ -49,10 +49,14 @@
   .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
   .page-hero h1{font-family:var(--serif-display);font-size:clamp(2rem,8vw,2.8rem);color:white;letter-spacing:3px;font-weight:700;}
   .page{max-width:1080px;margin:0 auto;padding:3rem 1.5rem;}
-  .filter-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:white;margin-bottom:2.5rem;max-width:400px;}
+  .filter-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:white;margin-bottom:1.25rem;max-width:400px;}
   .filter-tab{flex:1;padding:0.65rem 1rem;text-align:center;font-family:var(--serif-display);font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);border-right:1px solid var(--border);transition:all 0.2s;}
   .filter-tab:last-child{border-right:none;}
   .filter-tab.active{background:var(--green-dark);color:var(--gold);}
+  .sort-control{margin-bottom:2.5rem;max-width:320px;}
+  .sort-label{display:block;font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem;}
+  .sort-control select{width:100%;padding:0.7rem 1rem;border:1px solid var(--border);border-radius:4px;background:white;font-family:var(--serif-body);font-size:0.85rem;color:var(--text-dark);cursor:pointer;}
+  .sort-control select:focus{outline:none;border-color:var(--gold);}
   .players-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;}
   .player-card{perspective:1200px;opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease;}
   .player-card.visible{opacity:1;transform:translateY(0);}
@@ -144,6 +148,15 @@
     <div class="filter-tab" data-filter="baber">Team Baber</div>
     <div class="filter-tab" data-filter="weff">Team Weff</div>
   </div>
+  <div class="sort-control">
+    <label for="sort-select" class="sort-label">Sort by</label>
+    <select id="sort-select">
+      <option value="name-asc">Alphabetically &mdash; A to Z</option>
+      <option value="name-desc">Alphabetically &mdash; Z to A</option>
+      <option value="hcap-asc">Handicap &mdash; Low to High</option>
+      <option value="hcap-desc">Handicap &mdash; High to Low</option>
+    </select>
+  </div>
   <div class="players-grid" id="players-grid"></div>
 </div>
 
@@ -177,7 +190,7 @@
     {name:'Rich Horsley',team:'weff',role:'Player',hcap:'23',country:'NZ',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:'images/players/rich-horsley-face.jpg'},
     {name:'Ted Keeling',team:'baber',role:'Player',hcap:'5.6',country:'england',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:'images/players/ted-keeling-face.jpg'},
     {name:'Louis Kelly',team:'baber',role:'Vice Captain',hcap:'11.8',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:'images/players/louis-kelly-face.jpg'},
-    {name:'Sean Mongan',team:'weff',role:'Player',hcap:'24',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:'images/players/sean-mongan-face.jpg'},
+    {name:'Sean Mongan',team:'weff',role:'Player',hcap:'24',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:'images/players/sean-mongan-face.jpg',actionPhoto:'images/players/sean-mongan-action.jpg'},
     {name:'Dan Simkin',team:'baber',role:'Player',hcap:'5.7',country:'england',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:'images/players/dan-simkin-face.jpg'},
     {name:'Jack Taggart',team:'weff',role:'Player',hcap:'6',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:'images/players/jack-taggart-face.jpg'},
     {name:'Alex Tinawi',team:'weff',role:'Player',hcap:'7.2',country:'PL',trips:[{location:'Marbella',year:2026}],wins:0,losses:2,ties:0,bio:'',photo:'images/players/alex-tinawi-face.jpg'},
@@ -211,10 +224,30 @@
     +'</div>';
   }
 
-  function render(filter){
+  function sortPlayers(list,sortKey){
+    list=list.slice();
+    switch(sortKey){
+      case 'name-desc':
+        list.sort(function(a,b){return b.name.localeCompare(a.name);});
+        break;
+      case 'hcap-asc':
+        list.sort(function(a,b){return parseFloat(a.hcap)-parseFloat(b.hcap);});
+        break;
+      case 'hcap-desc':
+        list.sort(function(a,b){return parseFloat(b.hcap)-parseFloat(a.hcap);});
+        break;
+      case 'name-asc':
+      default:
+        list.sort(function(a,b){return a.name.localeCompare(b.name);});
+    }
+    return list;
+  }
+
+  function render(filterKey,sortKey){
     var grid=document.getElementById('players-grid');
     grid.innerHTML='';
-    var filtered=filter==='all'?players:players.filter(function(p){return p.team===filter;});
+    var base=filterKey==='all'?players:players.filter(function(p){return p.team===filterKey;});
+    var filtered=sortPlayers(base,sortKey);
     filtered.forEach(function(p,i){
       var photoHTML=p.photo
         ?'<img class="player-photo" src="'+p.photo+'" alt="'+p.name+'">'
@@ -259,17 +292,23 @@
   }
 
   var currentFilter='all';
+  var currentSort='name-asc';
 
   document.querySelectorAll('.filter-tab').forEach(function(tab){
     tab.addEventListener('click',function(){
       document.querySelectorAll('.filter-tab').forEach(function(t){t.classList.remove('active');});
       tab.classList.add('active');
       currentFilter=tab.dataset.filter;
-      render(currentFilter);
+      render(currentFilter,currentSort);
     });
   });
 
-  render('all');
+  document.getElementById('sort-select').addEventListener('change',function(){
+    currentSort=this.value;
+    render(currentFilter,currentSort);
+  });
+
+  render(currentFilter,currentSort);
 
   /* ---------- live records from the 2027 leaderboard ---------- */
   var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
@@ -299,7 +338,7 @@
         else p.losses++;
       });
     });
-    render(currentFilter);
+    render(currentFilter,currentSort);
   })
   .catch(function(){/* leaderboard unreachable — baseline records still show */});
 })();

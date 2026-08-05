@@ -319,14 +319,13 @@
   /* ================= CONFIG ================= */
   var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
   var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
-  var ADMIN_PASS='bciadmin2027';
-  var SCORER_PASS='bci2027';
   var WIN_NOTE='First to 9\u00BD points wins the BCI';
   var POLL_MS=30000;
   /* ========================================== */
 
   var COURSES={1:'Quinta do Vale',2:'Isla Canela'};
-  var state={day:1,role:null,scoringId:null,matches:[],lastData:''};
+  var ADMIN_PASS='bciadmin2027';
+  var state={day:1,role:'scorer',scoringId:null,matches:[],lastData:''};
   var sb=null;
 
   var configured=SUPABASE_URL.indexOf('http')===0;
@@ -716,16 +715,7 @@
     if(!m){closeScoreView();return;}
     var c=calc(m);
     var done=c.status==='final';
-    var controls;
-    if(!state.role){
-      controls='<div class="password-gate" style="margin-top:1.25rem;">'
-        +'<h4>Enter Password to Score</h4>'
-        +'<input type="password" id="sv-pw" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;">'
-        +'<button id="sv-pw-btn">Unlock</button>'
-        +'<div class="pw-error" id="sv-pw-error"></div>'
-      +'</div>';
-    } else {
-      controls=(done?'':'<div class="next-hole">Hole '+(c.played+1)+' result</div>')
+    var controls=(done?'':'<div class="next-hole">Hole '+(c.played+1)+' result</div>')
         +'<div class="hole-btns">'
           +'<button class="hb baber" data-act="b"'+(done?' disabled':'')+'>Baber<br>win</button>'
           +'<button class="hb halve" data-act="h"'+(done?' disabled':'')+'>Halved</button>'
@@ -736,7 +726,6 @@
           +'<button class="mini-btn" data-act="'+(c.manualFinal?'reopen':'concede')+'">'+(c.manualFinal?'Reopen':'End match now')+'</button>'
         +'</div>'
         +'<button class="entry-btn" id="sv-done" style="margin-top:1rem;">Save &amp; Back to Leaderboard</button>';
-    }
 
     el.innerHTML='<div class="score-view-head">'
         +'<span class="sv-title">Match '+esc(m.match_no)+' &middot; '+esc(m.format)+' &middot; Day '+esc(m.day)+'</span>'
@@ -751,22 +740,9 @@
     document.getElementById('sv-back').addEventListener('click',closeScoreView);
     var doneBtn=document.getElementById('sv-done');
     if(doneBtn)doneBtn.addEventListener('click',closeScoreView);
-    var pwBtn=document.getElementById('sv-pw-btn');
-    if(pwBtn){
-      pwBtn.addEventListener('click',svUnlock);
-      document.getElementById('sv-pw').addEventListener('keydown',function(e){if(e.key==='Enter')svUnlock();});
-    }
     Array.prototype.forEach.call(el.querySelectorAll('[data-act]'),function(btn){
       btn.addEventListener('click',function(){handleAction(state.scoringId,btn.dataset.act,null,btn);});
     });
-  }
-
-  function svUnlock(){
-    var v=document.getElementById('sv-pw').value;
-    if(v===ADMIN_PASS)state.role='admin';
-    else if(v===SCORER_PASS)state.role='scorer';
-    if(state.role){applyRole();renderScoreView();}
-    else document.getElementById('sv-pw-error').textContent='Incorrect password.';
   }
 
   function applyRole(){
@@ -779,7 +755,7 @@
     renderScorer(true);
   }
 
-  /* ---------- password gate ---------- */
+  /* ---------- admin password, gates Add Match / Reset only — scoring itself is always open ---------- */
   document.getElementById('scorer-toggle').addEventListener('click',function(){
     var toggle=this;
     if(state.role!=='admin'){

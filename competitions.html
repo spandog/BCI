@@ -79,12 +79,6 @@
   .scorer-toggle h3{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
   .arrow{width:12px;height:12px;color:var(--text-muted);transition:transform 0.2s;}
   .scorer-toggle.open .arrow{width:12px;height:12px;color:var(--text-muted);transition:transform 0.2s;}
-  .password-gate{background:white;border:1px solid var(--border);border-radius:6px;padding:1.5rem;text-align:center;max-width:320px;margin:0 auto;}
-  .password-gate h4{font-family:var(--serif-display);font-size:0.9rem;letter-spacing:2px;color:var(--green-dark);margin-bottom:0.75rem;text-transform:uppercase;}
-  .password-gate input{width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:4px;font-size:1rem;margin-bottom:0.625rem;text-align:center;letter-spacing:4px;-webkit-appearance:none;}
-  .password-gate input:focus{outline:none;border-color:var(--gold);}
-  .password-gate button{width:100%;padding:0.875rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;cursor:pointer;text-transform:uppercase;}
-  .pw-error{color:#dc2626;font-size:0.8rem;margin-top:0.5rem;}
   .scorer-panel{display:none;}
   .scorer-panel.visible{display:block;}
   .entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:1.25rem;}
@@ -160,12 +154,6 @@
       <h3>Scorer Access</h3>
       <svg class="icon arrow" aria-hidden="true"><use href="#i-chevron"/></svg>
     </div>
-    <div id="password-gate" class="password-gate" style="display:none;">
-      <h4>Enter Password</h4>
-      <input type="password" id="pw-input" placeholder="••••••">
-      <button id="pw-btn">Unlock</button>
-      <div class="pw-error" id="pw-error"></div>
-    </div>
     <div class="scorer-panel" id="scorer-panel">
       <div class="entry-grid" id="entry-fields"></div>
     </div>
@@ -176,9 +164,8 @@
 
 <script>
 (function(){
-  var PASS='bci2027';
   var COURSES={1:'Quinta do Vale',2:'Isla Canela'};
-  var state={day:1,unlocked:false,data:{1:{ld:{entries:[]},ntp:{entries:[]}},2:{ld:{entries:[]},ntp:{entries:[]}}}};
+  var state={day:1,unlocked:true,data:{1:{ld:{entries:[]},ntp:{entries:[]}},2:{ld:{entries:[]},ntp:{entries:[]}}}};
 
   function saveState(){try{localStorage.setItem('bci_comps',JSON.stringify(state.data));}catch(e){}}
   function loadState(){try{var s=localStorage.getItem('bci_comps');if(s)state.data=JSON.parse(s);}catch(e){}}
@@ -273,27 +260,12 @@
 
   document.getElementById('scorer-toggle').addEventListener('click',function(){
     this.classList.toggle('open');
-    var g=document.getElementById('password-gate');
-    if(!state.unlocked)g.style.display=g.style.display==='none'?'block':'none';
-  });
-
-  document.getElementById('pw-btn').addEventListener('click',function(){
-    if(document.getElementById('pw-input').value===PASS){
-      state.unlocked=true;
-      document.getElementById('password-gate').style.display='none';
-      document.getElementById('scorer-panel').classList.add('visible');
-      renderScorer();
-    } else {
-      document.getElementById('pw-error').textContent='Incorrect password.';
-    }
-  });
-
-  document.getElementById('pw-input').addEventListener('keydown',function(e){
-    if(e.key==='Enter')document.getElementById('pw-btn').click();
+    document.getElementById('scorer-panel').classList.toggle('visible');
   });
 
   loadState();
   renderDisplay();
+  renderScorer();
   setInterval(function(){loadState();renderDisplay();},30000);
 })();
 </script>

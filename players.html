@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Players — Book Club Invitational</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="manifest" href="manifest.json">
@@ -82,7 +82,9 @@
   .player-team{font-family:var(--serif-display);font-size:0.54rem;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:4px;}
   .player-team.baber{color:var(--green-mid);}
   .player-team.weff{color:#3a5f8a;}
-  .player-name{font-family:var(--serif-display);font-size:0.9rem;font-weight:600;color:var(--text-dark);margin-bottom:2px;letter-spacing:0.3px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .player-name{font-family:var(--serif-display);font-size:0.9rem;font-weight:600;color:var(--text-dark);margin-bottom:2px;letter-spacing:0.3px;line-height:1.25;display:flex;align-items:flex-start;justify-content:space-between;gap:6px;}
+  .player-name .pname-text{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .player-name .flag{flex-shrink:0;font-size:0.85em;}
   .player-role{font-family:var(--serif-display);font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:0.6rem;}
   .player-bio{font-family:var(--serif-body);font-size:0.88rem;color:var(--text-muted);font-style:italic;line-height:1.5;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
   .player-hcap{display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;}
@@ -164,23 +166,34 @@
      automatically from the Algarve 2027 matches in Supabase.
      Fill in the Marbella wins/losses/ties per player when you have them. */
   var players=[
-    {name:'James Baber',team:'baber',role:'Captain',hcap:'23',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
-    {name:'Kane Bailey',team:'baber',role:'Player',hcap:'22',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
-    {name:'Mark Brackenridge',team:'baber',role:'Player',hcap:'21',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
-    {name:'Tony Bryant',team:'weff',role:'Player',hcap:'13',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
-    {name:'Aaron Davies',team:'baber',role:'Player',hcap:'13',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
-    {name:'Will Dodgson',team:'baber',role:'Player',hcap:'23',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
-    {name:'Matt Higgins',team:'weff',role:'Player',hcap:'25',trips:[{location:'Marbella',year:2026}],wins:0,losses:2,ties:0,bio:'',photo:''},
-    {name:'Brian Hinojosa',team:'weff',role:'Vice Captain',hcap:'10.0',trips:[{location:'Marbella',year:2026},{location:'Algarve',year:2027}],wins:0,losses:2,ties:0,bio:'',photo:'images/players/brian-hinojosa-face.png',actionPhoto:'images/players/brian-hinojosa-action.png'},
-    {name:'Rich Horsley',team:'weff',role:'Player',hcap:'23',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
-    {name:'Ted Keeling',team:'baber',role:'Player',hcap:'5.6',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
-    {name:'Louis Kelly',team:'baber',role:'Vice Captain',hcap:'11.8',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
-    {name:'Sean Mongan',team:'weff',role:'Player',hcap:'24',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
-    {name:'Dan Simkin',team:'baber',role:'Player',hcap:'5.7',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
-    {name:'Jack Taggart',team:'weff',role:'Player',hcap:'6',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
-    {name:'Alex Tinawi',team:'weff',role:'Player',hcap:'7.2',trips:[{location:'Marbella',year:2026}],wins:0,losses:2,ties:0,bio:'',photo:''},
-    {name:'Matt Wreford',team:'weff',role:'Captain',hcap:'16',trips:[{location:'Marbella',year:2026}],wins:0,losses:2,ties:0,bio:'',photo:''},
+    {name:'James Baber',team:'baber',role:'Captain',hcap:'23',country:'scotland',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
+    {name:'Kane Bailey',team:'baber',role:'Player',hcap:'22',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Mark Brackenridge',team:'baber',role:'Player',hcap:'21',country:'england',trips:[{location:'Marbella',year:2026}],wins:0,losses:2,ties:0,bio:'',photo:''},
+    {name:'Tony Bryant',team:'weff',role:'Player',hcap:'13',country:'NZ',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
+    {name:'Aaron Davies',team:'baber',role:'Player',hcap:'13',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Will Dodgson',team:'baber',role:'Player',hcap:'23',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Matt Higgins',team:'weff',role:'Player',hcap:'25',country:'england',trips:[{location:'Marbella',year:2026}],wins:0,losses:2,ties:0,bio:'',photo:''},
+    {name:'Brian Hinojosa',team:'weff',role:'Vice Captain',hcap:'10.0',country:'ES',trips:[{location:'Marbella',year:2026},{location:'Algarve',year:2027}],wins:0,losses:2,ties:0,bio:'',photo:'images/players/brian-hinojosa-face.png',actionPhoto:'images/players/brian-hinojosa-action.png'},
+    {name:'Rich Horsley',team:'weff',role:'Player',hcap:'23',country:'NZ',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Ted Keeling',team:'baber',role:'Player',hcap:'5.6',country:'england',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
+    {name:'Louis Kelly',team:'baber',role:'Vice Captain',hcap:'11.8',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Sean Mongan',team:'weff',role:'Player',hcap:'24',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Dan Simkin',team:'baber',role:'Player',hcap:'5.7',country:'england',trips:[{location:'Marbella',year:2026}],wins:2,losses:0,ties:0,bio:'',photo:''},
+    {name:'Jack Taggart',team:'weff',role:'Player',hcap:'6',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
+    {name:'Alex Tinawi',team:'weff',role:'Player',hcap:'7.2',country:'PL',trips:[{location:'Marbella',year:2026}],wins:0,losses:2,ties:0,bio:'',photo:''},
+    {name:'Matt Wreford',team:'weff',role:'Captain',hcap:'16',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:''},
   ];
+
+  function flagEmoji(code){
+    if(!code)return '';
+    var special={
+      england:'\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f',
+      scotland:'\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f',
+      wales:'\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc77\udb40\udc6c\udb40\udc73\udb40\udc7f'
+    };
+    if(special[code.toLowerCase()])return special[code.toLowerCase()];
+    return code.toUpperCase().replace(/./g,function(c){return String.fromCodePoint(127397+c.charCodeAt(0));});
+  }
 
   function buildTrips(trips){
     var sorted=trips.slice().sort(function(a,b){return b.year-a.year;});
@@ -218,7 +231,7 @@
             photoHTML+
             '<div class="player-body">'+
               '<div class="player-team '+p.team+'">'+(p.team==='baber'?'Team Baber':'Team Weff')+'</div>'+
-              '<div class="player-name">'+p.name+'</div>'+
+              '<div class="player-name"><span class="pname-text">'+p.name+'</span><span class="flag">'+flagEmoji(p.country)+'</span></div>'+
               (p.role!=='Player'?'<div class="player-role">'+p.role+'</div>':'')+
               '<div class="player-hcap"><span class="hcap-label">Handicap</span><span class="hcap-val">'+p.hcap+'</span></div>'+
               '<div class="flip-hint">Tap for record &amp; trips</div>'+
@@ -228,7 +241,7 @@
             actionPhotoHTML+
             '<div class="player-body">'+
               '<div class="player-team '+p.team+'">'+(p.team==='baber'?'Team Baber':'Team Weff')+'</div>'+
-              '<div class="player-name">'+p.name+'</div>'+
+              '<div class="player-name"><span class="pname-text">'+p.name+'</span><span class="flag">'+flagEmoji(p.country)+'</span></div>'+
               (p.bio?'<div class="back-bio">'+p.bio+'</div>':'')+
               '<div class="back-trips-label">Trips</div>'+
               '<div class="back-trips">'+buildTrips(p.trips)+'</div>'+

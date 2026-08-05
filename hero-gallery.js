@@ -14,7 +14,7 @@
   var BUCKET='bci-images';
   var FOLDERS=['algarve-2027','marbella-2026'];
 
-  var hero=document.querySelector('.page-hero');
+  var hero=document.querySelector('.page-hero, .hero');
   if(!hero)return;
 
   function listFolder(folder){
@@ -47,7 +47,7 @@
     var img=new Image();
     img.onload=function(){
       hero.style.backgroundImage=
-        'linear-gradient(rgba(15,42,26,0.82),rgba(15,42,26,0.88)),url("'+pick+'")';
+        'linear-gradient(rgba(22,41,29,0.82),rgba(22,41,29,0.88)),url("'+pick+'")';
       hero.style.backgroundSize='cover';
       hero.style.backgroundPosition='center center';
       hero.style.backgroundRepeat='no-repeat';

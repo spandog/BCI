@@ -47,7 +47,7 @@
     var img=new Image();
     img.onload=function(){
       hero.style.backgroundImage=
-        'linear-gradient(rgba(22,41,29,0.82),rgba(22,41,29,0.88)),url("'+pick+'")';
+        'linear-gradient(rgba(32,48,59,0.82),rgba(32,48,59,0.88)),url("'+pick+'")';
       hero.style.backgroundSize='cover';
       hero.style.backgroundPosition='center center';
       hero.style.backgroundRepeat='no-repeat';

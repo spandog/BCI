@@ -26,13 +26,13 @@
   var style=document.createElement('style');
   style.textContent =
     '#bci-tracker-bar{position:fixed;left:0;right:0;bottom:0;z-index:500;'+
-      'background:#16291d;border-top:1px solid rgba(201,168,76,0.3);'+
+      'background:#20303b;border-top:1px solid rgba(176,83,43,0.3);'+
       'display:none;align-items:stretch;height:42px;'+
-      'font-family:"Manrope",Arial,sans-serif;overflow:hidden;}'+
+      'font-family:"IBM Plex Sans",Arial,sans-serif;overflow:hidden;}'+
     '#bci-tracker-bar.visible{display:flex;}'+
-    '#bci-tracker-bar .bt-status{font-family:"Cormorant Garamond",Georgia,serif;'+
+    '#bci-tracker-bar .bt-status{font-family:"Fraunces",Georgia,serif;'+
       'font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;'+
-      'color:#16291d;background:#c9a84c;padding:0 14px;flex-shrink:0;'+
+      'color:#20303b;background:#b0532b;padding:0 14px;flex-shrink:0;'+
       'display:flex;align-items:center;white-space:nowrap;}'+
     '#bci-tracker-bar .bt-status.pulsing{animation:bci-pulse 1.6s ease-in-out infinite;}'+
     '@keyframes bci-pulse{0%,100%{opacity:1;}50%{opacity:0.55;}}'+
@@ -42,25 +42,25 @@
       'display:flex;align-items:center;white-space:nowrap;will-change:transform;}'+
     '#bci-tracker-bar .bt-item{display:inline-flex;align-items:center;color:rgba(255,255,255,0.85);'+
       'font-size:0.85rem;padding:0 1.5rem;white-space:nowrap;}'+
-    '#bci-tracker-bar .bt-item .gold{color:#e8c97e;font-weight:600;}'+
-    '#bci-tracker-bar .bt-item .dot{color:#c9a84c;margin-right:1.5rem;}'+
+    '#bci-tracker-bar .bt-item .gold{color:#d98b5f;font-weight:600;}'+
+    '#bci-tracker-bar .bt-item .dot{color:#b0532b;margin-right:1.5rem;}'+
     '#bci-tracker-bar a.bt-link{color:inherit;text-decoration:none;flex-shrink:0;'+
-      'display:flex;align-items:center;padding:0 14px;border-left:1px solid rgba(201,168,76,0.25);'+
-      'font-family:"Cormorant Garamond",Georgia,serif;font-size:0.6rem;letter-spacing:2px;'+
+      'display:flex;align-items:center;padding:0 14px;border-left:1px solid rgba(176,83,43,0.25);'+
+      'font-family:"Fraunces",Georgia,serif;font-size:0.6rem;letter-spacing:2px;'+
       'text-transform:uppercase;color:rgba(255,255,255,0.5);white-space:nowrap;}'+
-    '#bci-tracker-bar a.bt-link:hover{color:#c9a84c;}'+
+    '#bci-tracker-bar a.bt-link:hover{color:#b0532b;}'+
     'body.bci-tracker-padded{padding-bottom:42px;}'+
     '@media(max-width:640px){#bci-tracker-bar a.bt-link{display:none;}}'+
     '#bci-toast-stack{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:600;'+
       'display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;'+
       'width:100%;padding:0 1rem;box-sizing:border-box;}'+
-    '.bci-toast{background:#16291d;border:1px solid rgba(201,168,76,0.4);border-radius:6px;'+
-      'padding:0.7rem 1.1rem;font-family:"Manrope",Arial,sans-serif;font-size:0.85rem;'+
+    '.bci-toast{background:#20303b;border:1px solid rgba(176,83,43,0.4);border-radius:6px;'+
+      'padding:0.7rem 1.1rem;font-family:"IBM Plex Sans",Arial,sans-serif;font-size:0.85rem;'+
       'color:rgba(255,255,255,0.9);box-shadow:0 8px 24px rgba(0,0,0,0.28);'+
       'opacity:0;transform:translateY(-14px);transition:opacity 0.35s ease,transform 0.35s ease;'+
       'max-width:400px;margin:0 auto;text-align:center;}'+
     '.bci-toast.show{opacity:1;transform:translateY(0);}'+
-    '.bci-toast .gold{color:#e8c97e;font-weight:600;font-family:"Cormorant Garamond",Georgia,serif;'+
+    '.bci-toast .gold{color:#d98b5f;font-weight:600;font-family:"Fraunces",Georgia,serif;'+
       'letter-spacing:1px;}';
   document.head.appendChild(style);
 
@@ -149,6 +149,7 @@
           pushEvent('<span class="gold">D'+esc(row.day)+' M'+esc(row.match_no)+'</span>&nbsp; '+winner+' win the '+label);
           pushToast('<span class="gold">'+winner+'</span> win the '+label+'<br>'+matchLabel);
         }
+        window.dispatchEvent(new CustomEvent('bci:hole-event',{detail:{day:row.day,match_no:row.match_no}}));
       }
     }
     if(row.status==='final'&&(!prevRow||prevRow.status!=='final')){
@@ -161,6 +162,9 @@
         ? finalMatchLabel+' is halved'
         : '<span class="gold">'+(row.leader==='baber'?'TEAM BABER':'TEAM WEFF')+'</span> win '+finalMatchLabel+' '+esc(row.score).toUpperCase();
       pushToast(toastLine);
+      window.dispatchEvent(new CustomEvent('bci:match-final',{detail:{
+        label:finalMatchLabel+(row.leader==='tie'?' halved':' — '+(row.leader==='baber'?'Baber':'Weff')+' win '+esc(row.score).toUpperCase())
+      }}));
     }
   }
 

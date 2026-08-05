@@ -7,35 +7,36 @@
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-<meta name="theme-color" content="#16291d">
+<meta name="theme-color" content="#20303b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BCI">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme-coastal.css">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{-webkit-tap-highlight-color:transparent;animation:bci-page-in 0.35s ease both;}
   @keyframes bci-page-in{from{opacity:0;}to{opacity:1;}}
-  ::selection{background:#c9a84c;color:#16291d;}
-  :focus-visible{outline:2px solid #c9a84c;outline-offset:2px;}
+  ::selection{background:#b0532b;color:#20303b;}
+  :focus-visible{outline:2px solid #b0532b;outline-offset:2px;}
   :root{
-    --green-dark:#16291d;--green-mid:#1e4d2e;--gold:#c9a84c;--gold-light:#e8c97e;
-    --cream:#f7f3eb;--text-dark:#1a1a1a;--text-muted:#6b7280;--border:#ddd8cc;
-    --serif-display:'Cormorant Garamond',Georgia,serif;
-    --serif-body:'Manrope',Arial,sans-serif;
+    --green-dark:#20303b;--green-mid:#4c7a82;--gold:#b0532b;--gold-light:#d98b5f;
+    --cream:#ede6d6;--text-dark:#20303b;--text-muted:#7a7267;--border:#d9cfb8;
+    --serif-display:'Fraunces',Georgia,serif;
+    --serif-body:'IBM Plex Sans',Arial,sans-serif;
   }
   body{font-family:var(--serif-body);background:var(--green-dark);color:white;}
   .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
-  nav{background:var(--green-dark);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  nav{background:var(--green-dark);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(176,83,43,0.2);}
   .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
-  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;transition:border-color 0.2s,transform 0.15s;}
+  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border:1px solid rgba(176,83,43,0.3);border-radius:4px;transition:border-color 0.2s,transform 0.15s;}
   .nav-menu-btn:hover{border-color:var(--gold);}
   .nav-menu-btn:active{transform:scale(0.95);}
   .nav-menu-btn span.menu-word{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;}
   .nav-menu-btn .chevron{color:var(--gold);width:12px;height:12px;transition:transform 0.2s;}
   .nav-menu-btn.open .chevron{transform:rotate(180deg);}
-  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(201,168,76,0.2);border-top:none;min-width:200px;z-index:199;}
+  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(176,83,43,0.2);border-top:none;min-width:200px;z-index:199;}
   .dropdown.open{display:block;}
   .dropdown a{display:flex;align-items:center;gap:10px;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.15s;}
   .dropdown a:last-child{border-bottom:none;}
@@ -44,19 +45,19 @@
   .dropdown a.live{color:var(--gold-light);}
   .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
   .dropdown a.live .d-icon{color:var(--gold-light);}
-  .bg-pattern{position:fixed;inset:0;background-image:repeating-linear-gradient(45deg,rgba(201,168,76,0.03) 0px,rgba(201,168,76,0.03) 1px,transparent 1px,transparent 50%);background-size:30px 30px;pointer-events:none;z-index:0;}
+  .bg-pattern{position:fixed;inset:0;background-image:repeating-linear-gradient(45deg,rgba(176,83,43,0.03) 0px,rgba(176,83,43,0.03) 1px,transparent 1px,transparent 50%);background-size:30px 30px;pointer-events:none;z-index:0;}
   .page{max-width:900px;margin:0 auto;padding:3rem 1.5rem;position:relative;z-index:1;}
-  .trip-header{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start;margin-bottom:3rem;padding:2rem;border-radius:8px;background-color:var(--green-dark);background-image:linear-gradient(rgba(22,41,29,0.82),rgba(22,41,29,0.88)),url('https://images.unsplash.com/photo-1742498626135-67a7d3501eff?fm=jpg&q=80&w=2000&auto=format&fit=crop');background-size:cover;background-position:center;border:1px solid rgba(201,168,76,0.15);}
+  .trip-header{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start;margin-bottom:3rem;padding:2rem;border-radius:8px;background-color:var(--green-dark);background-image:linear-gradient(rgba(32,48,59,0.82),rgba(32,48,59,0.88)),url('https://images.unsplash.com/photo-1742498626135-67a7d3501eff?fm=jpg&q=80&w=2000&auto=format&fit=crop');background-size:cover;background-position:center;border:1px solid rgba(176,83,43,0.15);}
   .trip-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
   h1{font-family:var(--serif-display);font-size:clamp(2.5rem,10vw,3.5rem);color:white;letter-spacing:3px;font-weight:700;line-height:1;margin-bottom:0.4rem;}
   h1 span{color:var(--gold);}
   .trip-sub{font-family:var(--serif-body);font-size:1rem;color:rgba(255,255,255,0.4);font-style:italic;margin-top:0.75rem;}
   .trip-logo{width:clamp(120px,20vw,180px);height:auto;border-radius:8px;}
-  .details-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.15);border-radius:4px;overflow:hidden;margin-bottom:3rem;}
+  .details-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(176,83,43,0.15);border:1px solid rgba(176,83,43,0.15);border-radius:4px;overflow:hidden;margin-bottom:3rem;}
   .detail-box{background:rgba(255,255,255,0.04);padding:1.25rem 0.75rem;text-align:center;}
   .detail-box .label{font-size:0.58rem;color:rgba(255,255,255,0.35);letter-spacing:2px;font-family:var(--serif-display);text-transform:uppercase;margin-bottom:0.4rem;display:block;}
   .detail-box .value{font-size:0.95rem;color:var(--gold-light);font-family:var(--serif-display);letter-spacing:1px;}
-  .section-title{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .section-title{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid rgba(176,83,43,0.2);}
   .itinerary{margin-bottom:3rem;}
   .itin-day{margin-bottom:1.75rem;}
   .itin-day-title{font-family:var(--serif-display);font-size:0.95rem;color:white;letter-spacing:2px;margin-bottom:0.75rem;}
@@ -64,8 +65,8 @@
   .itin-item:last-child{border-bottom:none;}
   .itin-time{font-family:var(--serif-display);font-size:0.8rem;color:var(--gold);letter-spacing:1px;min-width:42px;flex-shrink:0;padding-top:1px;}
   .itin-desc{font-size:0.875rem;color:rgba(255,255,255,0.65);line-height:1.4;}
-  .weather{margin-bottom:3rem;border:1px solid rgba(201,168,76,0.2);border-radius:4px;overflow:hidden;}
-  .weather-header{background:rgba(255,255,255,0.05);padding:0.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,0.1);}
+  .weather{margin-bottom:3rem;border:1px solid rgba(176,83,43,0.2);border-radius:4px;overflow:hidden;}
+  .weather-header{background:rgba(255,255,255,0.05);padding:0.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(176,83,43,0.1);}
   .weather-title{font-family:var(--serif-display);font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);}
   .weather-location{font-family:var(--serif-body);font-size:0.8rem;color:rgba(255,255,255,0.35);font-style:italic;}
   .weather-body{padding:1.25rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
@@ -78,36 +79,36 @@
   .weather-detail .wd-label{font-family:var(--serif-display);font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);}
   .weather-detail .wd-val{font-family:var(--serif-display);font-size:0.9rem;color:rgba(255,255,255,0.7);}
   .weather-loading{padding:1.25rem;font-family:var(--serif-body);font-size:0.9rem;color:rgba(255,255,255,0.3);font-style:italic;}
-  .forecast-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(201,168,76,0.1);border-top:1px solid rgba(201,168,76,0.1);}
+  .forecast-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(176,83,43,0.1);border-top:1px solid rgba(176,83,43,0.1);}
   .forecast-day{background:rgba(255,255,255,0.03);padding:1rem;text-align:center;}
   .forecast-date{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;}
   .forecast-icon{width:40px;height:40px;margin:0 auto;}
   .forecast-temp{font-family:var(--serif-display);font-size:1.1rem;font-weight:600;color:white;margin-top:4px;}
   .forecast-temp span{font-size:0.8rem;color:rgba(255,255,255,0.4);font-weight:400;margin-left:4px;}
   .forecast-desc{font-family:var(--serif-body);font-size:0.78rem;color:rgba(255,255,255,0.4);font-style:italic;text-transform:capitalize;margin-top:2px;}
-  .scoring-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--serif-display);font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);text-decoration:none;border:1px solid rgba(201,168,76,0.2);padding:0.5rem 1rem;border-radius:2px;transition:all 0.2s;margin-top:1rem;}
-  .scoring-link:hover{color:var(--gold);border-color:rgba(201,168,76,0.5);}
+  .scoring-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--serif-display);font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);text-decoration:none;border:1px solid rgba(176,83,43,0.2);padding:0.5rem 1rem;border-radius:2px;transition:all 0.2s;margin-top:1rem;}
+  .scoring-link:hover{color:var(--gold);border-color:rgba(176,83,43,0.5);}
   .scoring-link .icon{width:14px;height:14px;}
   .fade-up{opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease;}
   .fade-up.visible{opacity:1;transform:translateY(0);}
   .fade-up-delay-1{transition-delay:0.1s;}
   .fade-up-delay-2{transition-delay:0.2s;}
   .fade-up-delay-3{transition-delay:0.3s;}
-  .payment-banner{margin-bottom:2rem;padding:1.1rem 1.25rem;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.3);border-radius:3px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;}
+  .payment-banner{margin-bottom:2rem;padding:1.1rem 1.25rem;background:rgba(176,83,43,0.08);border:1px solid rgba(176,83,43,0.3);border-radius:3px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;}
   .payment-banner-left{display:flex;align-items:center;gap:0.75rem;}
   .payment-banner-left .icon{width:20px;height:20px;color:var(--gold);flex-shrink:0;}
   .payment-banner-title{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:1px;color:white;}
   .payment-banner-sub{font-family:var(--serif-body);font-size:0.8rem;font-style:italic;color:rgba(255,255,255,0.45);}
   .payment-banner-btn{font-family:var(--serif-display);font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--green-dark);background:var(--gold);text-decoration:none;padding:0.55rem 1.1rem;border-radius:3px;font-weight:700;transition:background 0.2s;flex-shrink:0;}
   .payment-banner-btn:hover{background:var(--gold-light);}
-  .teams-coming{margin-bottom:3rem;padding:1rem 1.25rem;border:1px solid rgba(201,168,76,0.15);border-radius:3px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;}
+  .teams-coming{margin-bottom:3rem;padding:1rem 1.25rem;border:1px solid rgba(176,83,43,0.15);border-radius:3px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;}
   .teams-coming-left{display:flex;align-items:center;gap:0.75rem;}
   .teams-coming-title{font-family:var(--serif-display);font-size:0.75rem;letter-spacing:3px;color:rgba(255,255,255,0.6);text-transform:uppercase;font-weight:600;}
   .teams-coming-soon{font-family:var(--serif-body);font-size:0.75rem;font-style:italic;color:var(--gold);opacity:0.7;}
   .teams-coming-chips{display:flex;align-items:center;gap:0.875rem;}
   .team-chip{font-family:var(--serif-body);font-size:0.95rem;font-style:italic;color:rgba(255,255,255,0.5);letter-spacing:0.5px;}
   .team-chip-vs{color:rgba(255,255,255,0.2);font-family:var(--serif-body);font-size:0.8rem;font-style:normal;}
-  footer{background:#0a1f12;color:rgba(255,255,255,0.2);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;position:relative;z-index:1;}
+  footer{background:#141f26;color:rgba(255,255,255,0.2);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;position:relative;z-index:1;}
   footer span{color:var(--gold);}
   @media(max-width:640px){
     .details-grid{grid-template-columns:repeat(2,1fr);}
@@ -193,13 +194,13 @@
     <div class="itin-day">
       <div class="itin-day-title">Day 1 &nbsp;&middot;&nbsp; Fri 23 April</div>
       <div class="itin-item"><span class="itin-time">12:30</span><span class="itin-desc">Transfer to Quinta do Vale Golf Course</span></div>
-      <div class="itin-item"><span class="itin-time">14:00</span><span class="itin-desc">Golf &middot; <a href="https://www.quintadovalegolf.com/" target="_blank" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.4);">Quinta do Vale Golf Course</a></span></div>
+      <div class="itin-item"><span class="itin-time">14:00</span><span class="itin-desc">Golf &middot; <a href="https://www.quintadovalegolf.com/" target="_blank" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(176,83,43,0.4);">Quinta do Vale Golf Course</a></span></div>
       <div class="itin-item"><span class="itin-time">15:00</span><span class="itin-desc">Check in &middot; Vila Gale Tavira</span></div>
     </div>
     <div class="itin-day">
       <div class="itin-day-title">Day 2 &nbsp;&middot;&nbsp; Sat 24 April</div>
       <div class="itin-item"><span class="itin-time">10:30</span><span class="itin-desc">Transfer to Isla Canela Links Course</span></div>
-      <div class="itin-item"><span class="itin-time">12:00</span><span class="itin-desc">Golf &middot; <a href="https://www.islacanela.es/en/golf" target="_blank" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.4);">Isla Canela Links Course</a></span></div>
+      <div class="itin-item"><span class="itin-time">12:00</span><span class="itin-desc">Golf &middot; <a href="https://www.islacanela.es/en/golf" target="_blank" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(176,83,43,0.4);">Isla Canela Links Course</a></span></div>
     </div>
     <div class="itin-day">
       <div class="itin-day-title">Day 3 &nbsp;&middot;&nbsp; Sun 25 April</div>
@@ -350,12 +351,13 @@
     });
     if(cards){
       document.getElementById('tee-forecast').innerHTML=
-        '<div class="weather-header" style="border-top:1px solid rgba(201,168,76,0.15);"><span class="weather-title">Tee Time Forecast</span></div>'
+        '<div class="weather-header" style="border-top:1px solid rgba(176,83,43,0.15);"><span class="weather-title">Tee Time Forecast</span></div>'
         +'<div class="forecast-grid" style="grid-template-columns:1fr 1fr;">'+cards+'</div>';
     }
   });
 })();
 </script>
 <script src="live-tracker.js"></script>
+<script src="bci-features.js"></script>
 </body>
 </html>

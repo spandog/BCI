@@ -71,8 +71,9 @@
   .countdown-box .num{font-size:clamp(1.6rem,6vw,2.5rem);font-weight:600;color:var(--gold);display:block;font-family:var(--serif-display);line-height:1;}
   .countdown-box .lbl{font-size:0.62rem;color:rgba(255,255,255,0.4);font-family:var(--serif-body);letter-spacing:2.5px;text-transform:uppercase;margin-top:5px;display:block;}
   .hero-location{font-family:var(--serif-body);font-size:0.78rem;letter-spacing:3px;color:rgba(255,255,255,0.35);margin-top:1.25rem;text-transform:uppercase;}
-  .nav-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:1000px;margin:3rem auto;padding:0 1.5rem;}
-  .nav-card{background:white;border:1px solid var(--border);border-radius:2px;padding:1.75rem 1.25rem;text-align:center;text-decoration:none;color:var(--text-dark);transition:transform 0.2s,box-shadow 0.2s;}
+  .nav-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;max-width:1000px;margin:3rem auto;padding:0 1.5rem;}
+  .nav-card{background:white;border:1px solid var(--border);border-radius:2px;padding:1.75rem 1.25rem;text-align:center;text-decoration:none;color:var(--text-dark);transition:transform 0.2s,box-shadow 0.2s;min-width:0;}
+  .nav-card h3{overflow-wrap:break-word;}
   .nav-card:active{transform:scale(0.98);}
   .nav-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.08);}
   .nav-card .card-icon{margin-bottom:0.85rem;}
@@ -90,8 +91,10 @@
   footer{background:#141f26;color:rgba(255,255,255,0.3);text-align:center;padding:1.5rem;font-family:var(--serif-body);font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;}
   footer span{color:var(--gold);}
   @media(max-width:640px){
-    .nav-cards{grid-template-columns:1fr 1fr;}
+    .nav-cards{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
     .nav-card p{display:none;}
+    .nav-card{padding:1.5rem 0.85rem;}
+    .nav-card h3{font-size:0.82rem;letter-spacing:1px;}
   }
   @media(max-width:400px){.nav-cards{grid-template-columns:1fr;}}
 </style>

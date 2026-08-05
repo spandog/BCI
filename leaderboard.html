@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Live Leaderboard — Book Club Invitational</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="manifest" href="manifest.json">
@@ -75,6 +75,10 @@
   .day-tab.active{background:var(--green-dark);color:var(--gold);}
 
   .hole-legend{display:flex;justify-content:center;gap:1.25rem;margin-bottom:1rem;font-family:var(--serif-display);font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
+  .sheet-banner{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--green-dark);border-radius:6px;padding:0.9rem 1.1rem;margin-bottom:1rem;flex-wrap:wrap;}
+  .sheet-banner span{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:0.5px;color:white;}
+  .sheet-banner button{background:var(--gold);color:var(--green-dark);border:none;border-radius:4px;padding:0.55rem 1rem;font-family:var(--serif-display);font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .sheet-banner button:hover{background:var(--gold-light);}
   .hole-legend span{display:flex;align-items:center;gap:5px;}
   .legend-sq{width:11px;height:11px;border-radius:2px;border:1px solid var(--border);display:inline-block;}
   .legend-sq.b{background:var(--baber-bg);border-color:var(--baber-border);}
@@ -257,6 +261,11 @@
     <span><span class="legend-sq w"></span>Weff</span>
   </div>
 
+  <div class="sheet-banner" id="sheet-banner" style="display:none;">
+    <span id="sheet-banner-text"></span>
+    <button id="sheet-banner-btn"></button>
+  </div>
+
   <div class="match-list" id="match-list">
     <div class="empty-note">Loading matches...</div>
   </div>
@@ -420,7 +429,203 @@
         renderMatches();
         renderScorer(true);
         if(state.scoringId)renderScoreView();
+        checkMatchSheets();
       });
+  }
+
+  /* ---------- match day sheet — auto-generated graphic once a day's lineup is complete ---------- */
+  var ROSTER=[
+    {name:'James Baber',hcap:'23'},{name:'Kane Bailey',hcap:'22'},{name:'Mark Brackenridge',hcap:'21'},
+    {name:'Tony Bryant',hcap:'13'},{name:'Aaron Davies',hcap:'13'},{name:'Will Dodgson',hcap:'23'},
+    {name:'Matt Higgins',hcap:'25'},{name:'Brian Hinojosa',hcap:'10.0'},{name:'Rich Horsley',hcap:'23'},
+    {name:'Ted Keeling',hcap:'5.6'},{name:'Louis Kelly',hcap:'11.8'},{name:'Sean Mongan',hcap:'24'},
+    {name:'Dan Simkin',hcap:'5.7'},{name:'Jack Taggart',hcap:'6'},{name:'Alex Tinawi',hcap:'7.2'},
+    {name:'Matt Wreford',hcap:'16'}
+  ];
+  var DAY_COURSE={1:'Quinta do Vale Golf Course',2:'Isla Canela Links Course'};
+
+  function findRosterPlayer(fragment){
+    fragment=(fragment||'').trim();
+    if(!fragment)return null;
+    var surname=fragment.split(/\s+/).pop().replace(/[^a-zA-Z'-]/g,'');
+    if(!surname)return null;
+    var re=new RegExp('\\b'+surname+'\\b','i');
+    for(var i=0;i<ROSTER.length;i++){if(re.test(ROSTER[i].name))return ROSTER[i];}
+    return null;
+  }
+  function resolvePlayers(str){
+    return (str||'').split(/\s*(?:&|,| and )\s*/i).map(function(s){return s.trim();}).filter(Boolean).map(function(tok){
+      var p=findRosterPlayer(tok);
+      return p?{name:p.name,hcap:p.hcap}:{name:tok,hcap:null};
+    });
+  }
+  function matchesForDay(day){
+    return state.matches.filter(function(m){return m.day===day;});
+  }
+  function dayComplete(day){
+    var ms=matchesForDay(day);
+    if(!ms.length)return false;
+    return ms.every(function(m){
+      return (m.baber_players||'').trim()&&(m.weff_players||'').trim()&&(m.tee_time||'').trim();
+    });
+  }
+
+  function checkMatchSheets(){
+    var banner=document.getElementById('sheet-banner');
+    var text=document.getElementById('sheet-banner-text');
+    var btn=document.getElementById('sheet-banner-btn');
+    var readyDays=[1,2].filter(dayComplete);
+    if(!readyDays.length){banner.style.display='none';return;}
+    banner.style.display='flex';
+    var downloadDay=readyDays.indexOf(state.day)!==-1?state.day:readyDays[0];
+    var label=readyDays.map(function(d){return 'Day '+d;}).join(' & ');
+    text.textContent=label+' lineup'+(readyDays.length>1?'s are':' is')+' set';
+    btn.textContent='Download Day '+downloadDay+' Sheet';
+    btn.onclick=function(){downloadMatchSheet(downloadDay);};
+  }
+
+  async function loadCanvasFonts(){
+    try{
+      await Promise.all([
+        document.fonts.load('700 44px Fraunces'),
+        document.fonts.load('600 24px Fraunces'),
+        document.fonts.load('600 15px Fraunces'),
+        document.fonts.load('400 15px "IBM Plex Sans"'),
+        document.fonts.load('600 14px "IBM Plex Sans"')
+      ]);
+    }catch(e){/* fonts unavailable — canvas falls back to system fonts */}
+  }
+
+  function groupByTeeTime(ms){
+    var groups=[],map={};
+    ms.forEach(function(m){
+      var key=(m.tee_time||'').trim()||('_solo'+m.match_no);
+      if(!map[key]){map[key]={tee_time:m.tee_time,matches:[]};groups.push(map[key]);}
+      map[key].matches.push(m);
+    });
+    return groups;
+  }
+
+  async function buildMatchSheetCanvas(day){
+    await loadCanvasFonts();
+    var ms=matchesForDay(day).slice().sort(function(a,b){return a.match_no-b.match_no;});
+    var groups=groupByTeeTime(ms);
+    var NAVY='#20303b',SAND='#ede6d6',SANDD='#e4dac2',RUST='#b0532b',RUSTL='#d98b5f',
+        BORDER='#d9cfb8',INK='#20303b',MUTED='#6f6558',WHITE='#ffffff';
+    var W=1000,HEADER=270,FOOTER=70;
+    var GROUP_HEAD=38,MATCH_LABEL=24,BOX_H=118,INNER_GAP=14,GROUP_GAP=28;
+
+    var bodyH=0;
+    groups.forEach(function(g){
+      bodyH+=GROUP_HEAD;
+      g.matches.forEach(function(m,mi){
+        bodyH+=MATCH_LABEL+BOX_H;
+        if(mi<g.matches.length-1)bodyH+=INNER_GAP;
+      });
+      bodyH+=GROUP_GAP;
+    });
+    var H=HEADER+bodyH+FOOTER;
+    var canvas=document.createElement('canvas');
+    canvas.width=W;canvas.height=H;
+    var ctx=canvas.getContext('2d');
+
+    ctx.fillStyle=SAND;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=NAVY;ctx.fillRect(0,0,W,HEADER);
+
+    ctx.textAlign='left';ctx.fillStyle=RUST;ctx.font="700 26px Fraunces, Georgia, serif";
+    ctx.fillText('B C I',40,54);
+
+    ctx.textAlign='center';
+    ctx.fillStyle=WHITE;ctx.font="700 42px Fraunces, Georgia, serif";
+    ctx.fillText('BOOK CLUB INVITATIONAL',W/2,120);
+
+    ctx.fillStyle=RUSTL;ctx.font="600 15px Fraunces, Georgia, serif";
+    ctx.fillText((dayFormat(day)+'  ·  Day '+day).toUpperCase(),W/2,158);
+    ctx.fillStyle='rgba(255,255,255,0.55)';ctx.font="400 15px \"IBM Plex Sans\", Arial, sans-serif";
+    ctx.fillText(DAY_COURSE[day]||'',W/2,186);
+
+    ctx.strokeStyle=RUST;ctx.lineWidth=2;ctx.setLineDash([9,7]);
+    ctx.beginPath();ctx.moveTo(0,HEADER-1);ctx.lineTo(W,HEADER-1);ctx.stroke();
+    ctx.setLineDash([]);
+
+    var boxLeft=40,boxRight=W-40,boxW=boxRight-boxLeft,mid=boxLeft+boxW/2;
+    var y=HEADER;
+    groups.forEach(function(g){
+      ctx.textAlign='left';ctx.fillStyle=MUTED;ctx.font="600 13px \"IBM Plex Sans\", Arial, sans-serif";
+      ctx.fillText(g.tee_time?('TEE  '+g.tee_time):'',boxLeft,y+24);
+      y+=GROUP_HEAD;
+
+      g.matches.forEach(function(m,mi){
+        var baber=resolvePlayers(m.baber_players);
+        var weff=resolvePlayers(m.weff_players);
+        var boxTop=y+MATCH_LABEL;
+
+        ctx.textAlign='left';ctx.fillStyle=RUST;ctx.font="600 14px Fraunces, Georgia, serif";
+        ctx.fillText(('MATCH '+m.match_no).toUpperCase(),boxLeft,y+16);
+
+        ctx.fillStyle=WHITE;ctx.strokeStyle=BORDER;ctx.lineWidth=1;
+        roundRect(ctx,boxLeft,boxTop,boxW,BOX_H,6);ctx.fill();ctx.stroke();
+
+        ctx.strokeStyle=BORDER;ctx.beginPath();ctx.moveTo(mid,boxTop);ctx.lineTo(mid,boxTop+BOX_H);ctx.stroke();
+
+        drawTeamHalf(ctx,baber,boxLeft,boxTop,boxW/2,BOX_H,'left',RUST,INK,MUTED,NAVY,WHITE);
+        drawTeamHalf(ctx,weff,mid,boxTop,boxW/2,BOX_H,'right',RUST,INK,MUTED,NAVY,WHITE);
+
+        ctx.fillStyle=RUST;ctx.beginPath();ctx.arc(mid,boxTop+BOX_H/2,17,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=WHITE;ctx.font="700 12px Fraunces, Georgia, serif";ctx.textAlign='center';
+        ctx.fillText('VS',mid,boxTop+BOX_H/2+4);
+
+        y=boxTop+BOX_H+(mi<g.matches.length-1?INNER_GAP:0);
+      });
+      y+=GROUP_GAP;
+    });
+
+    ctx.textAlign='center';ctx.fillStyle=MUTED;ctx.font="600 12px Fraunces, Georgia, serif";
+    ctx.fillText('BCINVITATIONAL.COM',W/2,H-28);
+
+    return canvas;
+  }
+
+  function drawTeamHalf(ctx,players,x,y,w,h,align,rust,ink,muted,navy,white){
+    var cx=x+w/2;
+    ctx.textAlign='center';
+    ctx.fillStyle=muted;ctx.font="600 11px Fraunces, Georgia, serif";
+    var teamLabel=align==='left'?'TEAM BABER':'TEAM WEFF';
+    ctx.fillText(teamLabel,cx,y+22);
+
+    var step=42;
+    var startY=players.length>1?(y+h/2-16):(y+h/2+6);
+    players.forEach(function(p,i){
+      var ny=startY+i*step;
+      ctx.fillStyle=ink;ctx.font="600 18px Fraunces, Georgia, serif";
+      ctx.fillText(p.name,cx,ny);
+      if(p.hcap){
+        ctx.fillStyle=rust;ctx.font="400 13px \"IBM Plex Sans\", Arial, sans-serif";
+        ctx.fillText('Handicap '+p.hcap,cx,ny+18);
+      }
+    });
+  }
+
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function downloadMatchSheet(day){
+    buildMatchSheetCanvas(day).then(function(canvas){
+      canvas.toBlob(function(blob){
+        var url=URL.createObjectURL(blob);
+        var a=document.createElement('a');
+        a.href=url;a.download='bci-day'+day+'-match-sheet.png';
+        document.body.appendChild(a);a.click();a.remove();
+        setTimeout(function(){URL.revokeObjectURL(url);},4000);
+      },'image/png');
+    });
   }
 
   function points(){

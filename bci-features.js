@@ -151,9 +151,7 @@
   })();
 
   /* ---------- bottom tab bar, mobile only ---------- */
-  /* TEMPORARILY DISABLED for iOS overflow diagnosis — re-enable once confirmed */
-  (function bottomNavDISABLED(){
-    return;
+  (function bottomNav(){
     var path=(location.pathname.split('/').pop())||'index.html';
     var tabs=[
       {href:'index.html',label:'Home',match:['index.html',''],

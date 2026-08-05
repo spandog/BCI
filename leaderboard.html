@@ -75,10 +75,6 @@
   .day-tab.active{background:var(--green-dark);color:var(--gold);}
 
   .hole-legend{display:flex;justify-content:center;gap:1.25rem;margin-bottom:1rem;font-family:var(--serif-display);font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
-  .sheet-banner{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--green-dark);border-radius:6px;padding:0.9rem 1.1rem;margin-bottom:1rem;flex-wrap:wrap;}
-  .sheet-banner span{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:0.5px;color:white;}
-  .sheet-banner button{background:var(--gold);color:var(--green-dark);border:none;border-radius:4px;padding:0.55rem 1rem;font-family:var(--serif-display);font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;cursor:pointer;white-space:nowrap;}
-  .sheet-banner button:hover{background:var(--gold-light);}
   .hole-legend span{display:flex;align-items:center;gap:5px;}
   .legend-sq{width:11px;height:11px;border-radius:2px;border:1px solid var(--border);display:inline-block;}
   .legend-sq.b{background:var(--baber-bg);border-color:var(--baber-border);}
@@ -261,11 +257,6 @@
     <span><span class="legend-sq w"></span>Weff</span>
   </div>
 
-  <div class="sheet-banner" id="sheet-banner" style="display:none;">
-    <span id="sheet-banner-text"></span>
-    <button id="sheet-banner-btn"></button>
-  </div>
-
   <div class="match-list" id="match-list">
     <div class="empty-note">Loading matches...</div>
   </div>
@@ -413,7 +404,7 @@
   }
 
   /* ---------- data ---------- */
-  function loadMatches(){
+  function loadMatches(triggerSheetCheck){
     if(!sb)return;
     sb.from('bci_matches').select('*').order('day').order('match_no').order('created_at')
       .then(function(res){
@@ -429,7 +420,7 @@
         renderMatches();
         renderScorer(true);
         if(state.scoringId)renderScoreView();
-        checkMatchSheets();
+        if(triggerSheetCheck)checkMatchSheets();
       });
   }
 
@@ -470,18 +461,19 @@
     });
   }
 
+  var sheetTriggered={1:false,2:false};
+
   function checkMatchSheets(){
-    var banner=document.getElementById('sheet-banner');
-    var text=document.getElementById('sheet-banner-text');
-    var btn=document.getElementById('sheet-banner-btn');
-    var readyDays=[1,2].filter(dayComplete);
-    if(!readyDays.length){banner.style.display='none';return;}
-    banner.style.display='flex';
-    var downloadDay=readyDays.indexOf(state.day)!==-1?state.day:readyDays[0];
-    var label=readyDays.map(function(d){return 'Day '+d;}).join(' & ');
-    text.textContent=label+' lineup'+(readyDays.length>1?'s are':' is')+' set';
-    btn.textContent='Download Day '+downloadDay+' Sheet';
-    btn.onclick=function(){downloadMatchSheet(downloadDay);};
+    if(state.role!=='admin')return;
+    [1,2].forEach(function(day){
+      var complete=dayComplete(day);
+      if(complete&&!sheetTriggered[day]){
+        sheetTriggered[day]=true;
+        downloadMatchSheet(day);
+      } else if(!complete){
+        sheetTriggered[day]=false;
+      }
+    });
   }
 
   async function loadCanvasFonts(){
@@ -828,7 +820,7 @@
       if(results.some(function(r){return r.error;})){
         alert('Some changes could not be saved. Check your connection and try again.');
       }
-      loadMatches();
+      loadMatches(true);
     });
   }
 
@@ -853,7 +845,7 @@
       document.getElementById('add-baber').value='';
       document.getElementById('add-weff').value='';
       document.getElementById('add-tee').value='';
-      loadMatches();
+      loadMatches(true);
     });
   });
 

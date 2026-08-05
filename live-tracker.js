@@ -32,7 +32,7 @@
     '#bci-tracker-bar.visible{display:flex;}'+
     '#bci-tracker-bar .bt-status{font-family:"Fraunces",Georgia,serif;'+
       'font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;'+
-      'color:#20303b;background:#b0532b;padding:0 14px;flex-shrink:0;'+
+      'color:#20303b;background:#d98b5f;padding:0 14px;flex-shrink:0;'+
       'display:flex;align-items:center;white-space:nowrap;}'+
     '#bci-tracker-bar .bt-status.pulsing{animation:bci-pulse 1.6s ease-in-out infinite;}'+
     '@keyframes bci-pulse{0%,100%{opacity:1;}50%{opacity:0.55;}}'+
@@ -42,13 +42,13 @@
       'display:flex;align-items:center;white-space:nowrap;will-change:transform;}'+
     '#bci-tracker-bar .bt-item{display:inline-flex;align-items:center;color:rgba(255,255,255,0.85);'+
       'font-size:0.85rem;padding:0 1.5rem;white-space:nowrap;}'+
-    '#bci-tracker-bar .bt-item .gold{color:#d98b5f;font-weight:600;}'+
-    '#bci-tracker-bar .bt-item .dot{color:#b0532b;margin-right:1.5rem;}'+
+    '#bci-tracker-bar .bt-item .gold{color:#efc39a;font-weight:600;}'+
+    '#bci-tracker-bar .bt-item .dot{color:#d98b5f;margin-right:1.5rem;}'+
     '#bci-tracker-bar a.bt-link{color:inherit;text-decoration:none;flex-shrink:0;'+
       'display:flex;align-items:center;padding:0 14px;border-left:1px solid rgba(176,83,43,0.25);'+
       'font-family:"Fraunces",Georgia,serif;font-size:0.6rem;letter-spacing:2px;'+
       'text-transform:uppercase;color:rgba(255,255,255,0.5);white-space:nowrap;}'+
-    '#bci-tracker-bar a.bt-link:hover{color:#b0532b;}'+
+    '#bci-tracker-bar a.bt-link:hover{color:#d98b5f;}'+
     'body.bci-tracker-padded{padding-bottom:42px;}'+
     '@media(max-width:640px){#bci-tracker-bar a.bt-link{display:none;}}'+
     '#bci-toast-stack{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:600;'+
@@ -60,7 +60,7 @@
       'opacity:0;transform:translateY(-14px);transition:opacity 0.35s ease,transform 0.35s ease;'+
       'max-width:400px;margin:0 auto;text-align:center;}'+
     '.bci-toast.show{opacity:1;transform:translateY(0);}'+
-    '.bci-toast .gold{color:#d98b5f;font-weight:600;font-family:"Fraunces",Georgia,serif;'+
+    '.bci-toast .gold{color:#efc39a;font-weight:600;font-family:"Fraunces",Georgia,serif;'+
       'letter-spacing:1px;}';
   document.head.appendChild(style);
 

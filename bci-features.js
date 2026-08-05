@@ -1,34 +1,13 @@
 /* ============================================================
-   BCI shared features — golf ball (mouse + touch), fairway
-   scroll progress bar, divot tap ripple, haptic buzz + flag-plant
-   on live score events, and scorecard-flip pull-to-refresh.
+   BCI shared features — golf ball (mouse + touch), divot tap
+   ripple, haptic buzz + flag-plant on live score events, and
+   scorecard-flip pull-to-refresh.
    Include after live-tracker.js on every page:
    <script src="bci-features.js"></script>
    ============================================================ */
 (function(){
   var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var isCoarse=window.matchMedia('(pointer: coarse)').matches;
-
-  /* ---------- fairway scroll progress bar ---------- */
-  (function fairway(){
-    var bar=document.createElement('div');
-    bar.id='bci-fairway';
-    bar.innerHTML='<div id="bci-fairway-fill"></div><div id="bci-fairway-ball"></div>';
-    document.body.appendChild(bar);
-    var fill=document.getElementById('bci-fairway-fill');
-    var marker=document.getElementById('bci-fairway-ball');
-    function update(){
-      var h=document.documentElement;
-      var scrollTop=h.scrollTop||document.body.scrollTop;
-      var height=(h.scrollHeight-h.clientHeight)||1;
-      var pct=Math.min(100,Math.max(0,(scrollTop/height)*100));
-      fill.style.width=pct+'%';
-      marker.style.left=pct+'%';
-    }
-    document.addEventListener('scroll',update,{passive:true});
-    window.addEventListener('resize',update);
-    update();
-  })();
 
   /* ---------- golf ball, mouse hover or touch drag ---------- */
   if(!reduceMotion)(function ball(){

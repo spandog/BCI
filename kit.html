@@ -123,6 +123,11 @@
   .confirmation h3{font-family:var(--serif-display);font-size:1.2rem;letter-spacing:2px;color:var(--green-dark);text-transform:uppercase;margin-bottom:0.75rem;}
   .confirmation p{font-size:0.875rem;color:var(--text-muted);line-height:1.6;max-width:400px;margin:0 auto;}
   .confirmation .total-conf{font-family:var(--serif-display);font-size:1.5rem;color:var(--gold);margin:1rem 0;}
+  .conf-recap{text-align:left;max-width:340px;margin:1.25rem auto 0;background:var(--cream-dark);border:1px solid var(--border);border-radius:6px;padding:0.5rem 1.1rem;}
+  .conf-recap .cr-name{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:0.75rem 0 0.25rem;}
+  .conf-recap .cr-item{display:flex;justify-content:space-between;gap:0.75rem;font-size:0.85rem;padding:0.5rem 0;border-bottom:1px solid var(--border);}
+  .conf-recap .cr-item:last-child{border-bottom:none;}
+  .conf-recap .cr-item .cr-qty{color:var(--text-muted);flex-shrink:0;}
   footer{background:#141f26;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
   footer span{color:var(--gold);}
   @media(max-width:768px){
@@ -333,8 +338,9 @@
   <div class="confirmation" id="confirmation">
     <div class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
     <h3>Order Received</h3>
+    <div class="conf-recap" id="conf-recap"></div>
     <div class="total-conf" id="conf-total"></div>
-    <p>Your order has now been submitted. The team will be in touch soon.</p>
+    <p>Your order has now been submitted. The team will be in touch soon. Worth a screenshot of the summary above to double check your sizes.</p>
   </div>
 </div>
 
@@ -400,11 +406,20 @@
 
     var total=PRIZE_FUND;
     var orderLines=['Prize Fund — £'+PRIZE_FUND.toFixed(2)];
+    var recapItems=[];
     items.forEach(function(k){
       var sub=prices[k]*qtys[k]; total+=sub;
       var name=k.charAt(0).toUpperCase()+k.slice(1).replace('_',' ');
       orderLines.push(name+' ('+sizes[k]+') x'+qtys[k]+' — £'+sub.toFixed(2));
+      recapItems.push({name:name,size:sizes[k],qty:qtys[k]});
     });
+
+    // Stash a clean recap so it survives the redirect out to Stripe and back.
+    try{
+      sessionStorage.setItem('bci_kit_recap',JSON.stringify({
+        name:fname+' '+lname,items:recapItems,total:'£'+total.toFixed(2)
+      }));
+    }catch(e){/* sessionStorage unavailable — confirmation will just show the total */}
 
     var btn=document.getElementById('submit-btn');
     btn.disabled=true; btn.textContent='Submitting...';
@@ -472,6 +487,22 @@
     document.getElementById('form-section').style.display='none';
     document.querySelector('.kit-grid').style.display='none';
     document.querySelector('.order-section').style.display='none';
+
+    var recap=null;
+    try{
+      var raw=sessionStorage.getItem('bci_kit_recap');
+      if(raw){recap=JSON.parse(raw);sessionStorage.removeItem('bci_kit_recap');}
+    }catch(e){/* no stored recap — confirmation still shows fine without it */}
+
+    if(recap){
+      var recapHtml='<div class="cr-name">'+recap.name+'</div>';
+      recap.items.forEach(function(it){
+        recapHtml+='<div class="cr-item"><span>'+it.name+' &mdash; '+it.size+'</span><span class="cr-qty">&times;'+it.qty+'</span></div>';
+      });
+      document.getElementById('conf-recap').innerHTML=recapHtml;
+      document.getElementById('conf-total').textContent=recap.total;
+    }
+
     document.getElementById('confirmation').classList.add('visible');
   }
 

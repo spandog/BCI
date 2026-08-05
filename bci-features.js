@@ -149,4 +149,75 @@
       pulling=false;startY=null;
     },{passive:true});
   })();
+
+  /* ---------- bottom tab bar, mobile only ---------- */
+  (function bottomNav(){
+    var path=(location.pathname.split('/').pop())||'index.html';
+    var tabs=[
+      {href:'index.html',label:'Home',match:['index.html',''],
+        icon:'<path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/>'},
+      {href:'leaderboard.html',label:'Scores',match:['leaderboard.html'],
+        icon:'<path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/>'},
+      {href:'gallery.html',label:'Gallery',match:['gallery.html'],
+        icon:'<path d="M3 8.5a2 2 0 0 1 2-2h2.2L8.8 4.5h6.4L16.8 6.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5z"/><circle cx="12" cy="12.5" r="3.4"/>'},
+      {href:'kit.html',label:'Shop',match:['kit.html'],
+        icon:'<path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/>'}
+    ];
+    var nav=document.createElement('div');
+    nav.id='bci-bottomnav';
+    nav.innerHTML=tabs.map(function(t){
+      var active=t.match.indexOf(path)!==-1;
+      return '<a href="'+t.href+'"'+(active?' class="active"':'')+'>'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" '+
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+t.icon+'</svg>'+
+        '<span>'+t.label+'</span></a>';
+    }).join('');
+    document.body.appendChild(nav);
+    document.body.classList.add('bci-bottomnav-padded');
+  })();
+
+  /* ---------- add to calendar, any element with data-ics-date ---------- */
+  (function addToCalendar(){
+    function pad(n){return n<10?'0'+n:''+n;}
+    function buildICS(item){
+      var start=new Date(item.date+'T'+item.time+':00');
+      var end=new Date(start.getTime()+(parseInt(item.duration,10)||30)*60000);
+      function stamp(d){
+        return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
+      }
+      var now=new Date();
+      var nowStamp=now.getUTCFullYear()+pad(now.getUTCMonth()+1)+pad(now.getUTCDate())+'T'+pad(now.getUTCHours())+pad(now.getUTCMinutes())+'00Z';
+      var uid='bci-'+start.getTime()+'-'+Math.random().toString(36).slice(2)+'@bcinvitational.com';
+      return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//BCI//Algarve 2027//EN','BEGIN:VEVENT',
+        'UID:'+uid,'DTSTAMP:'+nowStamp,'DTSTART:'+stamp(start),'DTEND:'+stamp(end),
+        'SUMMARY:'+item.title.replace(/,/g,'\\,'),'LOCATION:Algarve, Portugal',
+        'DESCRIPTION:Book Club Invitational - Algarve 2027','END:VEVENT','END:VCALENDAR'
+      ].join('\r\n');
+    }
+    document.addEventListener('click',function(e){
+      var btn=e.target.closest('.ics-add-btn');
+      if(!btn)return;
+      var host=btn.closest('[data-ics-date]');
+      if(!host)return;
+      var item={date:host.dataset.icsDate,time:host.dataset.icsTime,
+        duration:host.dataset.icsDuration,title:host.dataset.icsTitle||'BCI event'};
+      var ics=buildICS(item);
+      var blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url;
+      a.download=item.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')+'.ics';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function(){URL.revokeObjectURL(url);},2000);
+    });
+  })();
+
+  /* ---------- offline fallback via service worker ---------- */
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){/* offline caching unavailable — site still works online */});
+    });
+  }
 })();

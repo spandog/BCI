@@ -32,6 +32,19 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-3px;height:3px;z-
   letter-spacing:1px;color:var(--text-dark,#20303B);text-transform:uppercase;
   box-shadow:0 4px 14px rgba(0,0,0,0.14);}
 
+#bci-bottomnav{display:none;position:fixed;left:0;right:0;bottom:42px;z-index:9993;height:56px;
+  background:var(--green-dark,#20303b);border-top:1px solid rgba(217,139,95,0.25);
+  align-items:stretch;justify-content:space-around;}
+#bci-bottomnav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;color:rgba(255,255,255,0.55);text-decoration:none;font-family:var(--serif-display,serif);
+  font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;}
+#bci-bottomnav a svg{width:20px;height:20px;}
+#bci-bottomnav a.active{color:var(--gold,#d98b5f);}
+@media (max-width:640px){
+  #bci-bottomnav{display:flex;}
+  body.bci-bottomnav-padded{padding-bottom:98px !important;}
+}
+
 @media (prefers-reduced-motion:reduce){
   #bci-ball-wrap,.bci-trail-dot,.bci-divot,.bci-flag-plant,#bci-pull-refresh{display:none !important;}
 }

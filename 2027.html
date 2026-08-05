@@ -64,7 +64,12 @@
   .itin-item{display:flex;align-items:flex-start;gap:1rem;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.06);}
   .itin-item:last-child{border-bottom:none;}
   .itin-time{font-family:var(--serif-display);font-size:0.8rem;color:var(--gold);letter-spacing:1px;min-width:42px;flex-shrink:0;padding-top:1px;}
-  .itin-desc{font-size:0.875rem;color:rgba(255,255,255,0.65);line-height:1.4;}
+  .itin-desc{font-size:0.875rem;color:rgba(255,255,255,0.65);line-height:1.4;flex:1;}
+  .ics-add-btn{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1px solid rgba(217,139,95,0.35);
+    background:transparent;color:var(--gold);display:flex;align-items:center;justify-content:center;cursor:pointer;
+    padding:0;transition:background 0.15s,border-color 0.15s;}
+  .ics-add-btn:hover{background:rgba(217,139,95,0.12);border-color:var(--gold);}
+  .ics-add-btn svg{width:14px;height:14px;}
   .weather{margin-bottom:3rem;border:1px solid rgba(176,83,43,0.2);border-radius:4px;overflow:hidden;}
   .weather-header{background:rgba(255,255,255,0.05);padding:0.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(176,83,43,0.1);}
   .weather-title{font-family:var(--serif-display);font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);}
@@ -128,6 +133,7 @@
     <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
     <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
     <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></symbol>
+    <symbol id="i-cal-plus" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17"/><path d="M8 3v4M16 3v4"/><path d="M12 12.5v5M9.5 15h5"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
     <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
   </defs>
@@ -193,18 +199,18 @@
     <div class="section-title">Itinerary</div>
     <div class="itin-day">
       <div class="itin-day-title">Day 1 &nbsp;&middot;&nbsp; Fri 23 April</div>
-      <div class="itin-item"><span class="itin-time">12:30</span><span class="itin-desc">Transfer to Quinta do Vale Golf Course</span></div>
-      <div class="itin-item"><span class="itin-time">14:00</span><span class="itin-desc">Golf &middot; <a href="https://www.quintadovalegolf.com/" target="_blank" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(176,83,43,0.4);">Quinta do Vale Golf Course</a></span></div>
-      <div class="itin-item"><span class="itin-time">15:00</span><span class="itin-desc">Check in &middot; Vila Gale Tavira</span></div>
+      <div class="itin-item" data-ics-date="2027-04-23" data-ics-time="12:30" data-ics-duration="30" data-ics-title="Transfer to Quinta do Vale Golf Course"><span class="itin-time">12:30</span><span class="itin-desc">Transfer to Quinta do Vale Golf Course</span><button class="ics-add-btn" aria-label="Add to calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cal-plus"/></svg></button></div>
+      <div class="itin-item" data-ics-date="2027-04-23" data-ics-time="14:00" data-ics-duration="270" data-ics-title="Golf — Quinta do Vale Golf Course"><span class="itin-time">14:00</span><span class="itin-desc">Golf &middot; <a href="https://www.quintadovalegolf.com/" target="_blank" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(176,83,43,0.4);">Quinta do Vale Golf Course</a></span><button class="ics-add-btn" aria-label="Add to calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cal-plus"/></svg></button></div>
+      <div class="itin-item" data-ics-date="2027-04-23" data-ics-time="15:00" data-ics-duration="30" data-ics-title="Check in — Vila Gale Tavira"><span class="itin-time">15:00</span><span class="itin-desc">Check in &middot; Vila Gale Tavira</span><button class="ics-add-btn" aria-label="Add to calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cal-plus"/></svg></button></div>
     </div>
     <div class="itin-day">
       <div class="itin-day-title">Day 2 &nbsp;&middot;&nbsp; Sat 24 April</div>
-      <div class="itin-item"><span class="itin-time">10:30</span><span class="itin-desc">Transfer to Isla Canela Links Course</span></div>
-      <div class="itin-item"><span class="itin-time">12:00</span><span class="itin-desc">Golf &middot; <a href="https://www.islacanela.es/en/golf" target="_blank" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(176,83,43,0.4);">Isla Canela Links Course</a></span></div>
+      <div class="itin-item" data-ics-date="2027-04-24" data-ics-time="10:30" data-ics-duration="30" data-ics-title="Transfer to Isla Canela Links Course"><span class="itin-time">10:30</span><span class="itin-desc">Transfer to Isla Canela Links Course</span><button class="ics-add-btn" aria-label="Add to calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cal-plus"/></svg></button></div>
+      <div class="itin-item" data-ics-date="2027-04-24" data-ics-time="12:00" data-ics-duration="270" data-ics-title="Golf — Isla Canela Links Course"><span class="itin-time">12:00</span><span class="itin-desc">Golf &middot; <a href="https://www.islacanela.es/en/golf" target="_blank" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(176,83,43,0.4);">Isla Canela Links Course</a></span><button class="ics-add-btn" aria-label="Add to calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cal-plus"/></svg></button></div>
     </div>
     <div class="itin-day">
       <div class="itin-day-title">Day 3 &nbsp;&middot;&nbsp; Sun 25 April</div>
-      <div class="itin-item"><span class="itin-time">12:00</span><span class="itin-desc">Check out &middot; Vila Gale Tavira</span></div>
+      <div class="itin-item" data-ics-date="2027-04-25" data-ics-time="12:00" data-ics-duration="30" data-ics-title="Check out — Vila Gale Tavira"><span class="itin-time">12:00</span><span class="itin-desc">Check out &middot; Vila Gale Tavira</span><button class="ics-add-btn" aria-label="Add to calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cal-plus"/></svg></button></div>
     </div>
   </div>
   <div class="defending fade-up fade-up-delay-3">Defending Champions &nbsp;&middot;&nbsp; Team Baber</div>

@@ -274,32 +274,6 @@
       <div class="pw-error" id="pw-error"></div>
     </div>
     <div class="scorer-panel" id="scorer-panel">
-      <div class="entry-card" id="add-card" style="display:none;">
-        <h4>Add Match — <span id="add-day-label">Day 1</span></h4>
-        <div class="entry-row">
-          <div class="entry-group">
-            <label>Format</label>
-            <input type="text" id="add-format-display" value="Better Ball" readonly style="background:#fafaf7;color:var(--text-muted);">
-          </div>
-          <div class="entry-group">
-            <label>Match Number</label>
-            <input type="number" id="add-matchno" min="1" value="1">
-          </div>
-          <div class="entry-group full">
-            <label>Tee Time (e.g. 08:40)</label>
-            <input type="text" id="add-tee" placeholder="e.g. 08:40">
-          </div>
-          <div class="entry-group full">
-            <label>Team Baber Players</label>
-            <input type="text" id="add-baber" placeholder="e.g. J. Baber &amp; K. Bailey">
-          </div>
-          <div class="entry-group full">
-            <label>Team Weff Players</label>
-            <input type="text" id="add-weff" placeholder="e.g. M. Wreford &amp; B. Smith">
-          </div>
-        </div>
-        <button class="entry-btn" id="add-btn">Add Match</button>
-      </div>
       <div class="entry-card" id="reset-card" style="display:none;">
         <h4>Reset Scoring</h4>
         <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">Wipes every hole result on both days and sets all matches back to upcoming. Players, tee times and formats are kept. Use this to clear test scores.</p>
@@ -398,8 +372,6 @@
     state.day=d;
     document.getElementById('tab-1').classList.toggle('active',d===1);
     document.getElementById('tab-2').classList.toggle('active',d===2);
-    document.getElementById('add-day-label').textContent='Day '+d;
-    document.getElementById('add-format-display').value=dayFormat(d);
     renderMatches();
     renderScorer(true);
   }
@@ -713,14 +685,11 @@
   /* ---------- admin panel: match management only ---------- */
   function renderScorer(force){
     if(state.role!=='admin')return;
-    var next=dayMatches().length+1;
-    var addNo=document.getElementById('add-matchno');
-    if(force&&document.activeElement!==addNo)addNo.value=next;
     var el=document.getElementById('edit-list');
     var list=dayMatches();
 
     if(!list.length){
-      el.innerHTML='<div class="empty-note">No matches yet for Day '+state.day+'. Add them above.</div>';
+      el.innerHTML='<div class="empty-note">No matches yet for Day '+state.day+'.</div>';
       return;
     }
     el.innerHTML=list.map(function(m){
@@ -824,31 +793,6 @@
     });
   }
 
-  document.getElementById('add-btn').addEventListener('click',function(){
-    if(state.role!=='admin')return;
-    var baber=document.getElementById('add-baber').value.trim();
-    var weff=document.getElementById('add-weff').value.trim();
-    if(!baber||!weff){alert('Please enter players for both teams.');return;}
-    var btn=this;
-    btn.disabled=true;btn.textContent='Adding...';
-    sb.from('bci_matches').insert({
-      day:state.day,
-      match_no:parseInt(document.getElementById('add-matchno').value,10)||1,
-      format:dayFormat(state.day),
-      baber_players:baber,
-      weff_players:weff,
-      tee_time:document.getElementById('add-tee').value.trim(),
-      status:'upcoming',leader:'tie',score:'',thru:'',holes:''
-    }).then(function(res){
-      btn.disabled=false;btn.textContent='Add Match';
-      if(res.error){alert('Could not add that match. Check your connection and try again.');return;}
-      document.getElementById('add-baber').value='';
-      document.getElementById('add-weff').value='';
-      document.getElementById('add-tee').value='';
-      loadMatches(true);
-    });
-  });
-
   document.getElementById('reset-btn').addEventListener('click',function(){
     if(state.role!=='admin')return;
     if(!confirm('Reset ALL scoring on both days? Every hole result will be wiped and all matches set back to upcoming. Players and tee times are kept.'))return;
@@ -947,12 +891,11 @@
     document.getElementById('password-gate').style.display='none';
     document.getElementById('scorer-panel').classList.add('visible');
     document.getElementById('scorer-toggle').classList.add('open');
-    document.getElementById('add-card').style.display='';
     document.getElementById('reset-card').style.display='';
     renderScorer(true);
   }
 
-  /* ---------- admin password, gates Add Match / Reset only — scoring itself is always open ---------- */
+  /* ---------- admin password, gates Reset only — scoring itself is always open ---------- */
   document.getElementById('scorer-toggle').addEventListener('click',function(){
     var toggle=this;
     if(state.role!=='admin'){

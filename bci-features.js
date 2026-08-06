@@ -9,8 +9,75 @@
   var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var isCoarse=window.matchMedia('(pointer: coarse)').matches;
 
-  /* ---------- golf ball, mouse hover or touch drag ---------- */
-  if(!reduceMotion)(function ball(){
+  /* ---------- custom cursor: golf flag (precise) + trailing ball, mouse only ---------- */
+  if(!reduceMotion&&!isCoarse)(function customCursor(){
+    var flag=document.createElement('div');
+    flag.id='bci-flag-cursor';
+    flag.setAttribute('aria-hidden','true');
+    flag.innerHTML='<svg viewBox="0 0 24 36" width="22" height="33">'+
+      '<ellipse cx="12" cy="32" rx="7" ry="2.6" fill="#20303b" opacity="0.85"/>'+
+      '<line x1="12" y1="30" x2="12" y2="4" stroke="#20303b" stroke-width="1.6" stroke-linecap="round"/>'+
+      '<path d="M12 4 L12 15 L22 9 Z" fill="#b0532b"/></svg>';
+    document.body.appendChild(flag);
+
+    var ball=document.createElement('div');
+    ball.id='bci-ball-wrap';
+    ball.setAttribute('aria-hidden','true');
+    ball.innerHTML='<svg viewBox="0 0 20 20" width="16" height="16">'+
+      '<circle cx="10" cy="10" r="9" fill="#f7f4ea" stroke="rgba(32,48,59,0.2)" stroke-width="0.6"/>'+
+      '<circle cx="6" cy="6" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="10" cy="5" r="1" fill="rgba(32,48,59,0.15)"/>'+
+      '<circle cx="14" cy="6" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="5" cy="10" r="1" fill="rgba(32,48,59,0.15)"/>'+
+      '<circle cx="10" cy="10" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="15" cy="10" r="1" fill="rgba(32,48,59,0.15)"/>'+
+      '<circle cx="6" cy="14" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="10" cy="15" r="1" fill="rgba(32,48,59,0.15)"/>'+
+      '<circle cx="14" cy="14" r="1" fill="rgba(32,48,59,0.15)"/></svg>';
+    document.body.appendChild(ball);
+
+    var mouseX=-100,mouseY=-100,ballX=-100,ballY=-100,active=false,lastTrail=0;
+
+    function spawnTrail(x,y){
+      var dot=document.createElement('div');
+      dot.className='bci-trail-dot';
+      dot.style.left=x+'px';dot.style.top=y+'px';
+      document.body.appendChild(dot);
+      setTimeout(function(){dot.remove();},450);
+    }
+
+    window.addEventListener('pointermove',function(e){
+      if(e.pointerType!=='mouse')return;
+      if(!active){
+        active=true;
+        ballX=e.clientX;ballY=e.clientY;
+        document.body.classList.add('bci-custom-cursor');
+        flag.style.opacity='1';ball.style.opacity='1';
+      }
+      mouseX=e.clientX;mouseY=e.clientY;
+      flag.style.transform='translate('+mouseX+'px,'+mouseY+'px)';
+    },{passive:true});
+
+    document.addEventListener('mouseleave',function(){
+      active=false;
+      document.body.classList.remove('bci-custom-cursor');
+      flag.style.opacity='0';ball.style.opacity='0';
+    });
+    document.addEventListener('mouseenter',function(){
+      if(active){flag.style.opacity='1';ball.style.opacity='1';}
+    });
+
+    function loop(ts){
+      if(active){
+        var dx=mouseX-ballX,dy=mouseY-ballY;
+        ballX+=dx*0.16;ballY+=dy*0.16;
+        var dist=Math.sqrt(dx*dx+dy*dy);
+        ball.style.transform='translate('+ballX+'px,'+ballY+'px) rotate('+(ballX*1.3)+'deg)';
+        if(dist>4&&ts-lastTrail>70){lastTrail=ts;spawnTrail(ballX,ballY);}
+      }
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  })();
+
+  /* ---------- golf ball trail, touch only (drag/tap) ---------- */
+  if(!reduceMotion&&isCoarse)(function touchBall(){
     var wrap=document.createElement('div');
     wrap.id='bci-ball-wrap';
     wrap.setAttribute('aria-hidden','true');
@@ -43,17 +110,12 @@
     }
 
     window.addEventListener('pointermove',function(e){
-      if(e.pointerType==='mouse'){ wake(e.clientX,e.clientY,null); }
-      else { wake(e.clientX,e.clientY,700); }
+      if(e.pointerType!=='mouse'){ wake(e.clientX,e.clientY,700); }
     },{passive:true});
 
     window.addEventListener('pointerdown',function(e){
       if(e.pointerType!=='mouse'){ wake(e.clientX,e.clientY,700); }
     },{passive:true});
-
-    document.addEventListener('mouseleave',function(){
-      if(!isCoarse){ wrap.style.opacity='0'; active=false; }
-    });
 
     function loop(ts){
       if(active){

@@ -122,7 +122,8 @@
   .legend-sq.h{background:var(--halve-bg);border-color:var(--gold);}
 
   .match-list{display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.5rem;}
-  .match-card{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+  .match-card{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);transition:box-shadow 0.3s ease;}
+  .match-card.just-landed{box-shadow:0 0 0 3px var(--gold);}
   .match-top{display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.875rem;border-bottom:1px solid var(--border);background:var(--cream);}
   .match-label{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
   .status-pill{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text-muted);}
@@ -434,6 +435,19 @@
     renderScorer(true);
   }
 
+  function goToMatch(id){
+    var m=findMatch(id);
+    if(!m)return;
+    if(m.day!==state.day)switchDay(m.day);
+    requestAnimationFrame(function(){
+      var card=document.querySelector('.match-card[data-id="'+id+'"]');
+      if(!card)return;
+      card.scrollIntoView({behavior:'smooth',block:'center'});
+      card.classList.add('just-landed');
+      setTimeout(function(){card.classList.remove('just-landed');},1600);
+    });
+  }
+
   /* ---------- data ---------- */
   function loadMatches(triggerSheetCheck){
     if(!sb)return;
@@ -474,7 +488,7 @@
       +'</div>';
     }).join('');
     Array.prototype.forEach.call(el.querySelectorAll('.live-tile'),function(tile){
-      tile.addEventListener('click',function(){openScoreView(tile.dataset.id);});
+      tile.addEventListener('click',function(){goToMatch(tile.dataset.id);});
     });
   }
 
@@ -791,7 +805,7 @@
       }
       var baberLead=c.status!=='upcoming'&&c.leader==='baber';
       var weffLead=c.status!=='upcoming'&&c.leader==='weff';
-      return '<div class="match-card">'
+      return '<div class="match-card" data-id="'+esc(m.id)+'">'
         +'<div class="match-top">'
           +'<span class="match-label">'+esc(m.format)+' &middot; Match '+esc(m.match_no)+'</span>'
           +'<span class="status-pill '+c.status+'">'+c.status+'</span>'

@@ -58,6 +58,29 @@
   .config-warning.visible{display:block;}
 
   .score-banner{display:grid;grid-template-columns:1fr auto 1fr;background:var(--green-dark);border-radius:8px;overflow:hidden;margin-bottom:0.5rem;border:1px solid rgba(176,83,43,0.2);}
+
+  .rc-card{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:0.6rem;}
+  .rc-threshold{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 0.85rem 0.5rem;gap:0.5rem;}
+  .rc-side{display:flex;align-items:center;gap:7px;}
+  .rc-side.right{flex-direction:row-reverse;}
+  .rc-pennant{width:14px;height:10px;border-radius:1px;flex-shrink:0;}
+  .rc-pennant.baber{background:linear-gradient(135deg,var(--baber-text),var(--green-mid));}
+  .rc-pennant.weff{background:linear-gradient(135deg,var(--gold),var(--weff-text));}
+  .rc-side-text{font-family:var(--serif-display);line-height:1.15;}
+  .rc-side .rc-num{font-size:1.05rem;font-weight:700;}
+  .rc-side.baber .rc-num{color:var(--baber-text);}
+  .rc-side.weff .rc-num{color:var(--weff-text);}
+  .rc-side .rc-sub{font-size:0.56rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-muted);font-style:italic;font-family:var(--serif-body);}
+  .rc-mid{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-dark);font-weight:700;}
+  .rc-bar{position:relative;display:flex;height:48px;background:var(--cream);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+  .rc-fill{display:flex;align-items:center;height:100%;position:relative;transition:width 0.6s ease;}
+  .rc-fill.baber{background:linear-gradient(90deg,var(--baber-text),var(--green-mid));justify-content:flex-start;}
+  .rc-fill.weff{background:linear-gradient(90deg,var(--gold),var(--weff-text));justify-content:flex-end;}
+  .rc-fill.undecided{background:repeating-linear-gradient(45deg,var(--cream-dark) 0 6px,var(--cream) 6px 12px);}
+  .rc-score{font-family:var(--serif-display);font-weight:800;font-size:1.4rem;color:white;padding:0 14px;text-shadow:0 1px 3px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;}
+  .rc-trophy{width:16px;height:16px;flex-shrink:0;}
+  .rc-seam{position:absolute;top:0;bottom:0;width:2px;background:var(--green-dark);opacity:0.5;}
+  .rc-footer{text-align:center;padding:0.5rem;font-family:var(--serif-display);font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);background:#fafaf7;}
   .score-team{padding:0.85rem 1rem;text-align:center;}
   .score-team.baber{background:rgba(30,77,46,0.5);}
   .score-team.weff{background:rgba(26,46,74,0.35);}
@@ -245,6 +268,23 @@
       <div class="t-score" id="score-weff">0</div>
     </div>
   </div>
+
+  <div class="rc-card" id="points-bar">
+    <div class="rc-threshold">
+      <div class="rc-side baber">
+        <div class="rc-pennant baber"></div>
+        <div class="rc-side-text"><span class="rc-num">9</span><br><span class="rc-sub">Baber to retain</span></div>
+      </div>
+      <div class="rc-mid">Points</div>
+      <div class="rc-side weff right">
+        <div class="rc-pennant weff"></div>
+        <div class="rc-side-text" style="text-align:right;"><span class="rc-num">9&frac12;</span><br><span class="rc-sub">Weff to win</span></div>
+      </div>
+    </div>
+    <div class="rc-bar" id="rc-bar-fills"></div>
+    <div class="rc-footer" id="rc-footer"></div>
+  </div>
+
   <div class="day-tabs">
     <div class="day-tab active" id="tab-1">Day 1 &middot; Pairs<div class="day-tab-sub">Quinta do Vale</div></div>
     <div class="day-tab" id="tab-2">Day 2 &middot; Singles<div class="day-tab-sub">Isla Canela</div></div>
@@ -610,12 +650,59 @@
     return (n%1===0.5)?(whole===0?'\u00BD':whole+'\u00BD'):String(n);
   }
 
+  var TOTAL_POINTS=18,RETAIN_AT=9,WIN_AT=9.5;
+
+  function renderPointsBar(){
+    var p=points();
+    var played=p.baber+p.weff;
+    var undecided=Math.max(0,TOTAL_POINTS-played);
+    var baberPct=(p.baber/TOTAL_POINTS)*100;
+    var weffPct=(p.weff/TOTAL_POINTS)*100;
+    var undecidedPct=Math.max(0,100-baberPct-weffPct);
+
+    var trophySvg='<svg class="rc-trophy" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
+      +'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/>'
+      +'<path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/>'
+    +'</svg>';
+
+    var baberRetained=p.baber>=RETAIN_AT;
+    var weffWon=p.weff>=WIN_AT;
+
+    var html='';
+    if(baberPct>0){
+      html+='<div class="rc-fill baber" style="width:'+baberPct+'%;">'
+        +'<div class="rc-score" style="margin-left:12px;">'+(baberRetained?trophySvg:'')+fmtPts(p.baber)+'</div>'
+      +'</div>';
+    }
+    if(undecidedPct>0){
+      html+='<div class="rc-fill undecided" style="width:'+undecidedPct+'%;"></div>';
+    }
+    if(weffPct>0){
+      html+='<div class="rc-fill weff" style="width:'+weffPct+'%;">'
+        +'<div class="rc-score" style="margin-right:12px;">'+fmtPts(p.weff)+(weffWon?trophySvg:'')+'</div>'
+      +'</div>';
+    }
+    if(baberPct>0&&(undecidedPct>0||weffPct>0)){
+      html+='<div class="rc-seam" style="left:'+baberPct+'%;"></div>';
+    }
+    if(weffPct>0&&undecidedPct>0){
+      html+='<div class="rc-seam" style="left:'+(100-weffPct)+'%;"></div>';
+    }
+    document.getElementById('rc-bar-fills').innerHTML=html;
+
+    var footer=played+' / '+TOTAL_POINTS+' points played';
+    if(weffWon)footer+=' &middot; Weff win the BCI';
+    else if(baberRetained)footer+=' &middot; Baber retain the BCI';
+    document.getElementById('rc-footer').innerHTML=footer;
+  }
+
   function renderBanner(){
     var p=points();
     document.getElementById('score-baber').textContent=fmtPts(p.baber);
     document.getElementById('score-weff').textContent=fmtPts(p.weff);
     document.getElementById('banner-baber').classList.toggle('winning',p.baber>p.weff);
     document.getElementById('banner-weff').classList.toggle('winning',p.weff>p.baber);
+    renderPointsBar();
   }
 
   function dayMatches(){

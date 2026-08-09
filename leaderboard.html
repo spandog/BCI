@@ -81,6 +81,20 @@
   .rc-trophy{width:16px;height:16px;flex-shrink:0;}
   .rc-seam{position:absolute;top:0;bottom:0;width:2px;background:var(--green-dark);opacity:0.5;}
   .rc-footer{text-align:center;padding:0.5rem;font-family:var(--serif-display);font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);background:#fafaf7;}
+
+  .live-strip{display:flex;gap:0.5rem;overflow-x:auto;padding:0.15rem 0.05rem 0.6rem;-webkit-overflow-scrolling:touch;}
+  .live-strip::-webkit-scrollbar{display:none;}
+  .live-tile{flex-shrink:0;width:98px;background:white;border:1px solid var(--border);border-top:3px solid var(--text-muted);border-radius:6px;padding:0.5rem 0.55rem;cursor:pointer;transition:transform 0.15s;}
+  .live-tile:active{transform:scale(0.96);}
+  .live-tile.leads-baber{border-top-color:var(--baber-text);}
+  .live-tile.leads-weff{border-top-color:var(--weff-text);}
+  .live-tile .lt-match{font-family:var(--serif-display);font-size:0.56rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;gap:4px;margin-bottom:3px;}
+  .live-tile .lt-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;animation:lt-pulse 1.6s ease-in-out infinite;}
+  @keyframes lt-pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  .live-tile .lt-score{font-family:var(--serif-display);font-size:0.95rem;font-weight:700;color:var(--text-dark);}
+  .live-tile.leads-baber .lt-score{color:var(--baber-text);}
+  .live-tile.leads-weff .lt-score{color:var(--weff-text);}
+  .live-tile .lt-thru{font-family:var(--serif-body);font-size:0.6rem;color:var(--text-muted);margin-top:1px;}
   .score-team{padding:0.85rem 1rem;text-align:center;}
   .score-team.baber{background:rgba(30,77,46,0.5);}
   .score-team.weff{background:rgba(26,46,74,0.35);}
@@ -285,6 +299,8 @@
     <div class="rc-footer" id="rc-footer"></div>
   </div>
 
+  <div class="live-strip" id="live-strip" style="display:none;"></div>
+
   <div class="day-tabs">
     <div class="day-tab active" id="tab-1">Day 1 &middot; Pairs<div class="day-tab-sub">Quinta do Vale</div></div>
     <div class="day-tab" id="tab-2">Day 2 &middot; Singles<div class="day-tab-sub">Isla Canela</div></div>
@@ -430,11 +446,32 @@
         state.lastData=fresh;
         state.matches=res.data||[];
         renderBanner();
+        renderLiveStrip();
         renderMatches();
         renderScorer(true);
         if(state.scoringId)renderScoreView();
         if(triggerSheetCheck)checkMatchSheets();
       });
+  }
+
+  function renderLiveStrip(){
+    var el=document.getElementById('live-strip');
+    var live=state.matches.filter(function(m){return calc(m).status==='live';});
+    if(!live.length){el.style.display='none';el.innerHTML='';return;}
+    el.style.display='flex';
+    el.innerHTML=live.map(function(m){
+      var c=calc(m);
+      var leadClass=c.leader==='baber'?'leads-baber':(c.leader==='weff'?'leads-weff':'');
+      var scoreText=c.leader==='tie'?'AS':esc(c.score);
+      return '<div class="live-tile '+leadClass+'" data-id="'+esc(m.id)+'">'
+        +'<div class="lt-match"><span class="lt-dot"></span>Match '+esc(m.match_no)+'</div>'
+        +'<div class="lt-score">'+scoreText+'</div>'
+        +'<div class="lt-thru">Thru '+esc(c.thru)+'</div>'
+      +'</div>';
+    }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.live-tile'),function(tile){
+      tile.addEventListener('click',function(){openScoreView(tile.dataset.id);});
+    });
   }
 
   /* ---------- match day sheet — auto-generated graphic once a day's lineup is complete ---------- */

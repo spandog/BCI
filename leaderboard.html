@@ -82,15 +82,17 @@
   .rc-seam{position:absolute;top:0;bottom:0;width:2px;background:var(--green-dark);opacity:0.5;}
   .rc-footer{text-align:center;padding:0.5rem;font-family:var(--serif-display);font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);background:#fafaf7;}
 
-  .live-strip{display:flex;gap:0.5rem;overflow-x:auto;padding:0.15rem 0.05rem 0.6rem;-webkit-overflow-scrolling:touch;}
-  .live-strip::-webkit-scrollbar{display:none;}
-  .live-tile{flex-shrink:0;width:98px;background:white;border:1px solid var(--border);border-top:3px solid var(--text-muted);border-radius:6px;padding:0.5rem 0.55rem;cursor:pointer;transition:transform 0.15s;}
+  .live-strip{display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.15rem 0 0.6rem;}
+  .live-tile{flex:0 0 104px;width:104px;background:white;border:1px solid var(--border);border-top:3px solid var(--text-muted);border-radius:6px;padding:0.5rem 0.55rem;cursor:pointer;transition:transform 0.15s;}
   .live-tile:active{transform:scale(0.96);}
   .live-tile.leads-baber{border-top-color:var(--baber-text);}
   .live-tile.leads-weff{border-top-color:var(--weff-text);}
   .live-tile .lt-match{font-family:var(--serif-display);font-size:0.56rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;gap:4px;margin-bottom:3px;}
   .live-tile .lt-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;animation:lt-pulse 1.6s ease-in-out infinite;}
   @keyframes lt-pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  .live-tile .lt-team{font-family:var(--serif-display);font-size:0.58rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:1px;}
+  .live-tile.leads-baber .lt-team{color:var(--baber-text);}
+  .live-tile.leads-weff .lt-team{color:var(--weff-text);}
   .live-tile .lt-score{font-family:var(--serif-display);font-size:0.95rem;font-weight:700;color:var(--text-dark);}
   .live-tile.leads-baber .lt-score{color:var(--baber-text);}
   .live-tile.leads-weff .lt-score{color:var(--weff-text);}
@@ -463,8 +465,10 @@
       var c=calc(m);
       var leadClass=c.leader==='baber'?'leads-baber':(c.leader==='weff'?'leads-weff':'');
       var scoreText=c.leader==='tie'?'AS':esc(c.score);
+      var teamLabel=c.leader==='baber'?'Baber':(c.leader==='weff'?'Weff':'Tied');
       return '<div class="live-tile '+leadClass+'" data-id="'+esc(m.id)+'">'
         +'<div class="lt-match"><span class="lt-dot"></span>Match '+esc(m.match_no)+'</div>'
+        +'<div class="lt-team">'+teamLabel+'</div>'
         +'<div class="lt-score">'+scoreText+'</div>'
         +'<div class="lt-thru">Thru '+esc(c.thru)+'</div>'
       +'</div>';

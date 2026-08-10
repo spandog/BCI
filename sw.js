@@ -6,7 +6,7 @@
    network. Falls back to the cached itinerary page if a page
    navigation fails entirely offline.
    ============================================================ */
-var CACHE_NAME='bci-cache-v42';
+var CACHE_NAME='bci-cache-v46';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
@@ -74,10 +74,19 @@ self.addEventListener('push',function(e){
 self.addEventListener('notificationclick',function(e){
   e.notification.close();
   var url=(e.notification.data&&e.notification.data.url)||'leaderboard.html';
+  var targetPath;
+  try{targetPath=new URL(url,self.location.origin).origin+new URL(url,self.location.origin).pathname;}
+  catch(err){targetPath=url.split('?')[0].split('#')[0];}
+
   e.waitUntil(
     clients.matchAll({type:'window',includeUncontrolled:true}).then(function(list){
       for(var i=0;i<list.length;i++){
-        if(list[i].url.indexOf(url)!==-1&&'focus' in list[i])return list[i].focus();
+        var client=list[i];
+        var clientPath=client.url.split('?')[0].split('#')[0];
+        if(clientPath===targetPath&&'focus' in client){
+          client.postMessage({type:'bci-notification-click',url:url});
+          return client.focus();
+        }
       }
       if(clients.openWindow)return clients.openWindow(url);
     })

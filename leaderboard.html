@@ -480,6 +480,22 @@
     });
   }
 
+  /* ---------- act on a notification deep link (?match=id or ?day=1) ---------- */
+  var deepLinkPending=true;
+  function handleDeepLink(){
+    if(!deepLinkPending)return;
+    deepLinkPending=false;
+    var params=new URLSearchParams(window.location.search);
+    var matchId=params.get('match');
+    var day=params.get('day');
+    if(matchId){
+      goToMatch(matchId);
+    } else if(day){
+      var d=parseInt(day,10);
+      if(d===1||d===2)switchDay(d);
+    }
+  }
+
   /* ---------- data ---------- */
   function loadMatches(triggerSheetCheck){
     if(!sb)return;
@@ -499,6 +515,7 @@
         renderScorer(true);
         if(state.scoringId)renderScoreView();
         if(triggerSheetCheck)checkMatchSheets();
+        handleDeepLink();
       });
   }
 
@@ -1150,6 +1167,26 @@
   });
 
   /* ---------- live updates ---------- */
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.addEventListener('message',function(e){
+      if(!e.data||e.data.type!=='bci-notification-click')return;
+      try{
+        var u=new URL(e.data.url,window.location.origin);
+        var matchId=u.searchParams.get('match');
+        var day=u.searchParams.get('day');
+        if(matchId){
+          history.replaceState(null,'',u.pathname+u.search);
+          goToMatch(matchId);
+        } else if(day){
+          var d=parseInt(day,10);
+          if(d===1||d===2){
+            history.replaceState(null,'',u.pathname+u.search);
+            switchDay(d);
+          }
+        }
+      }catch(err){/* malformed deep link — ignore */}
+    });
+  }
   if(sb){
     loadMatches();
     setInterval(loadMatches,POLL_MS);

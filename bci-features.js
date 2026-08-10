@@ -282,4 +282,90 @@
       navigator.serviceWorker.register('sw.js').catch(function(){/* offline caching unavailable — site still works online */});
     });
   }
+
+  /* ---------- push notifications: opt-in banner + Firebase/Supabase registration ---------- */
+  (function pushNotifications(){
+    if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window))return;
+    if(localStorage.getItem('bci_notify_dismissed')==='1')return;
+    if(Notification.permission==='denied')return;
+    if(Notification.permission==='granted')return;
+
+    var FIREBASE_CONFIG={
+      apiKey:'AIzaSyBHslzaSiXjCubkxoM5lQRIMaBeDM3r-h8',
+      authDomain:'bci-notifications.firebaseapp.com',
+      projectId:'bci-notifications',
+      storageBucket:'bci-notifications.firebasestorage.app',
+      messagingSenderId:'593261387998',
+      appId:'1:593261387998:web:70eab1be9b6931873c624f'
+    };
+    var VAPID_KEY='BNMlGuHnlfoBjvJQHjAEL7WZXGIKeGwNpDwN7gVZPB8Ve-1yvoUPTBTjtZpgh51M67RWeA7olu9xQq1SWF3S2Mw';
+    var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+    var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+
+    function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+    function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
+    function loadScript(src){
+      return new Promise(function(resolve,reject){
+        var s=document.createElement('script');
+        s.src=src;s.onload=resolve;s.onerror=reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    var needsInstallFirst=isIOS()&&!isStandalone();
+
+    var el=document.createElement('div');
+    el.id='bci-notify-banner';
+    el.innerHTML=needsInstallFirst
+      ? '<span>Add BCI to your Home Screen to get notified when scores update.</span>'
+      : '<span>Get notified when scores update or tee times are set.</span><button id="bci-notify-btn">Enable</button>';
+    var closeBtn=document.createElement('button');
+    closeBtn.id='bci-notify-close';
+    closeBtn.setAttribute('aria-label','Dismiss');
+    closeBtn.innerHTML='&times;';
+    el.appendChild(closeBtn);
+    document.body.appendChild(el);
+
+    closeBtn.addEventListener('click',function(){
+      localStorage.setItem('bci_notify_dismissed','1');
+      el.remove();
+    });
+
+    if(!needsInstallFirst){
+      document.getElementById('bci-notify-btn').addEventListener('click',function(){
+        var btn=this;
+        btn.disabled=true;btn.textContent='Enabling...';
+        Notification.requestPermission().then(function(perm){
+          if(perm!=='granted'){
+            localStorage.setItem('bci_notify_dismissed','1');
+            btn.disabled=false;btn.textContent='Enable';
+            return;
+          }
+          loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js')
+            .then(function(){return loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');})
+            .then(function(){return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');})
+            .then(function(){
+              if(!window.firebase.apps.length)window.firebase.initializeApp(FIREBASE_CONFIG);
+              var messaging=window.firebase.messaging();
+              return navigator.serviceWorker.ready.then(function(reg){
+                return messaging.getToken({vapidKey:VAPID_KEY,serviceWorkerRegistration:reg});
+              });
+            })
+            .then(function(token){
+              var sb=window.supabase.createClient(SB_URL,SB_KEY);
+              return sb.from('bci_push_subscriptions').upsert({token:token},{onConflict:'token'});
+            })
+            .then(function(){
+              localStorage.setItem('bci_notify_dismissed','1');
+              el.innerHTML='<span>Notifications on \u2014 you\u2019re all set.</span>';
+              setTimeout(function(){el.remove();},2500);
+            })
+            .catch(function(err){
+              console.error('push enable failed',err);
+              btn.disabled=false;btn.textContent='Enable';
+            });
+        });
+      });
+    }
+  })();
 })();

@@ -6,7 +6,7 @@
    network. Falls back to the cached itinerary page if a page
    navigation fails entirely offline.
    ============================================================ */
-var CACHE_NAME='bci-cache-v32';
+var CACHE_NAME='bci-cache-v42';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
@@ -53,6 +53,33 @@ self.addEventListener('fetch',function(e){
         return undefined;
       });
       return cached||network;
+    })
+  );
+});
+
+/* ---------- push notifications ---------- */
+self.addEventListener('push',function(e){
+  var data={};
+  try{data=e.data?e.data.json():{};}catch(err){data={title:'Book Club Invitational',body:e.data?e.data.text():''};}
+  var title=data.title||'Book Club Invitational';
+  var options={
+    body:data.body||'',
+    icon:'icon-192.png',
+    badge:'icon-192.png',
+    data:{url:data.url||'leaderboard.html'}
+  };
+  e.waitUntil(self.registration.showNotification(title,options));
+});
+
+self.addEventListener('notificationclick',function(e){
+  e.notification.close();
+  var url=(e.notification.data&&e.notification.data.url)||'leaderboard.html';
+  e.waitUntil(
+    clients.matchAll({type:'window',includeUncontrolled:true}).then(function(list){
+      for(var i=0;i<list.length;i++){
+        if(list[i].url.indexOf(url)!==-1&&'focus' in list[i])return list[i].focus();
+      }
+      if(clients.openWindow)return clients.openWindow(url);
     })
   );
 });

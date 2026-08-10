@@ -353,7 +353,10 @@
             })
             .then(function(token){
               var sb=window.supabase.createClient(SB_URL,SB_KEY);
-              return sb.from('bci_push_subscriptions').upsert({token:token},{onConflict:'token'});
+              return sb.from('bci_push_subscriptions').upsert({token:token},{onConflict:'token'}).then(function(result){
+                if(result.error)throw new Error(result.error.message||JSON.stringify(result.error));
+                return result;
+              });
             })
             .then(function(){
               localStorage.setItem('bci_notify_dismissed','1');
@@ -362,6 +365,7 @@
             })
             .catch(function(err){
               console.error('push enable failed',err);
+              alert('Could not turn notifications on: '+(err&&err.message?err.message:'unknown error'));
               btn.disabled=false;btn.textContent='Enable';
             });
         });

@@ -333,6 +333,21 @@
       <div class="pw-error" id="pw-error"></div>
     </div>
     <div class="scorer-panel" id="scorer-panel">
+      <div class="entry-card" id="announce-card" style="display:none;">
+        <h4>Send Announcement</h4>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">Sends a push notification to everyone who's got notifications turned on, right now. Use for anything that isn't an automatic score or tee-time update.</p>
+        <div class="entry-row">
+          <div class="entry-group full">
+            <label>Title</label>
+            <input type="text" id="announce-title" placeholder="e.g. Change of plan">
+          </div>
+          <div class="entry-group full">
+            <label>Message</label>
+            <input type="text" id="announce-body" placeholder="e.g. Tee times moved to 9am">
+          </div>
+        </div>
+        <button class="entry-btn" id="announce-btn">Send Now</button>
+      </div>
       <div class="entry-card" id="reset-card" style="display:none;">
         <h4>Reset Scoring</h4>
         <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">Wipes every hole result on both days and sets all matches back to upcoming. Players, tee times and formats are kept. Use this to clear test scores.</p>
@@ -359,6 +374,23 @@
 
   var COURSES={1:'Pairs',2:'Singles'};
   var ADMIN_PASS='bciadmin2027';
+
+  /* ---------- push notifications ---------- */
+  /* This URL is deterministic from the Supabase project ref + function name,
+     so it's already correct once the Edge Function is deployed as "send-push".
+     Until it's actually deployed, calls below will just fail silently and
+     get swallowed by the .catch() — nothing on the site breaks either way. */
+  var PUSH_ENDPOINT='https://ccczckdewwlpofgjigdi.supabase.co/functions/v1/send-push';
+  var PUSH_SHARED_SECRET='7SjV_F5D-zpwPHUZ2uL7KLTnoxkTawiaeiTWILS6uA0';
+
+  function sendPushEvent(type,payload){
+    if(!PUSH_ENDPOINT)return;
+    fetch(PUSH_ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-BCI-Push-Secret':PUSH_SHARED_SECRET},
+      body:JSON.stringify({type:type,payload:payload})
+    }).catch(function(){/* push send failed — scores/matches are already saved regardless */});
+  }
   var state={day:1,role:'scorer',scoringId:null,matches:[],lastData:''};
   var sb=null;
 
@@ -879,7 +911,15 @@
 
     if(act==='b'||act==='w'||act==='h'){
       if(holes.length>=18)return;
-      pushUpdate(id,derived(m,holes+act),btn);
+      var newHoles=holes+act;
+      pushUpdate(id,derived(m,newHoles),btn);
+      if(newHoles.length%3===0){
+        var mc=calc({holes:newHoles,status:''});
+        sendPushEvent('hole-milestone',{
+          matchId:id,day:m.day,matchNo:m.match_no,thru:newHoles.length,
+          leader:mc.leader,score:mc.score,baber:m.baber_players,weff:m.weff_players
+        });
+      }
     }
     else if(act==='undo'){
       if(!holes.length)return;
@@ -907,6 +947,7 @@
     if(state.role!=='admin')return;
     var btn=document.getElementById('saveall-btn');
     var updates=[];
+    var announcements=[];
     var invalid=false;
     Array.prototype.forEach.call(document.querySelectorAll('#edit-list .team-edit'),function(card){
       var m=findMatch(card.dataset.id);
@@ -915,8 +956,13 @@
       var weff=card.querySelector('[data-f="weff"]').value.trim();
       var tee=card.querySelector('[data-f="tee"]').value.trim();
       if(!baber||!weff){invalid=true;return;}
+      var wasComplete=!!(m.baber_players&&m.weff_players&&m.tee_time);
+      var willBeComplete=!!(baber&&weff&&tee);
       if(baber!==m.baber_players||weff!==m.weff_players||tee!==(m.tee_time||'')){
         updates.push(sb.from('bci_matches').update({baber_players:baber,weff_players:weff,tee_time:tee}).eq('id',m.id));
+        if(!wasComplete&&willBeComplete){
+          announcements.push({matchId:m.id,day:m.day,matchNo:m.match_no,tee:tee,baber:baber,weff:weff});
+        }
       }
     });
     if(invalid){alert('Every match needs players for both teams. Nothing has been saved yet.');return;}
@@ -930,10 +976,27 @@
       btn.disabled=false;btn.textContent='Save All Teams & Times';
       if(results.some(function(r){return r.error;})){
         alert('Some changes could not be saved. Check your connection and try again.');
+      } else {
+        if(announcements.length)sendPushEvent('matches-announced',{day:state.day,matches:announcements});
       }
       loadMatches(true);
     });
   }
+
+  document.getElementById('announce-btn').addEventListener('click',function(){
+    if(state.role!=='admin')return;
+    var title=document.getElementById('announce-title').value.trim();
+    var body=document.getElementById('announce-body').value.trim();
+    if(!title||!body){alert('Add both a title and a message before sending.');return;}
+    var btn=this;
+    btn.disabled=true;btn.textContent='Sending...';
+    sendPushEvent('manual-announcement',{title:title,body:body});
+    setTimeout(function(){
+      btn.disabled=false;btn.textContent='Send Now';
+      document.getElementById('announce-title').value='';
+      document.getElementById('announce-body').value='';
+    },600);
+  });
 
   document.getElementById('reset-btn').addEventListener('click',function(){
     if(state.role!=='admin')return;
@@ -1033,6 +1096,7 @@
     document.getElementById('password-gate').style.display='none';
     document.getElementById('scorer-panel').classList.add('visible');
     document.getElementById('scorer-toggle').classList.add('open');
+    document.getElementById('announce-card').style.display='';
     document.getElementById('reset-card').style.display='';
     renderScorer(true);
   }

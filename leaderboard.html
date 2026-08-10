@@ -990,12 +990,32 @@
     if(!title||!body){alert('Add both a title and a message before sending.');return;}
     var btn=this;
     btn.disabled=true;btn.textContent='Sending...';
-    sendPushEvent('manual-announcement',{title:title,body:body});
-    setTimeout(function(){
+
+    if(!PUSH_ENDPOINT){
+      alert('Push endpoint is not configured on this page — nothing was sent. This page may be running an old cached version; try closing the tab and reopening the leaderboard.');
       btn.disabled=false;btn.textContent='Send Now';
-      document.getElementById('announce-title').value='';
-      document.getElementById('announce-body').value='';
-    },600);
+      return;
+    }
+
+    fetch(PUSH_ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-BCI-Push-Secret':PUSH_SHARED_SECRET},
+      body:JSON.stringify({type:'manual-announcement',payload:{title:title,body:body}})
+    }).then(function(res){
+      return res.json().catch(function(){return {};}).then(function(data){return {ok:res.ok,status:res.status,data:data};});
+    }).then(function(result){
+      btn.disabled=false;btn.textContent='Send Now';
+      if(result.ok){
+        document.getElementById('announce-title').value='';
+        document.getElementById('announce-body').value='';
+        alert('Sent to '+(result.data.sent||0)+' of '+(result.data.total||0)+' subscribed device(s).');
+      } else {
+        alert('Send failed (status '+result.status+'): '+JSON.stringify(result.data));
+      }
+    }).catch(function(err){
+      btn.disabled=false;btn.textContent='Send Now';
+      alert('Could not reach the notification service at all: '+err.message);
+    });
   });
 
   document.getElementById('reset-btn').addEventListener('click',function(){

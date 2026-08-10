@@ -6,7 +6,7 @@
    network. Falls back to the cached itinerary page if a page
    navigation fails entirely offline.
    ============================================================ */
-var CACHE_NAME='bci-cache-v48';
+var CACHE_NAME='bci-cache-v49';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
@@ -60,24 +60,27 @@ self.addEventListener('fetch',function(e){
 /* ---------- push notifications ---------- */
 self.addEventListener('push',function(e){
   var raw=e.data?e.data.text():'[[no e.data]]';
-  var data=null;
-  try{data=JSON.parse(raw);}catch(err){data=null;}
+  var parsed=null;
+  try{parsed=JSON.parse(raw);}catch(err){parsed=null;}
+  /* FCM sometimes nests our fields one level deeper under a "data" key —
+     unwrap it if present, otherwise use the top level as-is. */
+  var payload=(parsed&&parsed.data&&typeof parsed.data==='object')?parsed.data:parsed;
 
   var title,body;
-  if(data&&typeof data.title==='string'&&data.title.length>0){
-    title=data.title;
-    body=(typeof data.body==='string'&&data.body.length>0)?data.body:'[[empty body field]]';
+  if(payload&&typeof payload.title==='string'&&payload.title.length>0){
+    title=payload.title;
+    body=(typeof payload.body==='string'&&payload.body.length>0)?payload.body:'[[empty body field]]';
   } else {
     /* SW-DIAG: this prefix can never appear by accident — if you see it,
-       the payload arrived but didn't have a usable title field */
-    title='SW-DIAG: '+(data?('title='+JSON.stringify(data.title)):'JSON.parse failed');
+       the payload arrived but didn't have a usable title field even after unwrapping */
+    title='SW-DIAG2: '+(parsed?('top='+JSON.stringify(Object.keys(parsed))):'JSON.parse failed');
     body='raw: '+raw.slice(0,180);
   }
   var options={
     body:body,
     icon:'icon-192.png',
     badge:'icon-192.png',
-    data:{url:(data&&data.url)||'leaderboard.html'}
+    data:{url:(payload&&payload.url)||'leaderboard.html'}
   };
   e.waitUntil(self.registration.showNotification(title,options));
 

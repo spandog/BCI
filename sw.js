@@ -6,7 +6,7 @@
    network. Falls back to the cached itinerary page if a page
    navigation fails entirely offline.
    ============================================================ */
-var CACHE_NAME='bci-cache-v46';
+var CACHE_NAME='bci-cache-v47';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
@@ -59,15 +59,30 @@ self.addEventListener('fetch',function(e){
 
 /* ---------- push notifications ---------- */
 self.addEventListener('push',function(e){
-  var data={};
-  try{data=e.data?e.data.json():{};}catch(err){data={title:'Book Club Invitational',body:e.data?e.data.text():''};}
-  var title=data.title||'Book Club Invitational';
-  var options={
-    body:data.body||'',
-    icon:'icon-192.png',
-    badge:'icon-192.png',
-    data:{url:data.url||'leaderboard.html'}
-  };
+  var raw=e.data?e.data.text():'';
+  var data=null;
+  try{data=JSON.parse(raw);}catch(err){data=null;}
+
+  var title,options;
+  if(data&&(data.title||data.body)){
+    title=data.title||'Book Club Invitational';
+    options={
+      body:data.body||'',
+      icon:'icon-192.png',
+      badge:'icon-192.png',
+      data:{url:data.url||'leaderboard.html'}
+    };
+  } else {
+    /* diagnostic fallback — shows exactly what arrived so we can see what's wrong,
+       instead of hiding it behind a generic message */
+    title='[debug] payload did not parse as expected';
+    options={
+      body:raw?raw.slice(0,180):'(e.data was empty)',
+      icon:'icon-192.png',
+      badge:'icon-192.png',
+      data:{url:'leaderboard.html'}
+    };
+  }
   e.waitUntil(self.registration.showNotification(title,options));
 });
 

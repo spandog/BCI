@@ -372,4 +372,155 @@
       });
     }
   })();
+
+  /* ---------- site-wide account widget: sign in / your name, everywhere, inline ---------- */
+  (function accountWidget(){
+    var nav=document.querySelector('nav');
+    if(!nav)return;
+    if(document.body.getAttribute('data-bci-no-account')==='true')return; // opt-out hook, unused by default
+
+    var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+    var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+
+    function loadScript(src){
+      return new Promise(function(resolve,reject){
+        var s=document.createElement('script');
+        s.src=src;s.onload=resolve;s.onerror=reject;
+        document.head.appendChild(s);
+      });
+    }
+    function esc(s){
+      return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
+    }
+
+    var readyPromise=window.supabase?Promise.resolve():loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+
+    readyPromise.then(function(){
+      if(!window.supabase)return;
+      var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+      var currentUser=null,currentName=null,pendingEmail=null;
+
+      var wrap=document.createElement('div');
+      wrap.id='bci-account-wrap';
+
+      var btn=document.createElement('button');
+      btn.id='bci-account-btn';
+      btn.type='button';
+      btn.textContent='Sign In';
+      wrap.appendChild(btn);
+
+      var panel=document.createElement('div');
+      panel.id='bci-account-panel';
+      panel.className='hidden';
+      wrap.appendChild(panel);
+
+      var logo=nav.querySelector('.nav-logo');
+      var leftGroup=document.createElement('div');
+      leftGroup.style.display='flex';
+      leftGroup.style.alignItems='center';
+      leftGroup.style.gap='0.75rem';
+      if(logo&&logo.parentNode===nav){
+        nav.insertBefore(leftGroup,logo);
+        leftGroup.appendChild(logo);
+      } else {
+        nav.insertBefore(leftGroup,nav.firstChild);
+      }
+      leftGroup.appendChild(wrap);
+
+      function renderSignedOut(){
+        panel.innerHTML=
+          '<p class="bci-ap-note">Sign in for betting, kit orders, and settling up — one code sent to your email, no password.</p>'+
+          '<label class="bci-ap-label">Email</label>'+
+          '<input type="email" id="bci-ap-email" placeholder="you@email.com">'+
+          '<button class="bci-ap-btn" id="bci-ap-send">Send Me A Code</button>'+
+          '<div class="bci-ap-status" id="bci-ap-status"></div>'+
+          '<div id="bci-ap-code-row" class="hidden">'+
+            '<label class="bci-ap-label">6-Digit Code</label>'+
+            '<input type="text" inputmode="numeric" autocomplete="one-time-code" id="bci-ap-code" placeholder="123456" maxlength="10">'+
+            '<button class="bci-ap-btn" id="bci-ap-verify">Verify &amp; Sign In</button>'+
+          '</div>';
+        document.getElementById('bci-ap-send').addEventListener('click',sendCode);
+        document.getElementById('bci-ap-verify').addEventListener('click',verifyCode);
+      }
+
+      function renderSignedIn(){
+        panel.innerHTML=
+          '<div class="bci-ap-signedin">Signed in as <strong>'+esc(currentName||currentUser.email)+'</strong></div>'+
+          '<div class="bci-ap-links">'+
+            '<a href="leaderboard.html">Leaderboard</a>'+
+            '<a href="kit.html">BCI Shop</a>'+
+            '<a href="2027.html">Trip &amp; Balance</a>'+
+          '</div>'+
+          '<button class="bci-ap-signout" id="bci-ap-signout" type="button">Sign Out</button>';
+        document.getElementById('bci-ap-signout').addEventListener('click',function(){sb.auth.signOut();});
+      }
+
+      function sendCode(){
+        var email=document.getElementById('bci-ap-email').value.trim();
+        var statusEl=document.getElementById('bci-ap-status');
+        if(!email||email.indexOf('@')===-1){statusEl.textContent='Enter a valid email address.';statusEl.className='bci-ap-status error';return;}
+        var sendBtn=document.getElementById('bci-ap-send');
+        sendBtn.disabled=true;sendBtn.textContent='Sending...';
+        statusEl.textContent='';statusEl.className='bci-ap-status';
+        sb.auth.signInWithOtp({email:email}).then(function(res){
+          sendBtn.disabled=false;sendBtn.textContent='Send Me A Code';
+          if(res.error){
+            statusEl.textContent='Could not send the code: '+res.error.message;
+            statusEl.className='bci-ap-status error';
+          } else {
+            pendingEmail=email;
+            statusEl.textContent='Code sent — check your email.';
+            statusEl.className='bci-ap-status success';
+            document.getElementById('bci-ap-code-row').classList.remove('hidden');
+            document.getElementById('bci-ap-code').focus();
+          }
+        });
+      }
+
+      function verifyCode(){
+        var code=document.getElementById('bci-ap-code').value.replace(/\D/g,'');
+        var statusEl=document.getElementById('bci-ap-status');
+        if(!pendingEmail){statusEl.textContent='Send yourself a code first.';statusEl.className='bci-ap-status error';return;}
+        if(!code){statusEl.textContent='Enter the code from your email.';statusEl.className='bci-ap-status error';return;}
+        var verifyBtn=document.getElementById('bci-ap-verify');
+        verifyBtn.disabled=true;verifyBtn.textContent='Verifying...';
+        sb.auth.verifyOtp({email:pendingEmail,token:code,type:'email'}).then(function(res){
+          verifyBtn.disabled=false;verifyBtn.textContent='Verify & Sign In';
+          if(res.error){
+            statusEl.textContent='That code didn\u2019t work: '+res.error.message;
+            statusEl.className='bci-ap-status error';
+          }
+        });
+      }
+
+      function applySession(session){
+        if(session&&session.user){
+          currentUser=session.user;
+          btn.textContent='\u2022\u2022\u2022';
+          sb.from('bci_profiles').select('name').eq('id',session.user.id).single().then(function(res){
+            currentName=(res.data&&res.data.name)?res.data.name:session.user.email;
+            btn.textContent=currentName.split(' ')[0];
+          });
+          renderSignedIn();
+        } else {
+          currentUser=null;currentName=null;
+          btn.textContent='Sign In';
+          renderSignedOut();
+        }
+      }
+
+      btn.addEventListener('click',function(e){
+        e.stopPropagation();
+        panel.classList.toggle('hidden');
+      });
+      document.addEventListener('click',function(e){
+        if(!wrap.contains(e.target))panel.classList.add('hidden');
+      });
+
+      sb.auth.getSession().then(function(res){applySession(res.data&&res.data.session);});
+      sb.auth.onAuthStateChange(function(event,session){applySession(session);});
+    }).catch(function(){/* Supabase failed to load — the rest of the site still works fine without the account widget */});
+  })();
 })();

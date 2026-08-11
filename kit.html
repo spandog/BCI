@@ -182,7 +182,6 @@
       <a href="kit.html" class="active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
       <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
       <a href="leaderboard.html" class="live"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
-      <a href="login.html" id="account-link"><svg class="icon d-icon" aria-hidden="true"><use href="#i-login"/></svg><span id="account-link-text">Sign In</span></a>
     </div>
   </div>
 </nav>
@@ -634,28 +633,6 @@
   document.getElementById('lightbox-close').addEventListener('click',closeLightbox);
   document.getElementById('lightbox').addEventListener('click',function(e){if(e.target===e.currentTarget)closeLightbox();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLightbox();});
-})();
-</script>
-<script>
-(function(){
-  var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
-  var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
-  if(!window.supabase)return;
-  var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-  function applySession(session){
-    var link=document.getElementById('account-link');
-    var text=document.getElementById('account-link-text');
-    if(!link||!text)return;
-    if(session&&session.user){
-      sb.from('bci_profiles').select('name').eq('id',session.user.id).single().then(function(res){
-        text.textContent=(res.data&&res.data.name)?res.data.name:'My Account';
-      });
-    } else {
-      text.textContent='Sign In';
-    }
-  }
-  sb.auth.getSession().then(function(res){applySession(res.data&&res.data.session);});
-  sb.auth.onAuthStateChange(function(event,session){applySession(session);});
 })();
 </script>
 <script src="hero-gallery.js"></script>

@@ -333,12 +333,19 @@
     <h3>Checkout</h3>
 
     <div id="checkout-signin">
-      <p class="checkout-note">Sign in to complete your order — one link sent to your email, no password needed, and your cart will still be exactly as you left it when you get back.</p>
+      <p class="checkout-note">Enter your email and we'll send you a 6-digit code. Type it in below to verify, no link to click, no leaving this page or this device.</p>
       <div class="form-row">
         <div class="form-group full"><label>Email Address</label><input type="email" id="checkout-email" placeholder="you@email.com"></div>
       </div>
-      <button class="submit-btn" id="checkout-signin-btn">Send Me A Login Link</button>
+      <button class="submit-btn" id="checkout-send-code-btn">Send Me A Code</button>
       <div class="checkout-status" id="checkout-status"></div>
+
+      <div id="checkout-code-row" style="display:none;margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid var(--border);">
+        <div class="form-row">
+          <div class="form-group full"><label>6-Digit Code</label><input type="text" inputmode="numeric" autocomplete="one-time-code" id="checkout-code" placeholder="123456" maxlength="10"></div>
+        </div>
+        <button class="submit-btn" id="checkout-verify-btn">Verify &amp; Continue</button>
+      </div>
     </div>
 
     <div id="checkout-signed-in" style="display:none;">
@@ -378,51 +385,7 @@
   var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
   var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
   var sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
-  var currentUser=null,currentProfileName=null;
-  var CART_KEY='bci_kit_cart_pending';
-
-  function saveCartToStorage(){
-    try{
-      sessionStorage.setItem(CART_KEY,JSON.stringify({selected:selected,sizes:sizes,qtys:qtys,notes:document.getElementById('notes')?document.getElementById('notes').value:''}));
-    }catch(e){/* sessionStorage unavailable — cart just won't survive the redirect */}
-  }
-  function restoreCartFromStorage(){
-    try{
-      var raw=sessionStorage.getItem(CART_KEY);
-      if(!raw)return;
-      applySavedCart(JSON.parse(raw));
-    }catch(e){/* corrupted or missing saved cart — start fresh, nothing to restore */}
-  }
-  function applySavedCart(saved){
-    Object.keys(saved.qtys||{}).forEach(function(item){
-      if(!(item in qtys))return;
-      if(saved.sizes[item]){
-        sizes[item]=saved.sizes[item];
-        var sizeBtn=document.querySelector('#sizes-'+item+' .size-btn[data-size="'+saved.sizes[item]+'"]');
-        if(sizeBtn)document.querySelectorAll('#sizes-'+item+' .size-btn').forEach(function(b){b.classList.toggle('selected',b===sizeBtn);});
-      }
-      if(saved.qtys[item]>0)setQty(item,saved.qtys[item]);
-    });
-    if(saved.notes&&document.getElementById('notes'))document.getElementById('notes').value=saved.notes;
-  }
-  // The cart also travels inside the magic-link URL itself, not just sessionStorage,
-  // since the link is often opened on a different device/browser than the one that
-  // requested it (e.g. requested on a laptop, opened from a phone's mail app) — a
-  // device-local store alone can't survive that hop, but the URL does regardless of
-  // which device opens it.
-  function encodeCartForURL(){
-    try{
-      return encodeURIComponent(btoa(JSON.stringify({selected:selected,sizes:sizes,qtys:qtys,notes:document.getElementById('notes')?document.getElementById('notes').value:''})));
-    }catch(e){return '';}
-  }
-  function restoreCartFromURL(){
-    try{
-      var raw=new URLSearchParams(window.location.search).get('cart');
-      if(!raw)return false;
-      applySavedCart(JSON.parse(atob(decodeURIComponent(raw))));
-      return true;
-    }catch(e){return false;}
-  }
+  var currentUser=null,currentProfileName=null,pendingEmail=null;
 
   document.getElementById('menu-btn').addEventListener('click',function(){
     document.getElementById('menu-btn').classList.toggle('open');
@@ -462,7 +425,7 @@
     if(btn.dataset.dir==='-1')btn.disabled=true;
   });
 
-  document.getElementById('checkout-signin-btn').addEventListener('click',function(){
+  document.getElementById('checkout-send-code-btn').addEventListener('click',function(){
     var email=document.getElementById('checkout-email').value.trim();
     var statusEl=document.getElementById('checkout-status');
     if(!sb){statusEl.textContent='Could not connect — check your connection and reload the page.';statusEl.className='checkout-status error';return;}
@@ -470,26 +433,43 @@
     var btn=this;
     btn.disabled=true;btn.textContent='Sending...';
     statusEl.textContent='';statusEl.className='checkout-status';
-    saveCartToStorage();
-    sb.auth.signInWithOtp({
-      email:email,
-      options:{emailRedirectTo:window.location.origin+window.location.pathname+'?cart='+encodeCartForURL()}
-    }).then(function(res){
-      btn.disabled=false;btn.textContent='Send Me A Login Link';
+    sb.auth.signInWithOtp({email:email}).then(function(res){
+      btn.disabled=false;btn.textContent='Send Me A Code';
       if(res.error){
-        statusEl.textContent='Could not send the link: '+res.error.message;
+        statusEl.textContent='Could not send the code: '+res.error.message;
         statusEl.className='checkout-status error';
       } else {
-        statusEl.textContent='Check your email — tap the link there, then come straight back to this order.';
+        pendingEmail=email;
+        statusEl.textContent='Code sent — check your email and enter it below.';
         statusEl.className='checkout-status success';
+        document.getElementById('checkout-code-row').style.display='block';
+        document.getElementById('checkout-code').focus();
       }
+    });
+  });
+
+  document.getElementById('checkout-verify-btn').addEventListener('click',function(){
+    var code=document.getElementById('checkout-code').value.replace(/\D/g,'');
+    var statusEl=document.getElementById('checkout-status');
+    if(!sb){statusEl.textContent='Could not connect — check your connection and reload the page.';statusEl.className='checkout-status error';return;}
+    if(!pendingEmail){statusEl.textContent='Send yourself a code first.';statusEl.className='checkout-status error';return;}
+    if(!code){statusEl.textContent='Enter the code from your email.';statusEl.className='checkout-status error';return;}
+    var btn=this;
+    btn.disabled=true;btn.textContent='Verifying...';
+    sb.auth.verifyOtp({email:pendingEmail,token:code,type:'email'}).then(function(res){
+      btn.disabled=false;btn.textContent='Verify & Continue';
+      if(res.error){
+        statusEl.textContent='That code didn\'t work: '+res.error.message;
+        statusEl.className='checkout-status error';
+      }
+      // On success, onAuthStateChange below picks it up and switches the view —
+      // nothing else to do here, the whole thing stays on this page/device.
     });
   });
 
   document.getElementById('checkout-signout').addEventListener('click',function(){
     if(!sb)return;
-    saveCartToStorage();
-    sb.auth.signOut().then(function(){window.location.reload();});
+    sb.auth.signOut();
   });
 
   function applyCheckoutSession(session){
@@ -503,13 +483,6 @@
         currentProfileName=(res.data&&res.data.name)?res.data.name:session.user.email;
         document.getElementById('checkout-name').textContent=currentProfileName;
       });
-      if(!restoreCartFromURL()){
-        restoreCartFromStorage();
-      } else {
-        var cleanUrl=new URL(window.location.href);
-        cleanUrl.searchParams.delete('cart');
-        history.replaceState(null,'',cleanUrl.pathname+cleanUrl.search);
-      }
     } else {
       currentUser=null;currentProfileName=null;
       signinView.style.display='block';
@@ -549,7 +522,6 @@
       sessionStorage.setItem('bci_kit_recap',JSON.stringify({
         name:payload.name,items:recapItems,total:'£'+total.toFixed(2)
       }));
-      sessionStorage.removeItem(CART_KEY);
     }catch(e){/* sessionStorage unavailable — confirmation will just show the total */}
 
     var btn=document.getElementById('submit-btn');

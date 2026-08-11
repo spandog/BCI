@@ -113,6 +113,13 @@
   .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
   .submit-error{display:none;background:#fdf0ef;border:1px solid #e8b4af;border-radius:6px;padding:1rem 1.1rem;margin-top:1rem;}
   .submit-error.visible{display:block;}
+  .checkout-note{font-size:0.85rem;color:var(--text-muted);line-height:1.55;margin-bottom:1rem;}
+  .checkout-status{margin-top:0.85rem;text-align:center;font-size:0.85rem;color:var(--text-muted);line-height:1.5;min-height:1.2em;}
+  .checkout-status.success{color:var(--green-mid);}
+  .checkout-status.error{color:#b0532b;}
+  .signed-in-as{font-size:0.85rem;color:var(--text-muted);margin-bottom:1.1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
+  .signed-in-as strong{color:var(--text-dark);}
+  .link-btn{background:none;border:none;padding:0;font-family:inherit;font-size:inherit;color:var(--green-mid);text-decoration:underline;cursor:pointer;}
   .submit-error p{font-size:0.85rem;color:#8a2e26;line-height:1.55;margin-bottom:0.6rem;}
   .submit-error p:last-child{margin-bottom:0;}
   .submit-error a{color:var(--green-dark);font-weight:600;text-decoration:underline;}
@@ -136,6 +143,7 @@
   }
   @media(max-width:400px){.kit-grid{grid-template-columns:1fr;}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -153,6 +161,7 @@
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
     <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-login" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></symbol>
     <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
     <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
@@ -173,6 +182,7 @@
       <a href="kit.html" class="active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
       <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
       <a href="leaderboard.html" class="live"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
+      <a href="login.html" id="account-link"><svg class="icon d-icon" aria-hidden="true"><use href="#i-login"/></svg><span id="account-link-text">Sign In</span></a>
     </div>
   </div>
 </nav>
@@ -319,19 +329,28 @@
     <img id="lightbox-img" src="" alt="">
   </div>
 
-  <div class="form-section" id="form-section">
-    <h3>Your Details</h3>
-    <div class="form-row">
-      <div class="form-group"><label>First Name</label><input type="text" id="fname" placeholder="James"></div>
-      <div class="form-group"><label>Last Name</label><input type="text" id="lname" placeholder="Baber"></div>
+  <div class="form-section" id="checkout-section">
+    <h3>Checkout</h3>
+
+    <div id="checkout-signin">
+      <p class="checkout-note">Sign in to complete your order — one link sent to your email, no password needed, and your cart will still be exactly as you left it when you get back.</p>
+      <div class="form-row">
+        <div class="form-group full"><label>Email Address</label><input type="email" id="checkout-email" placeholder="you@email.com"></div>
+      </div>
+      <button class="submit-btn" id="checkout-signin-btn">Send Me A Login Link</button>
+      <div class="checkout-status" id="checkout-status"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group full"><label>Notes (optional)</label><textarea id="notes" placeholder="Any questions or special requests..."></textarea></div>
-    </div>
-    <button class="submit-btn" id="submit-btn">Submit Order</button>
-    <div class="submit-error" id="submit-error">
-      <p>Something went wrong submitting your order through the form. This can happen if the order form needs re-verifying — it doesn't mean your order details are lost.</p>
-      <p>Please <a href="#" id="mailto-fallback">email your order to the team directly</a> instead, and they'll confirm receipt and send a payment link.</p>
+
+    <div id="checkout-signed-in" style="display:none;">
+      <div class="signed-in-as">Ordering as <strong id="checkout-name"></strong> &mdash; <button type="button" id="checkout-signout" class="link-btn">not you?</button></div>
+      <div class="form-row">
+        <div class="form-group full"><label>Notes (optional)</label><textarea id="notes" placeholder="Any questions or special requests..."></textarea></div>
+      </div>
+      <button class="submit-btn" id="submit-btn">Proceed to Payment</button>
+      <div class="submit-error" id="submit-error">
+        <p>Something went wrong submitting your order through the form. This can happen if the order form needs re-verifying — it doesn't mean your order details are lost.</p>
+        <p>Please <a href="#" id="mailto-fallback">email your order to the team directly</a> instead, and they'll confirm receipt and send a payment link.</p>
+      </div>
     </div>
   </div>
 
@@ -355,6 +374,35 @@
   var selected={baber_polo:false,weff_polo:false,cap:false,gilet:false};
   var sizes={baber_polo:null,weff_polo:null,cap:null,gilet:null};
   var qtys={baber_polo:0,weff_polo:0,cap:0,gilet:0};
+
+  var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+  var sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+  var currentUser=null,currentProfileName=null;
+  var CART_KEY='bci_kit_cart_pending';
+
+  function saveCartToStorage(){
+    try{
+      sessionStorage.setItem(CART_KEY,JSON.stringify({selected:selected,sizes:sizes,qtys:qtys,notes:document.getElementById('notes')?document.getElementById('notes').value:''}));
+    }catch(e){/* sessionStorage unavailable — cart just won't survive the redirect */}
+  }
+  function restoreCartFromStorage(){
+    try{
+      var raw=sessionStorage.getItem(CART_KEY);
+      if(!raw)return;
+      var saved=JSON.parse(raw);
+      Object.keys(saved.qtys||{}).forEach(function(item){
+        if(!(item in qtys))return;
+        if(saved.sizes[item]){
+          sizes[item]=saved.sizes[item];
+          var sizeBtn=document.querySelector('#sizes-'+item+' .size-btn[data-size="'+saved.sizes[item]+'"]');
+          if(sizeBtn)document.querySelectorAll('#sizes-'+item+' .size-btn').forEach(function(b){b.classList.toggle('selected',b===sizeBtn);});
+        }
+        if(saved.qtys[item]>0)setQty(item,saved.qtys[item]);
+      });
+      if(saved.notes&&document.getElementById('notes'))document.getElementById('notes').value=saved.notes;
+    }catch(e){/* corrupted or missing saved cart — start fresh, nothing to restore */}
+  }
 
   document.getElementById('menu-btn').addEventListener('click',function(){
     document.getElementById('menu-btn').classList.toggle('open');
@@ -394,12 +442,64 @@
     if(btn.dataset.dir==='-1')btn.disabled=true;
   });
 
+  document.getElementById('checkout-signin-btn').addEventListener('click',function(){
+    var email=document.getElementById('checkout-email').value.trim();
+    var statusEl=document.getElementById('checkout-status');
+    if(!sb){statusEl.textContent='Could not connect — check your connection and reload the page.';statusEl.className='checkout-status error';return;}
+    if(!email||email.indexOf('@')===-1){statusEl.textContent='Enter a valid email address.';statusEl.className='checkout-status error';return;}
+    var btn=this;
+    btn.disabled=true;btn.textContent='Sending...';
+    statusEl.textContent='';statusEl.className='checkout-status';
+    saveCartToStorage();
+    sb.auth.signInWithOtp({
+      email:email,
+      options:{emailRedirectTo:window.location.origin+window.location.pathname}
+    }).then(function(res){
+      btn.disabled=false;btn.textContent='Send Me A Login Link';
+      if(res.error){
+        statusEl.textContent='Could not send the link: '+res.error.message;
+        statusEl.className='checkout-status error';
+      } else {
+        statusEl.textContent='Check your email — tap the link there, then come straight back to this order.';
+        statusEl.className='checkout-status success';
+      }
+    });
+  });
+
+  document.getElementById('checkout-signout').addEventListener('click',function(){
+    if(!sb)return;
+    saveCartToStorage();
+    sb.auth.signOut().then(function(){window.location.reload();});
+  });
+
+  function applyCheckoutSession(session){
+    var signinView=document.getElementById('checkout-signin');
+    var signedInView=document.getElementById('checkout-signed-in');
+    if(session&&session.user){
+      currentUser=session.user;
+      signinView.style.display='none';
+      signedInView.style.display='block';
+      sb.from('bci_profiles').select('name').eq('id',session.user.id).single().then(function(res){
+        currentProfileName=(res.data&&res.data.name)?res.data.name:session.user.email;
+        document.getElementById('checkout-name').textContent=currentProfileName;
+      });
+      restoreCartFromStorage();
+    } else {
+      currentUser=null;currentProfileName=null;
+      signinView.style.display='block';
+      signedInView.style.display='none';
+    }
+  }
+
+  if(sb){
+    sb.auth.getSession().then(function(res){applyCheckoutSession(res.data&&res.data.session);});
+    sb.auth.onAuthStateChange(function(event,session){applyCheckoutSession(session);});
+  }
+
   document.getElementById('submit-btn').addEventListener('click',function(){
     document.getElementById('submit-error').classList.remove('visible');
-    var fname=document.getElementById('fname').value.trim();
-    var lname=document.getElementById('lname').value.trim();
+    if(!currentUser){alert('Please sign in first.');return;}
     var notes=document.getElementById('notes').value.trim();
-    if(!fname||!lname){alert('Please enter your name.');return;}
     var items=Object.keys(selected).filter(function(k){return selected[k];});
     var missingSizes=items.filter(function(k){return !sizes[k];});
     if(missingSizes.length>0){alert('Please select a size for: '+missingSizes.join(', '));return;}
@@ -407,53 +507,70 @@
     var total=PRIZE_FUND;
     var orderLines=['Prize Fund — £'+PRIZE_FUND.toFixed(2)];
     var recapItems=[];
+    var dbItems=[{item:'Prize Fund',size:'',qty:1,price:PRIZE_FUND}];
     items.forEach(function(k){
       var sub=prices[k]*qtys[k]; total+=sub;
       var name=k.charAt(0).toUpperCase()+k.slice(1).replace('_',' ');
       orderLines.push(name+' ('+sizes[k]+') x'+qtys[k]+' — £'+sub.toFixed(2));
       recapItems.push({name:name,size:sizes[k],qty:qtys[k]});
+      dbItems.push({item:name,size:sizes[k],qty:qtys[k],price:prices[k]});
     });
+
+    var payload={name:currentProfileName||currentUser.email,order:orderLines.join('\n'),total:'£'+total.toFixed(2),notes:notes||'None'};
 
     // Stash a clean recap so it survives the redirect out to Stripe and back.
     try{
       sessionStorage.setItem('bci_kit_recap',JSON.stringify({
-        name:fname+' '+lname,items:recapItems,total:'£'+total.toFixed(2)
+        name:payload.name,items:recapItems,total:'£'+total.toFixed(2)
       }));
+      sessionStorage.removeItem(CART_KEY);
     }catch(e){/* sessionStorage unavailable — confirmation will just show the total */}
 
     var btn=document.getElementById('submit-btn');
-    btn.disabled=true; btn.textContent='Submitting...';
+    btn.disabled=true; btn.textContent='Saving Order...';
 
-    var payload={name:fname+' '+lname,order:orderLines.join('\n'),total:'£'+total.toFixed(2),notes:notes||'None'};
+    // Save the order against this person's account first, so it's on record
+    // even before Stripe's involved, then send them to pay.
+    sb.from('bci_kit_orders').insert({
+      user_id:currentUser.id,
+      items:dbItems,
+      total:total,
+      status:'pending'
+    }).then(function(){
+      btn.textContent='Submitting...';
 
-    // Log the order for your own records — this doesn't need to succeed for payment to work.
-    fetch('https://formspree.io/f/xaqzygea',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify(payload)
-    }).catch(function(){/* order record is best-effort, don't block payment on it */});
+      // Log the order for your own records too — this doesn't need to succeed for payment to work.
+      fetch('https://formspree.io/f/xaqzygea',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify(payload)
+      }).catch(function(){/* order record is best-effort, don't block payment on it */});
 
-    // Create a Stripe Checkout Session for this exact total and send the buyer to pay.
-    fetch(WORKER_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        amount:total,
-        description:'BCI Shop — '+payload.name+' — '+orderLines.join('; '),
-        name:payload.name
-      })
-    }).then(function(res){return res.json();})
-      .then(function(data){
-        if(data.url){
-          window.location.href=data.url;
-        } else {
+      // Create a Stripe Checkout Session for this exact total and send the buyer to pay.
+      fetch(WORKER_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          amount:total,
+          description:'BCI Shop — '+payload.name+' — '+orderLines.join('; '),
+          name:payload.name
+        })
+      }).then(function(res){return res.json();})
+        .then(function(data){
+          if(data.url){
+            window.location.href=data.url;
+          } else {
+            showSubmitError(payload);
+            btn.disabled=false; btn.textContent='Proceed to Payment';
+          }
+        }).catch(function(){
           showSubmitError(payload);
-          btn.disabled=false; btn.textContent='Submit Order';
-        }
-      }).catch(function(){
-        showSubmitError(payload);
-        btn.disabled=false; btn.textContent='Submit Order';
-      });
+          btn.disabled=false; btn.textContent='Proceed to Payment';
+        });
+    }).catch(function(){
+      showSubmitError(payload);
+      btn.disabled=false; btn.textContent='Proceed to Payment';
+    });
   });
 
   function showSubmitError(payload){
@@ -484,7 +601,7 @@
 
   // If we've just been redirected back from a successful Stripe payment, show the confirmation screen.
   if(new URLSearchParams(window.location.search).get('paid')==='1'){
-    document.getElementById('form-section').style.display='none';
+    document.getElementById('checkout-section').style.display='none';
     document.querySelector('.kit-grid').style.display='none';
     document.querySelector('.order-section').style.display='none';
 
@@ -519,6 +636,28 @@
   document.getElementById('lightbox-close').addEventListener('click',closeLightbox);
   document.getElementById('lightbox').addEventListener('click',function(e){if(e.target===e.currentTarget)closeLightbox();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLightbox();});
+})();
+</script>
+<script>
+(function(){
+  var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+  if(!window.supabase)return;
+  var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  function applySession(session){
+    var link=document.getElementById('account-link');
+    var text=document.getElementById('account-link-text');
+    if(!link||!text)return;
+    if(session&&session.user){
+      sb.from('bci_profiles').select('name').eq('id',session.user.id).single().then(function(res){
+        text.textContent=(res.data&&res.data.name)?res.data.name:'My Account';
+      });
+    } else {
+      text.textContent='Sign In';
+    }
+  }
+  sb.auth.getSession().then(function(res){applySession(res.data&&res.data.session);});
+  sb.auth.onAuthStateChange(function(event,session){applySession(session);});
 })();
 </script>
 <script src="hero-gallery.js"></script>

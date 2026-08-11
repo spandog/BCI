@@ -390,18 +390,38 @@
     try{
       var raw=sessionStorage.getItem(CART_KEY);
       if(!raw)return;
-      var saved=JSON.parse(raw);
-      Object.keys(saved.qtys||{}).forEach(function(item){
-        if(!(item in qtys))return;
-        if(saved.sizes[item]){
-          sizes[item]=saved.sizes[item];
-          var sizeBtn=document.querySelector('#sizes-'+item+' .size-btn[data-size="'+saved.sizes[item]+'"]');
-          if(sizeBtn)document.querySelectorAll('#sizes-'+item+' .size-btn').forEach(function(b){b.classList.toggle('selected',b===sizeBtn);});
-        }
-        if(saved.qtys[item]>0)setQty(item,saved.qtys[item]);
-      });
-      if(saved.notes&&document.getElementById('notes'))document.getElementById('notes').value=saved.notes;
+      applySavedCart(JSON.parse(raw));
     }catch(e){/* corrupted or missing saved cart — start fresh, nothing to restore */}
+  }
+  function applySavedCart(saved){
+    Object.keys(saved.qtys||{}).forEach(function(item){
+      if(!(item in qtys))return;
+      if(saved.sizes[item]){
+        sizes[item]=saved.sizes[item];
+        var sizeBtn=document.querySelector('#sizes-'+item+' .size-btn[data-size="'+saved.sizes[item]+'"]');
+        if(sizeBtn)document.querySelectorAll('#sizes-'+item+' .size-btn').forEach(function(b){b.classList.toggle('selected',b===sizeBtn);});
+      }
+      if(saved.qtys[item]>0)setQty(item,saved.qtys[item]);
+    });
+    if(saved.notes&&document.getElementById('notes'))document.getElementById('notes').value=saved.notes;
+  }
+  // The cart also travels inside the magic-link URL itself, not just sessionStorage,
+  // since the link is often opened on a different device/browser than the one that
+  // requested it (e.g. requested on a laptop, opened from a phone's mail app) — a
+  // device-local store alone can't survive that hop, but the URL does regardless of
+  // which device opens it.
+  function encodeCartForURL(){
+    try{
+      return encodeURIComponent(btoa(JSON.stringify({selected:selected,sizes:sizes,qtys:qtys,notes:document.getElementById('notes')?document.getElementById('notes').value:''})));
+    }catch(e){return '';}
+  }
+  function restoreCartFromURL(){
+    try{
+      var raw=new URLSearchParams(window.location.search).get('cart');
+      if(!raw)return false;
+      applySavedCart(JSON.parse(atob(decodeURIComponent(raw))));
+      return true;
+    }catch(e){return false;}
   }
 
   document.getElementById('menu-btn').addEventListener('click',function(){
@@ -453,7 +473,7 @@
     saveCartToStorage();
     sb.auth.signInWithOtp({
       email:email,
-      options:{emailRedirectTo:window.location.origin+window.location.pathname}
+      options:{emailRedirectTo:window.location.origin+window.location.pathname+'?cart='+encodeCartForURL()}
     }).then(function(res){
       btn.disabled=false;btn.textContent='Send Me A Login Link';
       if(res.error){
@@ -483,7 +503,13 @@
         currentProfileName=(res.data&&res.data.name)?res.data.name:session.user.email;
         document.getElementById('checkout-name').textContent=currentProfileName;
       });
-      restoreCartFromStorage();
+      if(!restoreCartFromURL()){
+        restoreCartFromStorage();
+      } else {
+        var cleanUrl=new URL(window.location.href);
+        cleanUrl.searchParams.delete('cart');
+        history.replaceState(null,'',cleanUrl.pathname+cleanUrl.search);
+      }
     } else {
       currentUser=null;currentProfileName=null;
       signinView.style.display='block';

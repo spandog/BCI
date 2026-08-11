@@ -113,6 +113,18 @@
   .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
   .submit-error{display:none;background:#fdf0ef;border:1px solid #e8b4af;border-radius:6px;padding:1rem 1.1rem;margin-top:1rem;}
   .submit-error.visible{display:block;}
+  .pay-confirm-overlay{display:none;position:fixed;inset:0;background:rgba(32,48,59,0.7);z-index:1000;align-items:center;justify-content:center;padding:1.25rem;}
+  .pay-confirm-overlay.open{display:flex;}
+  .pay-confirm-modal{background:white;border-radius:10px;max-width:420px;width:100%;padding:1.5rem;box-shadow:0 20px 50px rgba(0,0,0,0.3);max-height:85vh;overflow-y:auto;}
+  .pay-confirm-modal h3{font-family:var(--serif-display);font-size:1.05rem;letter-spacing:1px;color:var(--green-dark);text-transform:uppercase;margin-bottom:0.3rem;}
+  .pay-confirm-sub{font-size:0.8rem;color:var(--text-muted);margin-bottom:1.1rem;}
+  .pay-confirm-total{display:flex;justify-content:space-between;align-items:center;padding-top:0.9rem;margin-top:0.4rem;border-top:2px solid var(--border);}
+  .pay-confirm-total span:first-child{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;}
+  .pay-confirm-total span:last-child{font-family:var(--serif-display);font-size:1.4rem;color:var(--gold);font-weight:700;}
+  .pay-confirm-actions{display:flex;gap:0.6rem;margin-top:1.25rem;}
+  .pay-confirm-back-btn{flex:0 0 auto;background:none;border:1px solid var(--border);border-radius:6px;padding:0.85rem 1.1rem;font-family:var(--serif-display);font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);cursor:pointer;}
+  .pay-confirm-back-btn:hover{border-color:var(--text-muted);}
+  .pay-confirm-actions .submit-btn{flex:1;margin:0;}
   .checkout-note{font-size:0.85rem;color:var(--text-muted);line-height:1.55;margin-bottom:1rem;}
   .checkout-status{margin-top:0.85rem;text-align:center;font-size:0.85rem;color:var(--text-muted);line-height:1.5;min-height:1.2em;}
   .checkout-status.success{color:var(--green-mid);}
@@ -328,6 +340,22 @@
     <img id="lightbox-img" src="" alt="">
   </div>
 
+  <div class="pay-confirm-overlay" id="pay-confirm-overlay">
+    <div class="pay-confirm-modal">
+      <h3>Confirm Your Order</h3>
+      <div class="pay-confirm-sub">Check this over before it goes through to payment.</div>
+      <div id="pay-confirm-items"></div>
+      <div class="pay-confirm-total">
+        <span>Total</span>
+        <span id="pay-confirm-total-amount"></span>
+      </div>
+      <div class="pay-confirm-actions">
+        <button type="button" class="pay-confirm-back-btn" id="pay-confirm-back">Go Back</button>
+        <button type="button" class="submit-btn" id="pay-confirm-go">Confirm &amp; Pay</button>
+      </div>
+    </div>
+  </div>
+
   <div class="form-section" id="checkout-section">
     <h3>Checkout</h3>
 
@@ -494,6 +522,8 @@
     sb.auth.onAuthStateChange(function(event,session){applyCheckoutSession(session);});
   }
 
+  var pendingOrder=null;
+
   document.getElementById('submit-btn').addEventListener('click',function(){
     document.getElementById('submit-error').classList.remove('visible');
     if(!currentUser){alert('Please sign in first.');return;}
@@ -501,20 +531,40 @@
     var items=Object.keys(selected).filter(function(k){return selected[k];});
     var missingSizes=items.filter(function(k){return !sizes[k];});
     if(missingSizes.length>0){alert('Please select a size for: '+missingSizes.join(', '));return;}
+    if(items.length===0){alert('Add at least one item before checking out.');return;}
 
     var total=PRIZE_FUND;
     var orderLines=['Prize Fund — £'+PRIZE_FUND.toFixed(2)];
     var recapItems=[];
     var dbItems=[{item:'Prize Fund',size:'',qty:1,price:PRIZE_FUND}];
+    var itemsHtml='<div class="order-item"><span class="item-name">Prize Fund</span><span class="item-price">£'+PRIZE_FUND.toFixed(2)+'</span></div>';
     items.forEach(function(k){
       var sub=prices[k]*qtys[k]; total+=sub;
       var name=k.charAt(0).toUpperCase()+k.slice(1).replace('_',' ');
       orderLines.push(name+' ('+sizes[k]+') x'+qtys[k]+' — £'+sub.toFixed(2));
       recapItems.push({name:name,size:sizes[k],qty:qtys[k]});
       dbItems.push({item:name,size:sizes[k],qty:qtys[k],price:prices[k]});
+      itemsHtml+='<div class="order-item"><span class="item-name">'+name+' — '+sizes[k]+' × '+qtys[k]+'</span><span class="item-price">£'+sub.toFixed(2)+'</span></div>';
     });
 
     var payload={name:currentProfileName||currentUser.email,order:orderLines.join('\n'),total:'£'+total.toFixed(2),notes:notes||'None'};
+    pendingOrder={total:total,orderLines:orderLines,recapItems:recapItems,dbItems:dbItems,payload:payload};
+
+    // Show a final confirm-and-review step before anything is saved or paid —
+    // nobody should land on Stripe without seeing exactly what they're buying first.
+    document.getElementById('pay-confirm-items').innerHTML=itemsHtml;
+    document.getElementById('pay-confirm-total-amount').textContent='£'+total.toFixed(2);
+    document.getElementById('pay-confirm-overlay').classList.add('open');
+  });
+
+  document.getElementById('pay-confirm-back').addEventListener('click',function(){
+    document.getElementById('pay-confirm-overlay').classList.remove('open');
+  });
+
+  document.getElementById('pay-confirm-go').addEventListener('click',function(){
+    if(!pendingOrder)return;
+    var total=pendingOrder.total,orderLines=pendingOrder.orderLines,recapItems=pendingOrder.recapItems,
+        dbItems=pendingOrder.dbItems,payload=pendingOrder.payload;
 
     // Stash a clean recap so it survives the redirect out to Stripe and back.
     try{
@@ -523,8 +573,8 @@
       }));
     }catch(e){/* sessionStorage unavailable — confirmation will just show the total */}
 
-    var btn=document.getElementById('submit-btn');
-    btn.disabled=true; btn.textContent='Saving Order...';
+    var goBtn=this;
+    goBtn.disabled=true; goBtn.textContent='Saving Order...';
 
     // Save the order against this person's account first, so it's on record
     // even before Stripe's involved, then send them to pay.
@@ -534,7 +584,7 @@
       total:total,
       status:'pending'
     }).then(function(){
-      btn.textContent='Submitting...';
+      goBtn.textContent='Submitting...';
 
       // Log the order for your own records too — this doesn't need to succeed for payment to work.
       fetch('https://formspree.io/f/xaqzygea',{
@@ -557,12 +607,14 @@
           if(data.url){
             window.location.href=data.url;
           } else {
+            document.getElementById('pay-confirm-overlay').classList.remove('open');
             showSubmitError(payload);
-            btn.disabled=false; btn.textContent='Proceed to Payment';
+            goBtn.disabled=false; goBtn.textContent='Confirm & Pay';
           }
         }).catch(function(){
+          document.getElementById('pay-confirm-overlay').classList.remove('open');
           showSubmitError(payload);
-          btn.disabled=false; btn.textContent='Proceed to Payment';
+          goBtn.disabled=false; goBtn.textContent='Confirm & Pay';
         });
     }).catch(function(){
       showSubmitError(payload);

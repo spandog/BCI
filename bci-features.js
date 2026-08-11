@@ -449,7 +449,6 @@
         panel.innerHTML=
           '<div class="bci-ap-signedin">Signed in as <strong>'+esc(currentName||currentUser.email)+'</strong></div>'+
           '<div class="bci-ap-links">'+
-            '<a href="leaderboard.html">Leaderboard</a>'+
             '<a href="kit.html">BCI Shop</a>'+
             '<a href="2027.html">Trip &amp; Balance</a>'+
           '</div>'+

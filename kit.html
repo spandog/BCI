@@ -566,13 +566,6 @@
     var total=pendingOrder.total,orderLines=pendingOrder.orderLines,recapItems=pendingOrder.recapItems,
         dbItems=pendingOrder.dbItems,payload=pendingOrder.payload;
 
-    // Stash a clean recap so it survives the redirect out to Stripe and back.
-    try{
-      sessionStorage.setItem('bci_kit_recap',JSON.stringify({
-        name:payload.name,items:recapItems,total:'£'+total.toFixed(2)
-      }));
-    }catch(e){/* sessionStorage unavailable — confirmation will just show the total */}
-
     var goBtn=this;
     goBtn.disabled=true; goBtn.textContent='Saving Order...';
 
@@ -583,8 +576,18 @@
       items:dbItems,
       total:total,
       status:'pending'
-    }).then(function(){
+    }).select().single().then(function(insertRes){
       goBtn.textContent='Submitting...';
+
+      // Stash a clean recap (including the order id) so it survives the
+      // redirect out to Stripe and back — the id is what lets the
+      // confirmation page mark this exact order as paid on return.
+      try{
+        sessionStorage.setItem('bci_kit_recap',JSON.stringify({
+          orderId:insertRes.data&&insertRes.data.id,
+          name:payload.name,items:recapItems,total:'£'+total.toFixed(2)
+        }));
+      }catch(e){/* sessionStorage unavailable — confirmation will just show the total, and won't be able to mark itself paid */}
 
       // Log the order for your own records too — this doesn't need to succeed for payment to work.
       fetch('https://formspree.io/f/xaqzygea',{
@@ -667,6 +670,11 @@
       });
       document.getElementById('conf-recap').innerHTML=recapHtml;
       document.getElementById('conf-total').textContent=recap.total;
+
+      if(recap.orderId&&sb){
+        sb.from('bci_kit_orders').update({status:'paid'}).eq('id',recap.orderId)
+          .catch(function(){/* best-effort — order still exists as 'pending' if this fails, not lost */});
+      }
     }
 
     document.getElementById('confirmation').classList.add('visible');

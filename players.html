@@ -64,6 +64,7 @@
   .card-back .player-body{background:var(--green-dark);}
   .card-back .player-team.baber{color:var(--gold-light);}
   .card-back .player-team.weff{color:#8fb4e0;}
+  .card-back .player-team.tbc{color:rgba(255,255,255,0.45);}
   .card-back .player-name{color:white;}
   .flip-hint{font-family:var(--serif-display);font-size:0.5rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);text-align:center;margin-top:auto;padding-top:0.6rem;}
   .card-back .flip-hint{color:rgba(255,255,255,0.4);}
@@ -186,6 +187,16 @@
     {name:'Jack Taggart',team:'weff',hcap:'6',country:'england',trips:[{location:'Marbella',year:2026}],wins:1,losses:1,ties:0,bio:'',photo:'images/players/jack-taggart-face.jpg'},
     {name:'Alex Tinawi',team:'weff',hcap:'7.2',country:'PL',trips:[{location:'Marbella',year:2026}],wins:0,losses:2,ties:0,bio:'',photo:'images/players/alex-tinawi-face.jpg'},
     {name:'Matt Wreford',team:'weff',hcap:'16',country:'england',trips:[{location:'Marbella',year:2026,role:'Captain'}],wins:1,losses:1,ties:0,bio:'',photo:'images/players/matt-wreford-face.jpg'},
+    {name:'Jack Brown',team:'tbc',hcap:'TBC',country:'',trips:[{location:'Algarve',year:2027}],wins:0,losses:0,ties:0,bio:'',photo:''},
+    {name:'Oscar Hinojosa',team:'tbc',hcap:'TBC',country:'',trips:[{location:'Algarve',year:2027}],wins:0,losses:0,ties:0,bio:'',photo:''},
+    {name:'Will Reed',team:'tbc',hcap:'TBC',country:'',trips:[{location:'Algarve',year:2027}],wins:0,losses:0,ties:0,bio:'',photo:''},
+    {name:'Aaron Sonatun',team:'tbc',hcap:'TBC',country:'',trips:[{location:'Algarve',year:2027}],wins:0,losses:0,ties:0,bio:'',photo:''},
+    {name:'Angus Killin',team:'tbc',hcap:'TBC',country:'',trips:[{location:'Algarve',year:2027}],wins:0,losses:0,ties:0,bio:'',photo:''},
+    {name:'Luke Clark',team:'tbc',hcap:'TBC',country:'',trips:[{location:'Algarve',year:2027}],wins:0,losses:0,ties:0,bio:'',photo:''},
+    {name:'Phil Smith',team:'tbc',hcap:'TBC',country:'',trips:[{location:'Algarve',year:2027}],wins:0,losses:0,ties:0,bio:'',photo:''},
+    {name:'Joe Hollinworth',team:'tbc',hcap:'TBC',country:'',trips:[{location:'Algarve',year:2027}],wins:0,losses:0,ties:0,bio:'',photo:''},
+    {name:'Dan Burr',team:'tbc',hcap:'TBC',country:'',trips:[{location:'Algarve',year:2027}],wins:0,losses:0,ties:0,bio:'',photo:''},
+    {name:'Emory Garrett',team:'tbc',hcap:'TBC',country:'',trips:[{location:'Algarve',year:2027}],wins:0,losses:0,ties:0,bio:'',photo:''},
   ];
 
   function flagEmoji(code){
@@ -258,10 +269,22 @@
         list.sort(function(a,b){return b.name.localeCompare(a.name);});
         break;
       case 'hcap-asc':
-        list.sort(function(a,b){return parseFloat(a.hcap)-parseFloat(b.hcap);});
+        list.sort(function(a,b){
+          var av=parseFloat(a.hcap),bv=parseFloat(b.hcap);
+          if(isNaN(av)&&isNaN(bv))return 0;
+          if(isNaN(av))return 1;
+          if(isNaN(bv))return -1;
+          return av-bv;
+        });
         break;
       case 'hcap-desc':
-        list.sort(function(a,b){return parseFloat(b.hcap)-parseFloat(a.hcap);});
+        list.sort(function(a,b){
+          var av=parseFloat(a.hcap),bv=parseFloat(b.hcap);
+          if(isNaN(av)&&isNaN(bv))return 0;
+          if(isNaN(av))return 1;
+          if(isNaN(bv))return -1;
+          return bv-av;
+        });
         break;
       case 'name-asc':
       default:
@@ -296,7 +319,7 @@
           '<div class="card-face card-back">'+
             actionPhotoHTML+
             '<div class="player-body">'+
-              '<div class="player-team '+p.team+'">'+(p.team==='baber'?'Team Baber':'Team Weff')+'</div>'+
+              '<div class="player-team '+p.team+'">'+(p.team==='baber'?'Team Baber':p.team==='weff'?'Team Weff':'Team TBC')+'</div>'+
               '<div class="player-name"><span class="pname-text">'+p.name+'</span><span class="flag">'+flagEmoji(p.country)+'</span></div>'+
               (p.bio?'<div class="back-bio">'+p.bio+'</div>':'')+
               '<div class="back-trips-label">Trips</div>'+

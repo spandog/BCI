@@ -15,8 +15,8 @@
     flag.id='bci-flag-cursor';
     flag.setAttribute('aria-hidden','true');
     flag.innerHTML='<svg viewBox="0 0 24 36" width="22" height="33">'+
-      '<ellipse cx="12" cy="32" rx="7" ry="2.6" fill="#20303b" opacity="0.85"/>'+
-      '<line x1="12" y1="30" x2="12" y2="4" stroke="#20303b" stroke-width="1.6" stroke-linecap="round"/>'+
+      '<ellipse cx="12" cy="32" rx="7" ry="2.6" fill="#16291d" opacity="0.85"/>'+
+      '<line x1="12" y1="30" x2="12" y2="4" stroke="#16291d" stroke-width="1.6" stroke-linecap="round"/>'+
       '<path d="M12 4 L12 15 L22 9 Z" fill="#b0532b"/></svg>';
     document.body.appendChild(flag);
 
@@ -24,12 +24,12 @@
     ball.id='bci-ball-wrap';
     ball.setAttribute('aria-hidden','true');
     ball.innerHTML='<svg viewBox="0 0 20 20" width="16" height="16">'+
-      '<circle cx="10" cy="10" r="9" fill="#f7f4ea" stroke="rgba(32,48,59,0.2)" stroke-width="0.6"/>'+
-      '<circle cx="6" cy="6" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="10" cy="5" r="1" fill="rgba(32,48,59,0.15)"/>'+
-      '<circle cx="14" cy="6" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="5" cy="10" r="1" fill="rgba(32,48,59,0.15)"/>'+
-      '<circle cx="10" cy="10" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="15" cy="10" r="1" fill="rgba(32,48,59,0.15)"/>'+
-      '<circle cx="6" cy="14" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="10" cy="15" r="1" fill="rgba(32,48,59,0.15)"/>'+
-      '<circle cx="14" cy="14" r="1" fill="rgba(32,48,59,0.15)"/></svg>';
+      '<circle cx="10" cy="10" r="9" fill="#fbfaf7" stroke="rgba(22,41,29,0.2)" stroke-width="0.6"/>'+
+      '<circle cx="6" cy="6" r="1" fill="rgba(22,41,29,0.15)"/><circle cx="10" cy="5" r="1" fill="rgba(22,41,29,0.15)"/>'+
+      '<circle cx="14" cy="6" r="1" fill="rgba(22,41,29,0.15)"/><circle cx="5" cy="10" r="1" fill="rgba(22,41,29,0.15)"/>'+
+      '<circle cx="10" cy="10" r="1" fill="rgba(22,41,29,0.15)"/><circle cx="15" cy="10" r="1" fill="rgba(22,41,29,0.15)"/>'+
+      '<circle cx="6" cy="14" r="1" fill="rgba(22,41,29,0.15)"/><circle cx="10" cy="15" r="1" fill="rgba(22,41,29,0.15)"/>'+
+      '<circle cx="14" cy="14" r="1" fill="rgba(22,41,29,0.15)"/></svg>';
     document.body.appendChild(ball);
 
     var mouseX=-100,mouseY=-100,ballX=-100,ballY=-100,active=false,lastTrail=0;
@@ -82,12 +82,12 @@
     wrap.id='bci-ball-wrap';
     wrap.setAttribute('aria-hidden','true');
     wrap.innerHTML='<svg viewBox="0 0 20 20" width="18" height="18">'+
-      '<circle cx="10" cy="10" r="9" fill="#f7f4ea" stroke="rgba(32,48,59,0.2)" stroke-width="0.6"/>'+
-      '<circle cx="6" cy="6" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="10" cy="5" r="1" fill="rgba(32,48,59,0.15)"/>'+
-      '<circle cx="14" cy="6" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="5" cy="10" r="1" fill="rgba(32,48,59,0.15)"/>'+
-      '<circle cx="10" cy="10" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="15" cy="10" r="1" fill="rgba(32,48,59,0.15)"/>'+
-      '<circle cx="6" cy="14" r="1" fill="rgba(32,48,59,0.15)"/><circle cx="10" cy="15" r="1" fill="rgba(32,48,59,0.15)"/>'+
-      '<circle cx="14" cy="14" r="1" fill="rgba(32,48,59,0.15)"/></svg>';
+      '<circle cx="10" cy="10" r="9" fill="#fbfaf7" stroke="rgba(22,41,29,0.2)" stroke-width="0.6"/>'+
+      '<circle cx="6" cy="6" r="1" fill="rgba(22,41,29,0.15)"/><circle cx="10" cy="5" r="1" fill="rgba(22,41,29,0.15)"/>'+
+      '<circle cx="14" cy="6" r="1" fill="rgba(22,41,29,0.15)"/><circle cx="5" cy="10" r="1" fill="rgba(22,41,29,0.15)"/>'+
+      '<circle cx="10" cy="10" r="1" fill="rgba(22,41,29,0.15)"/><circle cx="15" cy="10" r="1" fill="rgba(22,41,29,0.15)"/>'+
+      '<circle cx="6" cy="14" r="1" fill="rgba(22,41,29,0.15)"/><circle cx="10" cy="15" r="1" fill="rgba(22,41,29,0.15)"/>'+
+      '<circle cx="14" cy="14" r="1" fill="rgba(22,41,29,0.15)"/></svg>';
     document.body.appendChild(wrap);
 
     var targetX=0,targetY=0,ballX=0,ballY=0,active=false,idleTimer=null,lastTrail=0;

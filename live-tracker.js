@@ -149,7 +149,7 @@
           pushEvent('<span class="gold">D'+esc(row.day)+' M'+esc(row.match_no)+'</span>&nbsp; the '+label+' is halved');
           pushToast('<span class="gold">'+matchLabel+'</span><br>the '+label+' is halved');
         } else {
-          var winner=ch==='b'?'TEAM BABER':'TEAM WEFF';
+          var winner=ch==='b'?'BLUE TEAM':'GREEN TEAM';
           pushEvent('<span class="gold">D'+esc(row.day)+' M'+esc(row.match_no)+'</span>&nbsp; '+winner+' win the '+label);
           pushToast('<span class="gold">'+winner+'</span> win the '+label+'<br>'+matchLabel);
         }
@@ -159,15 +159,15 @@
     if(row.status==='final'&&(!prevRow||prevRow.status!=='final')){
       var line=row.leader==='tie'
         ? 'D'+esc(row.day)+' M'+esc(row.match_no)+' IS HALVED'
-        : (row.leader==='baber'?'TEAM BABER':'TEAM WEFF')+' WIN D'+esc(row.day)+' M'+esc(row.match_no)+' '+esc(row.score).toUpperCase();
+        : (row.leader==='baber'?'BLUE TEAM':'GREEN TEAM')+' WIN D'+esc(row.day)+' M'+esc(row.match_no)+' '+esc(row.score).toUpperCase();
       pushEvent('<span class="gold">RESULT</span>&nbsp; '+line);
       var finalMatchLabel='Day '+esc(row.day)+', Match '+esc(row.match_no);
       var toastLine=row.leader==='tie'
         ? finalMatchLabel+' is halved'
-        : '<span class="gold">'+(row.leader==='baber'?'TEAM BABER':'TEAM WEFF')+'</span> win '+finalMatchLabel+' '+esc(row.score).toUpperCase();
+        : '<span class="gold">'+(row.leader==='baber'?'BLUE TEAM':'GREEN TEAM')+'</span> win '+finalMatchLabel+' '+esc(row.score).toUpperCase();
       pushToast(toastLine);
       window.dispatchEvent(new CustomEvent('bci:match-final',{detail:{
-        label:finalMatchLabel+(row.leader==='tie'?' halved':' — '+(row.leader==='baber'?'Baber':'Weff')+' win '+esc(row.score).toUpperCase())
+        label:finalMatchLabel+(row.leader==='tie'?' halved':' — '+(row.leader==='baber'?'Blue':'Green')+' win '+esc(row.score).toUpperCase())
       }}));
     }
   }
@@ -232,7 +232,7 @@
     eventLog.forEach(function(ev){items.push(ev);});
 
     if(finals.length&&finals.length===totalMatches&&rows.length===totalMatches){
-      var line=b>w?'TEAM BABER WIN THE BCI!':(w>b?'TEAM WEFF WIN THE BCI!':'THE BCI IS HALVED!');
+      var line=b>w?'BLUE TEAM WIN THE BCI!':(w>b?'GREEN TEAM WIN THE BCI!':'THE BCI IS HALVED!');
       items.unshift('<span class="gold">\uD83C\uDFC6 '+line+'</span>');
     }
     return items;
@@ -344,8 +344,8 @@
           else if(r.leader==='weff')w+=1;
           else{b+=0.5;w+=0.5;}
         });
-        var line=b>w?'TEAM BABER WINS THE BCI INVITATIONAL'
-          :(w>b?'TEAM WEFF WINS THE BCI INVITATIONAL':'THE BCI INVITATIONAL IS HALVED');
+        var line=b>w?'BLUE TEAM WINS THE BCI INVITATIONAL'
+          :(w>b?'GREEN TEAM WINS THE BCI INVITATIONAL':'THE BCI INVITATIONAL IS HALVED');
         showBar();
         document.getElementById('bt-status').textContent='Final';
         renderTicker(['<span class="gold">\uD83C\uDFC6 '+line+'</span>']);

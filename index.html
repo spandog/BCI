@@ -226,7 +226,7 @@
         else if(m.leader==='weff')w+=1;
         else{b+=0.5;w+=0.5;}
       });
-      const scoreText='Baber '+fmtPts(b)+' \u2013 '+fmtPts(w)+' Weff';
+      const scoreText='Blue '+fmtPts(b)+' \u2013 '+fmtPts(w)+' Green';
       const status=document.getElementById('ls-status');
       const detail=document.getElementById('ls-detail');
 
@@ -246,7 +246,7 @@
         status.textContent='Final';
         status.classList.remove('pulsing');
         document.getElementById('ls-score').textContent=scoreText;
-        detail.textContent=b>w?'Team Baber win the 2027 BCI':(w>b?'Team Weff win the 2027 BCI':'The 2027 BCI is halved');
+        detail.textContent=b>w?'Blue Team win the 2027 BCI':(w>b?'Green Team win the 2027 BCI':'The 2027 BCI is halved');
         liveLines=[];
         strip.classList.add('visible');
       } else if(finals.length){

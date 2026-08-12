@@ -26,8 +26,8 @@
     --cream:#fbfaf7;--cream-dark:#f0ede4;--text-dark:#16291d;--text-muted:#5c6259;--border:#dcd6c8;
     --serif-display:'Lora',Georgia,serif;
     --serif-body:'Public Sans',Arial,sans-serif;
-    --baber-bg:#e3eef0;--baber-border:#9dbfc7;--baber-text:#2c5a63;
-    --weff-bg:#f6e8dc;--weff-border:#dcb99a;--weff-text:#8a4224;
+    --baber-bg:#dce8f3;--baber-border:#8ab0d4;--baber-text:#1e5a8c;
+    --weff-bg:#e0f0e5;--weff-border:#8fc7a3;--weff-text:#2f7d4f;
     --halve-bg:#ece0c4;--halve-text:#7a5a2f;
   }
   .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
@@ -99,8 +99,8 @@
   .live-tile.leads-weff .lt-score{color:var(--weff-text);}
   .live-tile .lt-thru{font-family:var(--serif-body);font-size:0.6rem;color:var(--text-muted);margin-top:1px;}
   .score-team{padding:0.85rem 1rem;text-align:center;}
-  .score-team.baber{background:rgba(30,77,46,0.5);}
-  .score-team.weff{background:rgba(26,46,74,0.35);}
+  .score-team.baber{background:rgba(30,90,140,0.5);}
+  .score-team.weff{background:rgba(47,125,79,0.35);}
   .score-team .t-label{font-family:var(--serif-display);font-size:0.56rem;letter-spacing:2px;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:2px;}
   .score-team .t-name{font-family:var(--serif-display);font-size:clamp(0.85rem,3.4vw,1.15rem);font-weight:700;color:white;letter-spacing:1.5px;margin-bottom:2px;}
   .score-team .t-score{font-family:var(--serif-display);font-size:clamp(1.8rem,8vw,2.6rem);font-weight:700;color:var(--gold);line-height:1;}
@@ -275,14 +275,14 @@
   <div id="board-view">
   <div class="score-banner">
     <div class="score-team baber" id="banner-baber">
-      <div class="t-label">Captain: James Baber</div>
-      <div class="t-name">TEAM BABER</div>
+      <div class="t-label">Captain: TBC</div>
+      <div class="t-name">BLUE TEAM</div>
       <div class="t-score" id="score-baber">0</div>
     </div>
     <div class="score-divider"><span class="vs">vs</span></div>
     <div class="score-team weff" id="banner-weff">
-      <div class="t-label">Captain: Matt Wreford</div>
-      <div class="t-name">TEAM WEFF</div>
+      <div class="t-label">Captain: TBC</div>
+      <div class="t-name">GREEN TEAM</div>
       <div class="t-score" id="score-weff">0</div>
     </div>
   </div>
@@ -291,12 +291,12 @@
     <div class="rc-threshold">
       <div class="rc-side baber">
         <div class="rc-pennant baber"></div>
-        <div class="rc-side-text"><span class="rc-num">9</span><br><span class="rc-sub">Baber to retain</span></div>
+        <div class="rc-side-text"><span class="rc-num">9</span><br><span class="rc-sub">Blue to retain</span></div>
       </div>
       <div class="rc-mid">Points</div>
       <div class="rc-side weff right">
         <div class="rc-pennant weff"></div>
-        <div class="rc-side-text" style="text-align:right;"><span class="rc-num">9&frac12;</span><br><span class="rc-sub">Weff to win</span></div>
+        <div class="rc-side-text" style="text-align:right;"><span class="rc-num">9&frac12;</span><br><span class="rc-sub">Green to win</span></div>
       </div>
     </div>
     <div class="rc-bar" id="rc-bar-fills"></div>
@@ -311,9 +311,9 @@
   </div>
 
   <div class="hole-legend">
-    <span><span class="legend-sq b"></span>Baber</span>
+    <span><span class="legend-sq b"></span>Blue</span>
     <span><span class="legend-sq h"></span>Halved</span>
-    <span><span class="legend-sq w"></span>Weff</span>
+    <span><span class="legend-sq w"></span>Green</span>
   </div>
 
   <div class="match-list" id="match-list">
@@ -529,7 +529,7 @@
       var c=calc(m);
       var leadClass=c.leader==='baber'?'leads-baber':(c.leader==='weff'?'leads-weff':'');
       var scoreText=c.leader==='tie'?'AS':esc(c.score);
-      var teamLabel=c.leader==='baber'?'Baber':(c.leader==='weff'?'Weff':'Tied');
+      var teamLabel=c.leader==='baber'?'Blue':(c.leader==='weff'?'Green':'Tied');
       return '<div class="live-tile '+leadClass+'" data-id="'+esc(m.id)+'">'
         +'<div class="lt-match"><span class="lt-dot"></span>Match '+esc(m.match_no)+'</div>'
         +'<div class="lt-team">'+teamLabel+'</div>'
@@ -700,7 +700,7 @@
     var cx=x+w/2;
     ctx.textAlign='center';
     ctx.fillStyle=muted;ctx.font="600 11px Fraunces, Georgia, serif";
-    var teamLabel=align==='left'?'TEAM BABER':'TEAM WEFF';
+    var teamLabel=align==='left'?'BLUE TEAM':'GREEN TEAM';
     ctx.fillText(teamLabel,cx,y+22);
 
     var step=42;
@@ -796,8 +796,8 @@
     document.getElementById('rc-bar-fills').innerHTML=html;
 
     var footer=played+' / '+TOTAL_POINTS+' points played';
-    if(weffWon)footer+=' &middot; Weff win the BCI';
-    else if(baberRetained)footer+=' &middot; Baber retain the BCI';
+    if(weffWon)footer+=' &middot; Green win the BCI';
+    else if(baberRetained)footer+=' &middot; Blue retain the BCI';
     document.getElementById('rc-footer').innerHTML=footer;
   }
 
@@ -888,8 +888,8 @@
       return '<div class="entry-card team-edit" data-id="'+esc(m.id)+'">'
         +'<h4>Match '+esc(m.match_no)+' &middot; '+esc(m.format)+'</h4>'
         +'<div class="entry-row">'
-          +'<div class="entry-group"><label>Team Baber Players</label><input type="text" data-f="baber" value="'+esc(m.baber_players)+'"></div>'
-          +'<div class="entry-group"><label>Team Weff Players</label><input type="text" data-f="weff" value="'+esc(m.weff_players)+'"></div>'
+          +'<div class="entry-group"><label>Blue Team Players</label><input type="text" data-f="baber" value="'+esc(m.baber_players)+'"></div>'
+          +'<div class="entry-group"><label>Green Team Players</label><input type="text" data-f="weff" value="'+esc(m.weff_players)+'"></div>'
           +'<div class="entry-group full"><label>Tee Time (e.g. 08:40)</label><input type="text" data-f="tee" value="'+esc(m.tee_time||'')+'"></div>'
         +'</div>'
         +'<button class="mini-btn danger" data-act="delete">Delete Match</button>'
@@ -1101,9 +1101,9 @@
     var done=c.status==='final';
     var controls=(done?'':'<div class="next-hole">Hole '+(c.played+1)+' result</div>')
         +'<div class="hole-btns">'
-          +'<button class="hb baber" data-act="b"'+(done?' disabled':'')+'>Baber<br>win</button>'
+          +'<button class="hb baber" data-act="b"'+(done?' disabled':'')+'>Blue<br>win</button>'
           +'<button class="hb halve" data-act="h"'+(done?' disabled':'')+'>Halved</button>'
-          +'<button class="hb weff" data-act="w"'+(done?' disabled':'')+'>Weff<br>win</button>'
+          +'<button class="hb weff" data-act="w"'+(done?' disabled':'')+'>Green<br>win</button>'
         +'</div>'
         +'<div class="mini-btns two">'
           +'<button class="mini-btn" data-act="undo"'+(c.played===0?' disabled':'')+'>Undo hole</button>'

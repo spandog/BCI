@@ -63,8 +63,8 @@
   .card-inner:hover .card-face{box-shadow:0 6px 24px rgba(0,0,0,0.09);}
   .card-back{transform:rotateY(180deg);}
   .card-back .player-body{background:var(--green-dark);}
-  .card-back .player-team.baber{color:var(--gold-light);}
-  .card-back .player-team.weff{color:#8fb4e0;}
+  .card-back .player-team.baber{color:#8ab0d4;}
+  .card-back .player-team.weff{color:#8fc7a3;}
   .card-back .player-team.tbc{color:rgba(255,255,255,0.45);}
   .card-back .player-name{color:white;}
   .flip-hint{font-family:var(--serif-display);font-size:0.5rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);text-align:center;margin-top:auto;padding-top:0.6rem;}
@@ -82,8 +82,8 @@
   .player-body{padding:0.9rem 0.85rem;height:212px;min-height:0;overflow:hidden;display:flex;flex-direction:column;}
   .player-body>*{flex-shrink:0;}
   .player-team{font-family:var(--serif-display);font-size:0.54rem;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:4px;}
-  .player-team.baber{color:var(--green-mid);}
-  .player-team.weff{color:#3a5f8a;}
+  .player-team.baber{color:#1e5a8c;}
+  .player-team.weff{color:#2f7d4f;}
   .player-name{font-family:var(--serif-display);font-size:0.9rem;font-weight:600;color:var(--text-dark);margin-bottom:2px;letter-spacing:0.3px;line-height:1.25;display:flex;align-items:flex-start;justify-content:space-between;gap:6px;}
   .player-name .pname-text{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
   .player-name .flag{flex-shrink:0;font-size:0.85em;}
@@ -320,7 +320,7 @@
           '<div class="card-face card-back">'+
             actionPhotoHTML+
             '<div class="player-body">'+
-              '<div class="player-team '+p.team+'">'+(p.team==='baber'?'Team Baber':p.team==='weff'?'Team Weff':'Team TBC')+'</div>'+
+              '<div class="player-team '+p.team+'">'+(p.team==='baber'?'Blue Team':p.team==='weff'?'Green Team':'TBC Team')+'</div>'+
               '<div class="player-name"><span class="pname-text">'+p.name+'</span><span class="flag">'+flagEmoji(p.country)+'</span></div>'+
               (p.bio?'<div class="back-bio">'+p.bio+'</div>':'')+
               '<div class="back-trips-label">Trips</div>'+

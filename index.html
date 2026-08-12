@@ -53,34 +53,21 @@
   .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
   .dropdown a.live .d-icon{color:var(--gold-light);}
   .hero{background-color:var(--green-dark);background-image:linear-gradient(rgba(22,41,29,0.82),rgba(22,41,29,0.88)),url('BCI_club_pic.jpg');background-size:cover;background-position:center center;background-repeat:no-repeat;color:white;text-align:center;padding:5rem 1.5rem 4rem;position:relative;overflow:hidden;}
-  .hero-bg-pattern{position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(201,168,76,0.03) 0px,rgba(201,168,76,0.03) 1px,transparent 1px,transparent 50%);background-size:30px 30px;}
   .hero-inner{position:relative;z-index:1;}
-  .hero-eyebrow{font-family:var(--serif-body);font-size:0.75rem;letter-spacing:5px;color:var(--gold);margin-bottom:1.25rem;text-transform:uppercase;}
-  .hero h1{font-family:var(--serif-display);font-size:clamp(2.4rem,9vw,4.25rem);color:white;letter-spacing:2px;font-weight:700;line-height:1.05;margin-bottom:0.4rem;}
+  .hero-eyebrow{font-family:var(--serif-body);font-size:0.72rem;letter-spacing:3px;color:var(--gold);margin-bottom:1.1rem;text-transform:uppercase;font-weight:600;}
+  .hero h1{font-family:var(--serif-display);font-size:clamp(2.4rem,9vw,4.25rem);color:white;letter-spacing:0.5px;font-weight:700;line-height:1.05;margin-bottom:0.4rem;}
   .hero h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;}
   .hero h1 span{color:var(--gold);}
-  .hero-divider{display:flex;align-items:center;justify-content:center;gap:0.75rem;width:180px;margin:1.75rem auto;}
-  .hero-divider::before,.hero-divider::after{content:'';flex:1;height:1px;}
-  .hero-divider::before{background:linear-gradient(to right,transparent,var(--gold));}
-  .hero-divider::after{background:linear-gradient(to right,var(--gold),transparent);}
-  .divider-gem{width:7px;height:7px;background:var(--gold);transform:rotate(45deg);flex-shrink:0;}
-  .countdown-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:0.75rem;}
-  .countdown-label{font-family:var(--serif-body);font-size:0.72rem;letter-spacing:4px;color:rgba(255,255,255,0.45);text-transform:uppercase;}
-  .countdown-box{display:inline-flex;border:1px solid rgba(201,168,76,0.25);border-radius:2px;overflow:hidden;}
-  .countdown-box .unit{text-align:center;padding:1rem 1.25rem;border-right:1px solid rgba(201,168,76,0.15);}
-  .countdown-box .unit:last-child{border-right:none;}
-  .countdown-box .num{font-size:clamp(1.6rem,6vw,2.5rem);font-weight:600;color:var(--gold);display:block;font-family:var(--serif-display);line-height:1;}
-  .countdown-box .lbl{font-size:0.62rem;color:rgba(255,255,255,0.4);font-family:var(--serif-body);letter-spacing:2.5px;text-transform:uppercase;margin-top:5px;display:block;}
-  .hero-location{font-family:var(--serif-body);font-size:0.78rem;letter-spacing:3px;color:rgba(255,255,255,0.35);margin-top:1.25rem;text-transform:uppercase;}
-  .nav-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;max-width:1000px;margin:3rem auto;padding:0 1.5rem;}
-  .nav-card{background:white;border:1px solid var(--border);border-radius:2px;padding:1.75rem 1.25rem;text-align:center;text-decoration:none;color:var(--text-dark);transition:transform 0.2s,box-shadow 0.2s;min-width:0;}
-  .nav-card h3{overflow-wrap:break-word;}
-  .nav-card:active{transform:scale(0.98);}
-  .nav-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.08);}
-  .nav-card .card-icon{margin-bottom:0.85rem;}
-  .nav-card .card-icon .icon{width:30px;height:30px;color:var(--gold);stroke-width:1.25;}
-  .nav-card h3{font-family:var(--serif-display);font-size:0.95rem;letter-spacing:2px;font-weight:600;color:var(--green-dark);text-transform:uppercase;margin-bottom:0.35rem;}
-  .nav-card p{font-size:0.85rem;color:var(--text-muted);line-height:1.5;font-family:var(--serif-body);}
+  .countdown-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:0.6rem;margin-top:1.75rem;}
+  .countdown-line{font-family:var(--serif-display);font-size:1.15rem;letter-spacing:1px;color:var(--gold-light);font-weight:600;}
+  .hero-location{font-family:var(--serif-body);font-size:0.76rem;letter-spacing:2px;color:rgba(255,255,255,0.4);margin-top:0.5rem;text-transform:uppercase;}
+  .section{max-width:600px;margin:0 auto;padding:2.4rem 1.5rem;}
+  .section-title{font-family:var(--serif-display);font-weight:600;font-size:0.72rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.1rem;text-align:center;}
+  .link-list{border-top:1px solid var(--green-dark);}
+  .link-row{display:flex;justify-content:space-between;align-items:baseline;padding:1.05rem 0.1rem;border-bottom:1px solid var(--border);text-decoration:none;color:var(--text-dark);}
+  .link-row-title{font-family:var(--serif-display);font-weight:600;font-size:1.1rem;}
+  .link-row-sub{font-family:var(--serif-body);font-size:0.78rem;color:var(--text-muted);display:block;margin-top:2px;}
+  .link-row-arrow{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.15rem;color:var(--gold);flex-shrink:0;margin-left:1rem;}
   .live-strip{display:none;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;background:#141f26;border-bottom:1px solid rgba(201,168,76,0.25);padding:0.75rem 1.25rem;text-decoration:none;transition:background 0.2s;}
   .live-strip:hover{background:#0d2517;}
   .live-strip.visible{display:flex;}
@@ -91,13 +78,6 @@
   .ls-detail{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:1px;color:rgba(255,255,255,0.55);font-style:italic;}
   footer{background:#141f26;color:rgba(255,255,255,0.3);text-align:center;padding:1.5rem;font-family:var(--serif-body);font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;}
   footer span{color:var(--gold);}
-  @media(max-width:640px){
-    .nav-cards{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
-    .nav-card p{display:none;}
-    .nav-card{padding:1.5rem 0.85rem;}
-    .nav-card h3{font-size:0.82rem;letter-spacing:1px;}
-  }
-  @media(max-width:400px){.nav-cards{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -133,17 +113,12 @@
 </nav>
 
 <div class="hero">
-  <div class="hero-bg-pattern"></div>
   <div class="hero-inner">
-    <h1>BOOK CLUB<br><span>INVITATIONAL</span></h1>
-    <div class="hero-divider"><span class="divider-gem"></span></div>
+    <div class="hero-eyebrow">Book Club Invitational</div>
+    <h1>Book Club<br><span>Invitational</span></h1>
     <div class="countdown-wrap">
-      <div class="countdown-label">Next edition</div>
-      <div class="countdown-box" id="countdown">
-        <div class="unit"><span class="num" id="cd-days">--</span><span class="lbl">Days</span></div>
-        <div class="unit"><span class="num" id="cd-hrs">--</span><span class="lbl">Hours</span></div>
-        <div class="unit"><span class="num" id="cd-min">--</span><span class="lbl">Mins</span></div>
-        <div class="unit"><span class="num" id="cd-sec">--</span><span class="lbl">Secs</span></div>
+      <div class="countdown-line" id="countdown">
+        <span id="cd-days">--</span>d &middot; <span id="cd-hrs">--</span>h &middot; <span id="cd-min">--</span>m &middot; <span id="cd-sec">--</span>s
       </div>
       <div class="hero-location">Algarve, Portugal &nbsp;&middot;&nbsp; April 2027</div>
     </div>
@@ -156,31 +131,34 @@
   <span class="ls-detail" id="ls-detail"></span>
 </a>
 
-<div class="nav-cards">
-  <a href="editions.html" class="nav-card">
-    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg></div>
-    <div><h3>Results</h3><p>Past results, teams and courses</p></div>
-  </a>
-  <a href="gallery.html" class="nav-card">
-    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg></div>
-    <div><h3>Gallery</h3><p>Photos from Marbella 2026</p></div>
-  </a>
-  <a href="2027.html" class="nav-card">
-    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg></div>
-    <div><h3>Algarve · 2027</h3><p>Algarve &middot; next edition details</p></div>
-  </a>
-  <a href="kit.html" class="nav-card">
-    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-shirt"/></svg></div>
-    <div><h3>BCI Shop</h3><p>Order your kit for Algarve · 2027</p></div>
-  </a>
-  <a href="players.html" class="nav-card">
-    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg></div>
-    <div><h3>Players</h3><p>The full BCI roster</p></div>
-  </a>
-  <a href="leaderboard.html" class="nav-card">
-    <div class="card-icon"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg></div>
-    <div><h3>Leaderboard</h3><p>Live scoring &middot; Algarve · 2027</p></div>
-  </a>
+<div class="section">
+  <div class="section-title">Explore</div>
+  <div class="link-list">
+    <a href="editions.html" class="link-row">
+      <span><span class="link-row-title">Results</span><span class="link-row-sub">Past results, teams and courses</span></span>
+      <span class="link-row-arrow">&rarr;</span>
+    </a>
+    <a href="gallery.html" class="link-row">
+      <span><span class="link-row-title">Gallery</span><span class="link-row-sub">Photos from Marbella 2026</span></span>
+      <span class="link-row-arrow">&rarr;</span>
+    </a>
+    <a href="2027.html" class="link-row">
+      <span><span class="link-row-title">Algarve &middot; 2027</span><span class="link-row-sub">Algarve &middot; next edition details</span></span>
+      <span class="link-row-arrow">&rarr;</span>
+    </a>
+    <a href="kit.html" class="link-row">
+      <span><span class="link-row-title">BCI Shop</span><span class="link-row-sub">Order your kit for Algarve &middot; 2027</span></span>
+      <span class="link-row-arrow">&rarr;</span>
+    </a>
+    <a href="players.html" class="link-row">
+      <span><span class="link-row-title">Players</span><span class="link-row-sub">The full BCI roster</span></span>
+      <span class="link-row-arrow">&rarr;</span>
+    </a>
+    <a href="leaderboard.html" class="link-row">
+      <span><span class="link-row-title">Leaderboard</span><span class="link-row-sub">Live scoring &middot; Algarve &middot; 2027</span></span>
+      <span class="link-row-arrow">&rarr;</span>
+    </a>
+  </div>
 </div>
 
 <footer><p><span>Book Club Invitational</span></p></footer>

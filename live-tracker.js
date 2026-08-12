@@ -25,8 +25,11 @@
   /* ---------- styles ---------- */
   var style=document.createElement('style');
   style.textContent =
-    '#bci-tracker-bar{position:fixed;left:0;right:0;bottom:0;z-index:500;'+
-      'padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;'+
+    '#bci-bottom-fixed-wrap{position:static;left:0;right:0;z-index:9993;}'+
+    '@media(max-width:640px){'+
+      '#bci-bottom-fixed-wrap{position:fixed;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;}'+
+    '}'+
+    '#bci-tracker-bar{position:static;left:0;right:0;z-index:500;'+
       'background:#16291d;border-top:1px solid rgba(201,168,76,0.3);'+
       'display:none;align-items:stretch;height:42px;'+
       'font-family:"Public Sans",Arial,sans-serif;overflow:hidden;}'+
@@ -50,11 +53,6 @@
       'font-family:"Lora",Georgia,serif;font-size:0.6rem;letter-spacing:2px;'+
       'text-transform:uppercase;color:rgba(255,255,255,0.5);white-space:nowrap;}'+
     '#bci-tracker-bar a.bt-link:hover{color:#c9a84c;}'+
-    'body.bci-tracker-padded{padding-bottom:42px;}'+
-    '@media(min-width:860px){'+
-      '#bci-tracker-bar{position:static;}'+
-      'body.bci-tracker-padded{padding-bottom:0;}'+
-    '}'+
     '@media(max-width:640px){#bci-tracker-bar a.bt-link{display:none;}}'+
     '#bci-toast-stack{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:600;'+
       'display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;'+
@@ -69,6 +67,17 @@
       'letter-spacing:1px;}';
   document.head.appendChild(style);
 
+  /* ---------- shared fixed wrap, also used by bci-features.js's bottom-nav ---------- */
+  function getBottomWrap(){
+    var wrap=document.getElementById('bci-bottom-fixed-wrap');
+    if(!wrap){
+      wrap=document.createElement('div');
+      wrap.id='bci-bottom-fixed-wrap';
+      document.body.appendChild(wrap);
+    }
+    return wrap;
+  }
+
   /* ---------- bar markup ---------- */
   var bar=document.createElement('div');
   bar.id='bci-tracker-bar';
@@ -76,7 +85,8 @@
     '<span class="bt-status" id="bt-status">Day 1</span>'+
     '<div class="bt-viewport"><div class="bt-track" id="bt-track"></div></div>'+
     '<a class="bt-link" href="leaderboard.html">Full Leaderboard \u2192</a>';
-  document.body.appendChild(bar);
+  var bottomWrap=getBottomWrap();
+  bottomWrap.insertBefore(bar,bottomWrap.firstChild);
   var track=document.getElementById('bt-track');
 
   /* ---------- toast markup ---------- */
@@ -112,39 +122,23 @@
 
   function showBar(){
     bar.classList.add('visible');
-    document.body.classList.add('bci-tracker-padded');
-    syncBottomBars();
   }
 
-  /* Rather than trust two independent env(safe-area-inset-bottom) calculations
-     in two different files to land on the same number (which iOS doesn't
-     always guarantee, especially in installed-PWA vs Safari-tab contexts),
-     measure the ticker's actual rendered height directly and position the
-     bottom icon-nav flush against it, and size the page's own bottom padding
-     to the real combined height of both bars. */
-  function syncBottomBars(){
-    var nav=document.getElementById('bci-bottomnav');
-    var tickerH=bar.classList.contains('visible')?bar.getBoundingClientRect().height:0;
-    if(nav){
-      nav.style.bottom=tickerH+'px';
-      var navH=nav.getBoundingClientRect().height;
-      if(document.body.classList.contains('bci-bottomnav-padded')){
-        document.body.style.paddingBottom=(navH+tickerH)+'px';
-      }
-    } else if(document.body.classList.contains('bci-tracker-padded')){
-      document.body.style.paddingBottom=tickerH+'px';
-    }
+  /* Keep the page's own bottom padding matched to the wrap's real rendered
+     height, so content never sits hidden behind it. A ResizeObserver reacts
+     to the actual box changing size for any reason — ticker showing/hiding,
+     nav appearing, orientation change — rather than us trying to predict it. */
+  if(window.ResizeObserver){
+    var syncBodyPadding=function(){
+      var mobile=window.matchMedia('(max-width:640px)').matches;
+      var wrapH=mobile?bottomWrap.getBoundingClientRect().height:0;
+      document.body.style.paddingBottom=mobile?wrapH+'px':'';
+      var banner=document.getElementById('bci-notify-banner');
+      if(banner)banner.style.bottom=mobile?(wrapH+12)+'px':'';
+    };
+    new ResizeObserver(syncBodyPadding).observe(bottomWrap);
+    window.addEventListener('resize',syncBodyPadding);
   }
-  window.addEventListener('resize',syncBottomBars);
-  window.addEventListener('orientationchange',function(){setTimeout(syncBottomBars,300);});
-  // bci-features.js may add the bottom-nav slightly after this script runs —
-  // a short retry window covers that without needing the two files to know
-  // about each other's load order.
-  var syncTries=0;
-  var syncRetry=setInterval(function(){
-    syncBottomBars();
-    if(++syncTries>20)clearInterval(syncRetry);
-  },250);
 
   function fmtPts(n){
     var whole=Math.floor(n);

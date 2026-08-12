@@ -234,8 +234,13 @@
         'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+t.icon+'</svg>'+
         '<span>'+t.label+'</span></a>';
     }).join('');
-    document.body.appendChild(nav);
-    document.body.classList.add('bci-bottomnav-padded');
+    var bottomWrap=document.getElementById('bci-bottom-fixed-wrap');
+    if(!bottomWrap){
+      bottomWrap=document.createElement('div');
+      bottomWrap.id='bci-bottom-fixed-wrap';
+      document.body.appendChild(bottomWrap);
+    }
+    bottomWrap.appendChild(nav);
   })();
 
   /* ---------- add to calendar, any element with data-ics-date ---------- */

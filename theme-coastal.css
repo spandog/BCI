@@ -48,7 +48,7 @@ body.bci-custom-cursor input,body.bci-custom-cursor textarea{cursor:text !import
 #bci-bottomnav a.active{color:var(--gold,#d98b5f);}
 @media (max-width:640px){
   #bci-bottomnav{display:flex;}
-  body.bci-bottomnav-padded{padding-bottom:calc(98px + env(safe-area-inset-bottom,0px)) !important;}
+  body.bci-bottomnav-padded{padding-bottom:calc(98px + env(safe-area-inset-bottom,0px));}
 }
 
 @media (prefers-reduced-motion:reduce){

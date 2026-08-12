@@ -113,7 +113,38 @@
   function showBar(){
     bar.classList.add('visible');
     document.body.classList.add('bci-tracker-padded');
+    syncBottomBars();
   }
+
+  /* Rather than trust two independent env(safe-area-inset-bottom) calculations
+     in two different files to land on the same number (which iOS doesn't
+     always guarantee, especially in installed-PWA vs Safari-tab contexts),
+     measure the ticker's actual rendered height directly and position the
+     bottom icon-nav flush against it, and size the page's own bottom padding
+     to the real combined height of both bars. */
+  function syncBottomBars(){
+    var nav=document.getElementById('bci-bottomnav');
+    var tickerH=bar.classList.contains('visible')?bar.getBoundingClientRect().height:0;
+    if(nav){
+      nav.style.bottom=tickerH+'px';
+      var navH=nav.getBoundingClientRect().height;
+      if(document.body.classList.contains('bci-bottomnav-padded')){
+        document.body.style.paddingBottom=(navH+tickerH)+'px';
+      }
+    } else if(document.body.classList.contains('bci-tracker-padded')){
+      document.body.style.paddingBottom=tickerH+'px';
+    }
+  }
+  window.addEventListener('resize',syncBottomBars);
+  window.addEventListener('orientationchange',function(){setTimeout(syncBottomBars,300);});
+  // bci-features.js may add the bottom-nav slightly after this script runs —
+  // a short retry window covers that without needing the two files to know
+  // about each other's load order.
+  var syncTries=0;
+  var syncRetry=setInterval(function(){
+    syncBottomBars();
+    if(++syncTries>20)clearInterval(syncRetry);
+  },250);
 
   function fmtPts(n){
     var whole=Math.floor(n);

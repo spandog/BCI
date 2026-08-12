@@ -26,6 +26,7 @@
   var style=document.createElement('style');
   style.textContent =
     '#bci-tracker-bar{position:fixed;left:0;right:0;bottom:0;z-index:500;'+
+      'padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;'+
       'background:#16291d;border-top:1px solid rgba(201,168,76,0.3);'+
       'display:none;align-items:stretch;height:42px;'+
       'font-family:"Public Sans",Arial,sans-serif;overflow:hidden;}'+
@@ -193,7 +194,7 @@
     // final
     var wtxt=row.leader==='tie'
       ? 'HALVED'
-      : (row.leader==='baber'?'BABER':'WEFF')+' WIN '+esc(row.score).toUpperCase();
+      : (row.leader==='baber'?'BLUE':'GREEN')+' WIN '+esc(row.score).toUpperCase();
     return label+': <span class="gold">'+wtxt+'</span>';
   }
 

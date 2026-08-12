@@ -64,6 +64,11 @@
   .section{max-width:600px;margin:0 auto;padding:2.4rem 1.5rem;}
   .section-title{font-family:var(--serif-display);font-weight:600;font-size:0.72rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.1rem;text-align:center;}
   .link-list{border-top:1px solid var(--green-dark);}
+  @media(min-width:860px){
+    .section{max-width:820px;}
+    .link-list{display:grid;grid-template-columns:1fr 1fr;column-gap:3rem;border-top:none;}
+    .link-list::before{content:'';grid-column:1/-1;border-top:1px solid var(--green-dark);}
+  }
   .link-row{display:flex;justify-content:space-between;align-items:baseline;padding:1.05rem 0.1rem;border-bottom:1px solid var(--border);text-decoration:none;color:var(--text-dark);}
   .link-row-title{font-family:var(--serif-display);font-weight:600;font-size:1.1rem;}
   .link-row-sub{font-family:var(--serif-body);font-size:0.78rem;color:var(--text-muted);display:block;margin-top:2px;}

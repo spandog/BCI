@@ -110,6 +110,7 @@
   .form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--gold);}
   .form-group textarea{resize:vertical;min-height:80px;}
   .submit-btn{width:100%;padding:1rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.9rem;letter-spacing:3px;cursor:pointer;text-transform:uppercase;}
+  .submit-btn:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;}
   .submit-btn:hover{background:var(--green-mid);}
   .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
   .submit-error{display:none;background:#fdf0ef;border:1px solid #e8b4af;border-radius:6px;padding:1rem 1.1rem;margin-top:1rem;}
@@ -388,7 +389,7 @@
       <div class="form-row">
         <div class="form-group full"><label>Notes (optional)</label><textarea id="notes" placeholder="Any questions or special requests..."></textarea></div>
       </div>
-      <button class="submit-btn" id="submit-btn">Proceed to Payment</button>
+      <button class="submit-btn" id="submit-btn" disabled title="Orders aren't open yet">Not Yet Available</button>
       <div class="submit-error" id="submit-error">
         <p>Something went wrong submitting your order through the form. This can happen if the order form needs re-verifying — it doesn't mean your order details are lost.</p>
         <p>Please <a href="#" id="mailto-fallback">email your order to the team directly</a> instead, and they'll confirm receipt and send a payment link.</p>

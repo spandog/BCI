@@ -1054,6 +1054,8 @@
 
   /* ---------- per-match scoring page ---------- */
   function openScoreView(id){
+    alert('Scoring isn\'t open yet — check back once the trip is underway.');
+    return;
     state.scoringId=id;
     document.getElementById('board-view').style.display='none';
     document.getElementById('score-view').style.display='block';

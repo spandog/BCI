@@ -113,6 +113,9 @@
   .submit-btn:hover{background:var(--green-mid);}
   .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
   .submit-error{display:none;background:#fdf0ef;border:1px solid #e8b4af;border-radius:6px;padding:1rem 1.1rem;margin-top:1rem;}
+  .shop-soon-banner{background:white;border:1px solid var(--gold);border-radius:8px;padding:1.1rem 1.25rem;text-align:center;margin-bottom:2rem;}
+  .shop-soon-banner strong{font-family:var(--serif-display);color:var(--green-dark);}
+  .shop-soon-banner p{font-size:0.88rem;color:var(--text-muted);margin-top:0.3rem;line-height:1.5;}
   .submit-error.visible{display:block;}
   .pay-confirm-overlay{display:none;position:fixed;inset:0;background:rgba(22,41,29,0.7);z-index:1000;align-items:center;justify-content:center;padding:1.25rem;}
   .pay-confirm-overlay.open{display:flex;}
@@ -206,6 +209,10 @@
 </div>
 
 <div class="page">
+  <div class="shop-soon-banner">
+    <strong>Kit will be available to buy soon</strong>
+    <p>Have a browse and get your sizes sorted — orders aren't open yet.</p>
+  </div>
   <div class="kit-grid">
     <div class="kit-card" id="card-baber_polo">
       <div class="selected-tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
@@ -526,6 +533,9 @@
   var pendingOrder=null;
 
   document.getElementById('submit-btn').addEventListener('click',function(){
+    alert('Kit will be available to buy soon — orders aren\'t open yet.');
+    return;
+    // eslint-disable-next-line no-unreachable
     document.getElementById('submit-error').classList.remove('visible');
     if(!currentUser){alert('Please sign in first.');return;}
     var notes=document.getElementById('notes').value.trim();

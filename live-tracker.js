@@ -27,7 +27,7 @@
   style.textContent =
     '#bci-bottom-fixed-wrap{position:static;left:0;right:0;z-index:9993;}'+
     '@media(max-width:640px){'+
-      '#bci-bottom-fixed-wrap{position:fixed;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;}'+
+      '#bci-bottom-fixed-wrap{position:sticky;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;}'+
     '}'+
     '#bci-tracker-bar{position:static;left:0;right:0;z-index:500;'+
       'background:#16291d;border-top:1px solid rgba(201,168,76,0.3);'+
@@ -124,20 +124,20 @@
     bar.classList.add('visible');
   }
 
-  /* Keep the page's own bottom padding matched to the wrap's real rendered
-     height, so content never sits hidden behind it. A ResizeObserver reacts
-     to the actual box changing size for any reason — ticker showing/hiding,
-     nav appearing, orientation change — rather than us trying to predict it. */
+  /* The notify banner is still position:fixed, so it still needs to clear
+     whatever the bottom wrap's actual height is. The wrap itself no longer
+     needs body padding-bottom compensation now that it's sticky rather than
+     fixed — sticky elements stay in normal document flow and don't need
+     anything else to make room for them. */
   if(window.ResizeObserver){
-    var syncBodyPadding=function(){
+    var syncNotifyBanner=function(){
       var mobile=window.matchMedia('(max-width:640px)').matches;
       var wrapH=mobile?bottomWrap.getBoundingClientRect().height:0;
-      document.body.style.paddingBottom=mobile?wrapH+'px':'';
       var banner=document.getElementById('bci-notify-banner');
       if(banner)banner.style.bottom=mobile?(wrapH+12)+'px':'';
     };
-    new ResizeObserver(syncBodyPadding).observe(bottomWrap);
-    window.addEventListener('resize',syncBodyPadding);
+    new ResizeObserver(syncNotifyBanner).observe(bottomWrap);
+    window.addEventListener('resize',syncNotifyBanner);
   }
 
   function fmtPts(n){

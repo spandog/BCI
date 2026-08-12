@@ -50,6 +50,10 @@
       'text-transform:uppercase;color:rgba(255,255,255,0.5);white-space:nowrap;}'+
     '#bci-tracker-bar a.bt-link:hover{color:#c9a84c;}'+
     'body.bci-tracker-padded{padding-bottom:42px;}'+
+    '@media(min-width:860px){'+
+      '#bci-tracker-bar{position:static;}'+
+      'body.bci-tracker-padded{padding-bottom:0;}'+
+    '}'+
     '@media(max-width:640px){#bci-tracker-bar a.bt-link{display:none;}}'+
     '#bci-toast-stack{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:600;'+
       'display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;'+

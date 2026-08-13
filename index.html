@@ -32,11 +32,9 @@
     --serif-display:'Lora',Georgia,serif;
     --serif-body:'Public Sans',Arial,sans-serif;
   }
-  body{font-family:var(--serif-body);color:var(--text-dark);background-color:var(--cream);}
-  @media(min-width:860px){
-    body{display:flex;flex-direction:column;min-height:100vh;}
-    .section{flex:1 0 auto;}
-  }
+  body{font-family:var(--serif-body);color:var(--text-dark);background-color:var(--cream);
+    display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;}
+  .section{flex:1 0 auto;}
   .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
   nav{background:var(--green-dark);padding:0 1.5rem;padding-top:env(safe-area-inset-top,0px);display:flex;align-items:center;justify-content:space-between;height:calc(60px + env(safe-area-inset-top,0px));position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
   @media(max-width:640px){nav{position:relative;}}

@@ -145,27 +145,32 @@
     window.addEventListener('resize',syncBottomSpacing);
   }
 
-  /* iOS Safari fix, confirmed necessary from a real screen recording:
-     during active scroll momentum, window.innerHeight can briefly go stale
-     while visualViewport keeps reporting the true, currently-visible area —
-     position:fixed only tracks the (possibly stale) layout viewport, so the
-     bar can visibly lag below where the screen actually ends until things
-     settle. Correcting this needs the visualViewport API directly; no
-     CSS-only fix reaches it. This nudges the wrap by exactly whatever gap
-     has opened up, in real time, so it never lags visibly. Applies on every
-     screen size now, same reasoning as the fixed-position change above. */
+  /* Stop trusting native position:fixed to get this right on its own —
+     confirmed across several rounds that something in how iOS handles a
+     fixed element pinned right at the true bottom edge is unreliable
+     specifically in installed-PWA mode, even though the exact mechanism
+     isn't fully pinned down. Rather than chase the cause further, this
+     takes over positioning entirely: every single animation frame, for as
+     long as the page is open, it reads the real, current visualViewport
+     and places the wrap exactly where the bottom of the visible screen
+     actually is, right now. Not reacting to scroll/resize events (which
+     can lag or have gaps during fast momentum scrolling) — just
+     continuously correct, so there's never a window where it can be wrong. */
   if(window.visualViewport){
     var vv=window.visualViewport;
-    var correctForViewport=function(){
+    var lastGap=null;
+    var pinLoop=function(){
       var gap=window.innerHeight-vv.height-vv.offsetTop;
-      // translateZ(0) must stay present in every write to this property —
-      // it's what keeps the wrap on its own GPU layer (see the CSS above),
-      // setting transform to just translateY() here would silently drop it.
-      bottomWrap.style.transform=gap?'translate3d(0,'+(-gap)+'px,0)':'translateZ(0)';
+      if(gap!==lastGap){
+        // translateZ(0) must stay present in every write — it's what keeps
+        // the wrap on its own GPU layer (see the CSS above); writing just
+        // translateY() here would silently drop that.
+        bottomWrap.style.transform=gap?'translate3d(0,'+(-gap)+'px,0)':'translateZ(0)';
+        lastGap=gap;
+      }
+      requestAnimationFrame(pinLoop);
     };
-    vv.addEventListener('resize',correctForViewport);
-    vv.addEventListener('scroll',correctForViewport);
-    correctForViewport();
+    requestAnimationFrame(pinLoop);
   }
 
   function fmtPts(n){

@@ -26,13 +26,7 @@
   var style=document.createElement('style');
   style.textContent =
     '#bci-bottom-fixed-wrap{position:fixed;left:0;right:0;bottom:0;z-index:9993;'+
-      'padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;'+
-      '-webkit-transform:translateZ(0);transform:translateZ(0);'+
-      '-webkit-backface-visibility:hidden;backface-visibility:hidden;'+
-      'will-change:transform;isolation:isolate;}'+
-    '@media(max-width:640px){'+
-      '#bci-bottom-fixed-wrap{position:absolute;bottom:auto;}'+
-    '}'+
+      'padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;}'+
     '#bci-tracker-bar{position:static;left:0;right:0;z-index:500;'+
       'background:#16291d;border-top:1px solid rgba(201,168,76,0.3);'+
       'display:none;align-items:stretch;height:42px;'+
@@ -146,40 +140,6 @@
     };
     new ResizeObserver(syncBottomSpacing).observe(bottomWrap);
     window.addEventListener('resize',syncBottomSpacing);
-  }
-
-  /* Stop trusting native position:fixed to get this right on its own —
-     confirmed across several rounds that something in how iOS handles a
-     fixed element pinned right at the true bottom edge is unreliable
-     specifically in installed-PWA mode, even though the exact mechanism
-     isn't fully pinned down. On mobile the wrap is position:absolute
-     instead (see the CSS above) — deliberately not position:fixed at all,
-     since fixed is the one thing every failed attempt so far had in
-     common. Absolute doesn't auto-track the viewport the way fixed does,
-     so this loop does the full positioning job itself: every single
-     animation frame, for as long as the page is open, it works out where
-     the bottom of the currently-visible screen actually is in document
-     coordinates and places the wrap exactly there. Not reacting to
-     scroll/resize events (which can lag or gap during fast momentum
-     scrolling) — just continuously recalculating, so there's never a
-     window where it can be wrong. Desktop stays on plain position:fixed,
-     already proven reliable, untouched by any of this. */
-  var mobileMQ=window.matchMedia('(max-width:640px)');
-  if(window.visualViewport&&mobileMQ.matches){
-    var vv=window.visualViewport;
-    var lastTop=null;
-    var pinLoop=function(){
-      if(!mobileMQ.matches){requestAnimationFrame(pinLoop);return;}
-      var scrollY=window.scrollY||document.documentElement.scrollTop||0;
-      var wrapH=bottomWrap.offsetHeight;
-      var top=Math.round(scrollY+vv.height+vv.offsetTop-wrapH);
-      if(top!==lastTop){
-        bottomWrap.style.top=top+'px';
-        lastTop=top;
-      }
-      requestAnimationFrame(pinLoop);
-    };
-    requestAnimationFrame(pinLoop);
   }
 
   function fmtPts(n){
@@ -450,79 +410,5 @@
         .subscribe();
     }catch(e){/* realtime unavailable — the 15s poll still covers it */}
   }
-
-  /* ============================================================
-     TEMPORARY — real-device diagnostic panel for the bottom-bar
-     saga. Shows the actual numbers this device reports rather than
-     what any CSS is predicting. Safe to delete this whole block
-     (down to the matching })(); at the very end) once we're done
-     with it — nothing else in the file depends on it.
-     ============================================================ */
-  function bciShowDebugPanel(){
-    var panel=document.createElement('div');
-    panel.id='bci-debug-panel';
-    panel.style.cssText='position:fixed;top:0;left:0;right:0;z-index:999999;'+
-      'background:rgba(0,0,0,0.92);color:#0f0;font-family:monospace;font-size:11px;'+
-      'padding:10px;line-height:1.5;max-height:70vh;overflow-y:auto;white-space:pre-wrap;';
-    document.body.appendChild(panel);
-
-    function px(v){return v===undefined||v===null?'n/a':Math.round(v*100)/100+'px';}
-
-    function readSafeAreaBottom(){
-      var probe=document.createElement('div');
-      probe.style.cssText='position:fixed;visibility:hidden;padding-bottom:env(safe-area-inset-bottom,0px);';
-      document.body.appendChild(probe);
-      var v=getComputedStyle(probe).paddingBottom;
-      document.body.removeChild(probe);
-      return v;
-    }
-
-    function render(){
-      var wrap=document.getElementById('bci-bottom-fixed-wrap');
-      var ticker=document.getElementById('bci-tracker-bar');
-      var nav=document.getElementById('bci-bottomnav');
-      var wrapR=wrap?wrap.getBoundingClientRect():null;
-      var tickerR=ticker?ticker.getBoundingClientRect():null;
-      var navR=nav?nav.getBoundingClientRect():null;
-      var vv=window.visualViewport;
-
-      var lines=[];
-      lines.push('=== BCI DEBUG '+new Date().toLocaleTimeString()+' ===');
-      lines.push('standalone (installed PWA): '+(window.navigator.standalone===true));
-      lines.push('window.innerHeight: '+px(window.innerHeight));
-      lines.push('documentElement.clientHeight: '+px(document.documentElement.clientHeight));
-      lines.push('visualViewport.height: '+(vv?px(vv.height):'not supported'));
-      lines.push('visualViewport.offsetTop: '+(vv?px(vv.offsetTop):'n/a'));
-      lines.push('safe-area-inset-bottom (env): '+readSafeAreaBottom());
-      lines.push('');
-      lines.push('#bci-bottom-fixed-wrap:');
-      lines.push('  computed position: '+(wrap?getComputedStyle(wrap).position:'MISSING'));
-      lines.push('  rect top/bottom/h: '+(wrapR?px(wrapR.top)+' / '+px(wrapR.bottom)+' / '+px(wrapR.height):'n/a'));
-      lines.push('  gap below wrap (window.innerHeight - wrap.bottom): '+(wrapR?px(window.innerHeight-wrapR.bottom):'n/a'));
-      lines.push('#bci-tracker-bar rect: '+(tickerR?px(tickerR.top)+' / '+px(tickerR.bottom)+' / h='+px(tickerR.height):'n/a'));
-      lines.push('#bci-bottomnav rect: '+(navR?px(navR.top)+' / '+px(navR.bottom)+' / h='+px(navR.height):'n/a (hidden on desktop)'));
-      lines.push('gap between ticker bottom and nav top: '+((tickerR&&navR)?px(navR.top-tickerR.bottom):'n/a'));
-      lines.push('wrap correction transform (new fix): '+(wrap?getComputedStyle(wrap).transform:'n/a'));
-      lines.push('');
-      lines.push('body computed paddingBottom: '+getComputedStyle(document.body).paddingBottom);
-      lines.push('body scrollHeight vs innerHeight: '+px(document.body.scrollHeight)+' vs '+px(window.innerHeight));
-      lines.push('window.scrollY: '+px(window.scrollY));
-      lines.push('');
-      lines.push('(scroll to bottom of page, this panel keeps updating)');
-      panel.textContent=lines.join('\n');
-    }
-
-    render();
-    window.addEventListener('resize',render);
-    window.addEventListener('scroll',render);
-    if(window.visualViewport){
-      window.visualViewport.addEventListener('resize',render);
-      window.visualViewport.addEventListener('scroll',render);
-    }
-    setInterval(render,1000);
-  }
-  bciShowDebugPanel();
-  /* ============================================================
-     END TEMPORARY DIAGNOSTIC PANEL
-     ============================================================ */
 })();
+

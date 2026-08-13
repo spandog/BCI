@@ -30,6 +30,9 @@
       '-webkit-transform:translateZ(0);transform:translateZ(0);'+
       '-webkit-backface-visibility:hidden;backface-visibility:hidden;'+
       'will-change:transform;isolation:isolate;}'+
+    '@media(max-width:640px){'+
+      '#bci-bottom-fixed-wrap{position:absolute;bottom:auto;}'+
+    '}'+
     '#bci-tracker-bar{position:static;left:0;right:0;z-index:500;'+
       'background:#16291d;border-top:1px solid rgba(201,168,76,0.3);'+
       'display:none;align-items:stretch;height:42px;'+
@@ -149,24 +152,30 @@
      confirmed across several rounds that something in how iOS handles a
      fixed element pinned right at the true bottom edge is unreliable
      specifically in installed-PWA mode, even though the exact mechanism
-     isn't fully pinned down. Rather than chase the cause further, this
-     takes over positioning entirely: every single animation frame, for as
-     long as the page is open, it reads the real, current visualViewport
-     and places the wrap exactly where the bottom of the visible screen
-     actually is, right now. Not reacting to scroll/resize events (which
-     can lag or have gaps during fast momentum scrolling) — just
-     continuously correct, so there's never a window where it can be wrong. */
-  if(window.visualViewport){
+     isn't fully pinned down. On mobile the wrap is position:absolute
+     instead (see the CSS above) — deliberately not position:fixed at all,
+     since fixed is the one thing every failed attempt so far had in
+     common. Absolute doesn't auto-track the viewport the way fixed does,
+     so this loop does the full positioning job itself: every single
+     animation frame, for as long as the page is open, it works out where
+     the bottom of the currently-visible screen actually is in document
+     coordinates and places the wrap exactly there. Not reacting to
+     scroll/resize events (which can lag or gap during fast momentum
+     scrolling) — just continuously recalculating, so there's never a
+     window where it can be wrong. Desktop stays on plain position:fixed,
+     already proven reliable, untouched by any of this. */
+  var mobileMQ=window.matchMedia('(max-width:640px)');
+  if(window.visualViewport&&mobileMQ.matches){
     var vv=window.visualViewport;
-    var lastGap=null;
+    var lastTop=null;
     var pinLoop=function(){
-      var gap=window.innerHeight-vv.height-vv.offsetTop;
-      if(gap!==lastGap){
-        // translateZ(0) must stay present in every write — it's what keeps
-        // the wrap on its own GPU layer (see the CSS above); writing just
-        // translateY() here would silently drop that.
-        bottomWrap.style.transform=gap?'translate3d(0,'+(-gap)+'px,0)':'translateZ(0)';
-        lastGap=gap;
+      if(!mobileMQ.matches){requestAnimationFrame(pinLoop);return;}
+      var scrollY=window.scrollY||document.documentElement.scrollTop||0;
+      var wrapH=bottomWrap.offsetHeight;
+      var top=Math.round(scrollY+vv.height+vv.offsetTop-wrapH);
+      if(top!==lastTop){
+        bottomWrap.style.top=top+'px';
+        lastTop=top;
       }
       requestAnimationFrame(pinLoop);
     };

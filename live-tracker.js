@@ -143,6 +143,29 @@
     window.addEventListener('resize',syncBottomSpacing);
   }
 
+  /* iOS Safari fix, confirmed necessary from a real screen recording:
+     during active scroll momentum, window.innerHeight can briefly go stale
+     while visualViewport keeps reporting the true, currently-visible area —
+     position:fixed/sticky only track the (possibly stale) layout viewport,
+     so the bar visibly lags below where the screen actually ends until
+     things settle. Correcting this needs the visualViewport API directly;
+     no CSS-only fix reaches it. This nudges the wrap down by exactly
+     whatever gap has opened up, in real time, so it never lags visibly. */
+  if(window.visualViewport){
+    var vv=window.visualViewport;
+    var correctForViewport=function(){
+      if(!window.matchMedia('(max-width:640px)').matches){
+        bottomWrap.style.transform='';
+        return;
+      }
+      var gap=window.innerHeight-vv.height-vv.offsetTop;
+      bottomWrap.style.transform=gap?'translateY('+(-gap)+'px)':'';
+    };
+    vv.addEventListener('resize',correctForViewport);
+    vv.addEventListener('scroll',correctForViewport);
+    correctForViewport();
+  }
+
   function fmtPts(n){
     var whole=Math.floor(n);
     if(n%1===0.5)return whole===0?'\u00BD':whole+'\u00BD';
@@ -463,6 +486,7 @@
       lines.push('#bci-tracker-bar rect: '+(tickerR?px(tickerR.top)+' / '+px(tickerR.bottom)+' / h='+px(tickerR.height):'n/a'));
       lines.push('#bci-bottomnav rect: '+(navR?px(navR.top)+' / '+px(navR.bottom)+' / h='+px(navR.height):'n/a (hidden on desktop)'));
       lines.push('gap between ticker bottom and nav top: '+((tickerR&&navR)?px(navR.top-tickerR.bottom):'n/a'));
+      lines.push('wrap correction transform (new fix): '+(wrap?getComputedStyle(wrap).transform:'n/a'));
       lines.push('');
       lines.push('body computed paddingBottom: '+getComputedStyle(document.body).paddingBottom);
       lines.push('body scrollHeight vs innerHeight: '+px(document.body.scrollHeight)+' vs '+px(window.innerHeight));

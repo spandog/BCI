@@ -16,7 +16,7 @@
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
-  body{-webkit-tap-highlight-color:transparent;animation:bci-page-in 0.35s ease both;}
+  body{-webkit-tap-highlight-color:transparent;animation:bci-page-in 0.35s ease both;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;}
   @keyframes bci-page-in{from{opacity:0;}to{opacity:1;}}
   ::selection{background:#c9a84c;color:#16291d;}
   :focus-visible{outline:2px solid #c9a84c;outline-offset:2px;}
@@ -57,7 +57,7 @@
   .page-hero h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;}
   .page-hero p{font-family:var(--serif-body);font-size:1rem;color:rgba(255,255,255,0.4);font-style:italic;margin-top:0.75rem;}
 
-  .page{max-width:640px;margin:0 auto;padding:3rem 1.5rem;}
+  .page{max-width:640px;margin:0 auto;padding:3rem 1.5rem;flex:1 0 auto;}
 
   .pay-card{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.06);margin-bottom:2rem;}
   .pay-signin-note{background:white;border:1px solid var(--border);border-radius:8px;padding:2rem 1.5rem;text-align:center;margin-bottom:2rem;}

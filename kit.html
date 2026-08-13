@@ -16,7 +16,7 @@
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
-  body{-webkit-tap-highlight-color:transparent;animation:bci-page-in 0.35s ease both;}
+  body{-webkit-tap-highlight-color:transparent;animation:bci-page-in 0.35s ease both;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;}
   @keyframes bci-page-in{from{opacity:0;}to{opacity:1;}}
   ::selection{background:#c9a84c;color:#16291d;}
   :focus-visible{outline:2px solid #c9a84c;outline-offset:2px;}
@@ -50,7 +50,7 @@
   .page-hero h1{font-family:var(--serif-display);font-size:clamp(2rem,8vw,2.8rem);color:white;letter-spacing:0.5px;font-weight:700;}
   .page-hero h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;}
   .page-hero p{font-size:0.85rem;color:rgba(255,255,255,0.4);margin-top:0.5rem;}
-  .page{max-width:960px;margin:0 auto;padding:3rem 1.5rem;}
+  .page{max-width:960px;margin:0 auto;padding:3rem 1.5rem;flex:1 0 auto;}
   .kit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem;}
   .kit-card{background:white;border:1px solid var(--border);border-radius:2px;overflow:hidden;transition:border-color 0.2s;position:relative;display:flex;flex-direction:column;}
   .kit-card.selected{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold);}

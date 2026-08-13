@@ -25,10 +25,11 @@
   /* ---------- styles ---------- */
   var style=document.createElement('style');
   style.textContent =
-    '#bci-bottom-fixed-wrap{position:fixed;left:0;right:0;bottom:0;z-index:9993;}'+
-    '@media(max-width:640px){'+
-      '#bci-bottom-fixed-wrap{position:sticky;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;}'+
-    '}'+
+    '#bci-bottom-fixed-wrap{position:fixed;left:0;right:0;bottom:0;z-index:9993;'+
+      'padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;'+
+      '-webkit-transform:translateZ(0);transform:translateZ(0);'+
+      '-webkit-backface-visibility:hidden;backface-visibility:hidden;'+
+      'will-change:transform;isolation:isolate;}'+
     '#bci-tracker-bar{position:static;left:0;right:0;z-index:500;'+
       'background:#16291d;border-top:1px solid rgba(201,168,76,0.3);'+
       'display:none;align-items:stretch;height:42px;'+
@@ -128,16 +129,17 @@
      while scrolling, same as it always did before mobile PWA quirks forced
      a different approach there) — being fixed takes it out of normal flow,
      so body needs padding-bottom to stop real content sitting behind it.
-     On mobile the wrap stays position:sticky, which never needed this since
-     sticky elements remain part of normal document flow. The notify banner
-     is separately fixed on both, so it always needs to clear the wrap. */
+     Now applies the same way on every screen size — position:sticky turned
+     out to not reliably engage at all on his real device despite computing
+     correctly, so mobile now uses the identical fixed approach as desktop,
+     which has been solid throughout. The notify banner is separately fixed
+     too, so it always needs to clear the wrap. */
   if(window.ResizeObserver){
     var syncBottomSpacing=function(){
-      var mobile=window.matchMedia('(max-width:640px)').matches;
       var wrapH=bottomWrap.getBoundingClientRect().height;
-      document.body.style.paddingBottom=mobile?'':wrapH+'px';
+      document.body.style.paddingBottom=wrapH+'px';
       var banner=document.getElementById('bci-notify-banner');
-      if(banner)banner.style.bottom=mobile?(wrapH+12)+'px':(wrapH+12)+'px';
+      if(banner)banner.style.bottom=(wrapH+12)+'px';
     };
     new ResizeObserver(syncBottomSpacing).observe(bottomWrap);
     window.addEventListener('resize',syncBottomSpacing);
@@ -146,20 +148,20 @@
   /* iOS Safari fix, confirmed necessary from a real screen recording:
      during active scroll momentum, window.innerHeight can briefly go stale
      while visualViewport keeps reporting the true, currently-visible area —
-     position:fixed/sticky only track the (possibly stale) layout viewport,
-     so the bar visibly lags below where the screen actually ends until
-     things settle. Correcting this needs the visualViewport API directly;
-     no CSS-only fix reaches it. This nudges the wrap down by exactly
-     whatever gap has opened up, in real time, so it never lags visibly. */
+     position:fixed only tracks the (possibly stale) layout viewport, so the
+     bar can visibly lag below where the screen actually ends until things
+     settle. Correcting this needs the visualViewport API directly; no
+     CSS-only fix reaches it. This nudges the wrap by exactly whatever gap
+     has opened up, in real time, so it never lags visibly. Applies on every
+     screen size now, same reasoning as the fixed-position change above. */
   if(window.visualViewport){
     var vv=window.visualViewport;
     var correctForViewport=function(){
-      if(!window.matchMedia('(max-width:640px)').matches){
-        bottomWrap.style.transform='';
-        return;
-      }
       var gap=window.innerHeight-vv.height-vv.offsetTop;
-      bottomWrap.style.transform=gap?'translateY('+(-gap)+'px)':'';
+      // translateZ(0) must stay present in every write to this property —
+      // it's what keeps the wrap on its own GPU layer (see the CSS above),
+      // setting transform to just translateY() here would silently drop it.
+      bottomWrap.style.transform=gap?'translate3d(0,'+(-gap)+'px,0)':'translateZ(0)';
     };
     vv.addEventListener('resize',correctForViewport);
     vv.addEventListener('scroll',correctForViewport);

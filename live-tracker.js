@@ -25,7 +25,7 @@
   /* ---------- styles ---------- */
   var style=document.createElement('style');
   style.textContent =
-    '#bci-bottom-fixed-wrap{position:static;left:0;right:0;z-index:9993;}'+
+    '#bci-bottom-fixed-wrap{position:fixed;left:0;right:0;bottom:0;z-index:9993;}'+
     '@media(max-width:640px){'+
       '#bci-bottom-fixed-wrap{position:sticky;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;}'+
     '}'+
@@ -124,20 +124,23 @@
     bar.classList.add('visible');
   }
 
-  /* The notify banner is still position:fixed, so it still needs to clear
-     whatever the bottom wrap's actual height is. The wrap itself no longer
-     needs body padding-bottom compensation now that it's sticky rather than
-     fixed — sticky elements stay in normal document flow and don't need
-     anything else to make room for them. */
+  /* The wrap is position:fixed on desktop now (so the ticker stays visible
+     while scrolling, same as it always did before mobile PWA quirks forced
+     a different approach there) — being fixed takes it out of normal flow,
+     so body needs padding-bottom to stop real content sitting behind it.
+     On mobile the wrap stays position:sticky, which never needed this since
+     sticky elements remain part of normal document flow. The notify banner
+     is separately fixed on both, so it always needs to clear the wrap. */
   if(window.ResizeObserver){
-    var syncNotifyBanner=function(){
+    var syncBottomSpacing=function(){
       var mobile=window.matchMedia('(max-width:640px)').matches;
-      var wrapH=mobile?bottomWrap.getBoundingClientRect().height:0;
+      var wrapH=bottomWrap.getBoundingClientRect().height;
+      document.body.style.paddingBottom=mobile?'':wrapH+'px';
       var banner=document.getElementById('bci-notify-banner');
-      if(banner)banner.style.bottom=mobile?(wrapH+12)+'px':'';
+      if(banner)banner.style.bottom=mobile?(wrapH+12)+'px':(wrapH+12)+'px';
     };
-    new ResizeObserver(syncNotifyBanner).observe(bottomWrap);
-    window.addEventListener('resize',syncNotifyBanner);
+    new ResizeObserver(syncBottomSpacing).observe(bottomWrap);
+    window.addEventListener('resize',syncBottomSpacing);
   }
 
   function fmtPts(n){

@@ -105,3 +105,38 @@ body.bci-custom-cursor input,body.bci-custom-cursor textarea{cursor:text !import
 @media(max-width:400px){
   #bci-account-panel{position:fixed;top:auto;right:0.75rem;left:0.75rem;width:auto;max-width:none;}
 }
+
+/* ============================================================
+   Site-wide motion polish. Auto-applied via JS in bci-features.js
+   to common card/list-row elements across every page — nothing
+   here needs a class added by hand in any page's own HTML.
+   ============================================================ */
+.bci-reveal{opacity:0;transform:translateY(18px);
+  transition:opacity 0.55s ease,transform 0.55s ease;}
+.bci-reveal.bci-revealed{opacity:1;transform:translateY(0);}
+@media(prefers-reduced-motion:reduce){
+  .bci-reveal{opacity:1;transform:none;transition:none;}
+}
+
+/* Subtle, consistent hover/tap feedback everywhere — doesn't change
+   what happens on hover, just makes whatever a page's own CSS already
+   does (colour, background, border, position shifts) ease in rather
+   than snap, and gives cards/buttons a small, quiet lift and tap-down. */
+a,button,.link-row,.player-card,.kit-card,.result-team,.comp-card,
+.entry-card,.history-item,.prizes-card{
+  transition:transform 0.18s ease,box-shadow 0.18s ease,
+    background-color 0.18s ease,border-color 0.18s ease,
+    color 0.18s ease,opacity 0.18s ease,padding 0.18s ease;
+}
+.link-row:hover,.comp-card:hover,.prizes-card:hover{
+  box-shadow:0 4px 16px rgba(0,0,0,0.06);
+}
+.player-card:active,.kit-card:active,button:active,
+.link-row:active,.comp-card:active{
+  transform:scale(0.98);
+}
+@media(prefers-reduced-motion:reduce){
+  a,button,.link-row,.player-card,.kit-card,.result-team,.comp-card,
+  .entry-card,.history-item,.prizes-card{transition:none;}
+}
+

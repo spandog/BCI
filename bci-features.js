@@ -527,4 +527,46 @@
       sb.auth.onAuthStateChange(function(event,session){applySession(session);});
     }).catch(function(){/* Supabase failed to load — the rest of the site still works fine without the account widget */});
   })();
+
+  /* ---------- site-wide scroll-reveal for card/list-row elements ----------
+     Applies automatically to common repeating elements on every page — no
+     class needs adding by hand anywhere. A MutationObserver (not just a
+     one-time pass on load) is what makes this safe on pages like players.html
+     or leaderboard.html where cards get completely rebuilt from scratch after
+     load (sorting, live score updates, async photo fetches) — a plain
+     querySelectorAll done once would lose the animation the moment any of
+     those pages re-render their content. */
+  (function(){
+    if(!window.IntersectionObserver)return; // no support — content just shows normally, no animation, no harm
+    var SELECTORS='.link-row,.player-card,.kit-card,.result-team,.comp-card,.entry-card,.history-item,.prizes-card';
+
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          e.target.classList.add('bci-revealed');
+          io.unobserve(e.target);
+        }
+      });
+    },{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+
+    function treat(el){
+      if(el.classList.contains('fade-up')||el.classList.contains('bci-reveal'))return;
+      el.classList.add('bci-reveal');
+      var idx=el.parentNode?Array.prototype.indexOf.call(el.parentNode.children,el):0;
+      el.style.transitionDelay=Math.min(Math.max(idx,0)*0.06,0.4)+'s';
+      io.observe(el);
+    }
+
+    document.querySelectorAll(SELECTORS).forEach(treat);
+
+    new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        m.addedNodes.forEach(function(node){
+          if(node.nodeType!==1)return;
+          if(node.matches&&node.matches(SELECTORS))treat(node);
+          if(node.querySelectorAll)node.querySelectorAll(SELECTORS).forEach(treat);
+        });
+      });
+    }).observe(document.body,{childList:true,subtree:true});
+  })();
 })();

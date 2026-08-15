@@ -170,7 +170,8 @@
   .match-centre .m-thru{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-top:3px;white-space:nowrap;}
   .match-centre .m-vs{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
   .hole-strip{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;padding:0.625rem 1rem 0.875rem;border-top:1px solid var(--border);}
-  .hole-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--serif-display);font-size:0.55rem;border:1px solid var(--border);border-radius:3px;color:var(--text-muted);background:white;min-height:16px;}
+  .hole-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--serif-display);font-size:0.55rem;border:1px solid var(--border);border-radius:3px;color:var(--text-muted);background:white;min-height:22px;line-height:1;}
+  .hole-cell .hole-par{font-size:0.4rem;font-weight:400;opacity:0.55;margin-top:1px;}
   .hole-cell.b{background:var(--baber-bg);border-color:var(--baber-border);color:var(--baber-text);font-weight:700;}
   .hole-cell.w{background:var(--weff-bg);border-color:var(--weff-border);color:var(--weff-text);font-weight:700;}
   .hole-cell.h{background:var(--halve-bg);border-color:var(--gold);color:var(--halve-text);font-weight:700;}
@@ -925,13 +926,23 @@
     return state.matches.filter(function(m){return m.day===state.day;});
   }
 
+  /* Real par-per-hole from the actual course scorecards (Black tees at
+     Quinta do Vale, Negras tees at Isla Canela Links) — Day 1 plays
+     Quinta do Vale, Day 2 plays Isla Canela Links. */
+  var COURSE_PAR={
+    1:[5,3,4,5,3,4,5,4,3,5,4,3,5,3,4,3,5,4],
+    2:[5,4,3,4,4,4,3,5,4,4,4,3,4,3,5,4,4,5]
+  };
+
   function holeStrip(m){
     var holes=m.holes||'';
     if(!holes.length)return '';
+    var pars=COURSE_PAR[m.day]||[];
     var cells='';
     for(var i=0;i<18;i++){
       var r=holes[i]||'';
-      cells+='<div class="hole-cell'+(r?' '+r:'')+'">'+(i+1)+'</div>';
+      var par=pars[i]?'<span class="hole-par">'+pars[i]+'</span>':'';
+      cells+='<div class="hole-cell'+(r?' '+r:'')+'">'+(i+1)+par+'</div>';
     }
     return '<div class="hole-strip">'+cells+'</div>';
   }

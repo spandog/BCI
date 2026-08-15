@@ -71,6 +71,17 @@
     padding:0;transition:background 0.15s,border-color 0.15s;}
   .ics-add-btn:hover{background:rgba(201,168,76,0.12);border-color:var(--gold);}
   .ics-add-btn svg{width:16px;height:16px;}
+  .course-cards{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:3rem;}
+  @media(max-width:640px){.course-cards{grid-template-columns:1fr;}}
+  .course-card{border:1px solid rgba(201,168,76,0.2);border-radius:4px;overflow:hidden;}
+  .course-card-header{background:rgba(255,255,255,0.05);padding:0.875rem 1.25rem;border-bottom:1px solid rgba(201,168,76,0.1);}
+  .course-card-day{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
+  .course-card-name{font-family:var(--serif-display);font-weight:700;font-size:1.05rem;color:white;}
+  .course-card-body{padding:1.25rem;}
+  .course-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:0.9rem;margin-bottom:1rem;}
+  .course-stat .cs-label{font-family:var(--serif-body);font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:2px;}
+  .course-stat .cs-val{font-family:var(--serif-display);font-size:0.95rem;color:rgba(255,255,255,0.8);}
+  .course-desc{font-family:var(--serif-body);font-size:0.82rem;line-height:1.5;color:rgba(255,255,255,0.5);font-style:italic;}
   .weather{margin-bottom:3rem;border:1px solid rgba(201,168,76,0.2);border-radius:4px;overflow:hidden;}
   .weather-header{background:rgba(255,255,255,0.05);padding:0.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,0.1);}
   .weather-title{font-family:var(--serif-display);font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);}
@@ -214,6 +225,39 @@
     </div>
   </div>
   <div class="defending fade-up fade-up-delay-3">Defending Champions &nbsp;&middot;&nbsp; Blue Team</div>
+
+  <div class="course-cards fade-up fade-up-delay-3">
+    <div class="course-card">
+      <div class="course-card-header">
+        <div class="course-card-day">Day 1 &middot; Pairs</div>
+        <div class="course-card-name">Quinta do Vale</div>
+      </div>
+      <div class="course-card-body">
+        <div class="course-stats">
+          <div class="course-stat"><div class="cs-label">Par</div><div class="cs-val">72</div></div>
+          <div class="course-stat"><div class="cs-label">Designer</div><div class="cs-val">Severiano Ballesteros</div></div>
+          <div class="course-stat"><div class="cs-label">Championship Length</div><div class="cs-val">6,206m</div></div>
+          <div class="course-stat"><div class="cs-label">Slope &middot; Rating</div><div class="cs-val">132 &middot; 74.0</div></div>
+        </div>
+        <div class="course-desc">Six par 3s, six par 4s, six par 5s — a Seve Ballesteros design on the Portugal–Spain border near Castro Marim, built to test every level of golfer.</div>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="course-card-header">
+        <div class="course-card-day">Day 2 &middot; Singles</div>
+        <div class="course-card-name">Isla Canela Links</div>
+      </div>
+      <div class="course-card-body">
+        <div class="course-stats">
+          <div class="course-stat"><div class="cs-label">Par</div><div class="cs-val">72</div></div>
+          <div class="course-stat"><div class="cs-label">Designer</div><div class="cs-val">Juan Catarineu</div></div>
+          <div class="course-stat"><div class="cs-label">Championship Length</div><div class="cs-val">7,143 yds</div></div>
+          <div class="course-stat"><div class="cs-label">Slope &middot; Rating</div><div class="cs-val">127 &middot; 75.3</div></div>
+        </div>
+        <div class="course-desc">Sits in a nature reserve where the Guadiana river meets the Atlantic — wide fairways between natural dunes, with orange, olive and eucalyptus trees providing the hazards.</div>
+      </div>
+    </div>
+  </div>
 
   <div class="weather fade-up fade-up-delay-3" style="margin-top:2rem;">
     <div class="weather-header">

@@ -26,6 +26,7 @@
   var style=document.createElement('style');
   style.textContent =
     '#bci-bottom-fixed-wrap{position:fixed;left:0;right:0;bottom:0;z-index:9993;'+
+      'background:#16291d;'+
       'padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;}'+
     '#bci-tracker-bar{position:static;left:0;right:0;z-index:500;'+
       'background:#16291d;border-top:1px solid rgba(201,168,76,0.3);'+

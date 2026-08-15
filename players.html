@@ -539,9 +539,7 @@
     });
     if(!finals.length)return;
     players.forEach(function(p){
-      var parts=p.name.split(' ');
-      var surname=parts[parts.length-1];
-      var re=new RegExp('\\b'+surname+'\\b','i');
+      var re=new RegExp('\\b'+p.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i');
       finals.forEach(function(m){
         var side=re.test(m.baber_players)?'baber':(re.test(m.weff_players)?'weff':null);
         if(!side)return;

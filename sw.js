@@ -6,7 +6,7 @@
    network. Falls back to the cached itinerary page if a page
    navigation fails entirely offline.
    ============================================================ */
-var CACHE_NAME='bci-cache-v103';
+var CACHE_NAME='bci-cache-v104';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',

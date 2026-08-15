@@ -53,6 +53,13 @@
 
   .page{max-width:1080px;margin:0 auto;padding:2.5rem 1.5rem;flex:1 0 auto;}
   .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+  .skeleton-tile{aspect-ratio:1;border-radius:6px;
+    background:linear-gradient(90deg,#eee 25%,#f6f6f6 37%,#eee 63%);
+    background-size:400% 100%;animation:bci-shimmer 1.4s ease infinite;}
+  @keyframes bci-shimmer{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
+  @media(prefers-reduced-motion:reduce){
+    .skeleton-tile{animation:none;background:#eee;}
+  }
   .submit-photo-wrap{text-align:center;margin-bottom:2.5rem;}
   .submit-photo-btn{display:inline-flex;align-items:center;gap:0.5rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;padding:0.75rem 1.5rem;font-family:var(--serif-display);font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background 0.2s;}
   .submit-photo-btn:hover{background:var(--green-mid);}
@@ -71,9 +78,13 @@
   .plate-caption{font-size:0.72rem;color:var(--text-muted);font-style:italic;text-align:center;padding-top:0.4rem;}
   .empty-note{font-size:0.85rem;color:var(--text-muted);font-style:italic;grid-column:1/-1;text-align:center;padding:1rem 0;}
 
-  .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.94);z-index:1000;align-items:center;justify-content:center;touch-action:none;}
-  .lightbox.open{display:flex;}
-  .lightbox-img-wrap{max-width:92vw;max-height:82vh;display:flex;align-items:center;justify-content:center;}
+  .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.94);z-index:1000;align-items:center;justify-content:center;touch-action:none;opacity:0;transition:opacity 0.28s ease;}
+  .lightbox.open{display:flex;opacity:1;}
+  .lightbox-img-wrap{max-width:92vw;max-height:82vh;display:flex;align-items:center;justify-content:center;transform-origin:center center;transition:transform 0.32s cubic-bezier(0.22,0.68,0,1.21);}
+  @media(prefers-reduced-motion:reduce){
+    .lightbox{transition:none;}
+    .lightbox-img-wrap{transition:none !important;transform:none !important;}
+  }
   .lightbox img{max-width:100%;max-height:82vh;object-fit:contain;border-radius:4px;}
   .lightbox video{max-width:100%;max-height:82vh;border-radius:4px;}
   .lightbox-close{position:absolute;top:1rem;right:1rem;color:white;cursor:pointer;opacity:0.6;background:rgba(0,0,0,0.4);padding:8px;border-radius:4px;line-height:0;}
@@ -149,12 +160,12 @@
 
   <div class="gallery-section">
     <div class="gallery-section-title">Algarve · 2027</div>
-    <div class="gallery-grid" id="grid-algarve-2027"><p class="empty-note">Loading...</p></div>
+    <div class="gallery-grid" id="grid-algarve-2027"><div class="skeleton-tile"></div><div class="skeleton-tile"></div><div class="skeleton-tile"></div><div class="skeleton-tile"></div><div class="skeleton-tile"></div><div class="skeleton-tile"></div></div>
   </div>
 
   <div class="gallery-section">
     <div class="gallery-section-title">Marbella 2026</div>
-    <div class="gallery-grid" id="grid-marbella-2026"><p class="empty-note">Loading...</p></div>
+    <div class="gallery-grid" id="grid-marbella-2026"><div class="skeleton-tile"></div><div class="skeleton-tile"></div><div class="skeleton-tile"></div><div class="skeleton-tile"></div><div class="skeleton-tile"></div><div class="skeleton-tile"></div></div>
   </div>
 
 </div>
@@ -295,14 +306,39 @@
     });
 
     plates.forEach(function(el){observer.observe(el);});
-    mediaEls.forEach(function(el,i){el.addEventListener('click',function(){openLightbox(i);});});
+    mediaEls.forEach(function(el,i){el.addEventListener('click',function(){openLightbox(i,el.getBoundingClientRect());});});
   }
 
-  function openLightbox(i){
+  function openLightbox(i,fromRect){
     current=i;
     updateLightboxImage();
-    document.getElementById('lightbox').classList.add('open');
+    var lb=document.getElementById('lightbox');
+    var wrap=document.getElementById('lightbox-img-wrap')||document.querySelector('.lightbox-img-wrap');
+    lb.classList.add('open');
     document.body.style.overflow='hidden';
+    if(fromRect&&wrap&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      // Start the wrap exactly where the clicked thumbnail was, then let the
+      // CSS transition above carry it out to its natural centred size —
+      // a proper "grow from where you tapped it" rather than a straight fade.
+      requestAnimationFrame(function(){
+        var toRect=wrap.getBoundingClientRect();
+        var scaleX=fromRect.width/toRect.width;
+        var scaleY=fromRect.height/toRect.height;
+        var fromCenterX=fromRect.left+fromRect.width/2;
+        var fromCenterY=fromRect.top+fromRect.height/2;
+        var toCenterX=toRect.left+toRect.width/2;
+        var toCenterY=toRect.top+toRect.height/2;
+        wrap.style.transition='none';
+        wrap.style.transform='translate('+(fromCenterX-toCenterX)+'px,'+(fromCenterY-toCenterY)+'px) scale('+scaleX+','+scaleY+')';
+        // force layout so the browser registers the starting transform
+        // before switching the transition back on for the next frame
+        wrap.getBoundingClientRect();
+        requestAnimationFrame(function(){
+          wrap.style.transition='';
+          wrap.style.transform='';
+        });
+      });
+    }
   }
   function closeLightbox(){
     document.getElementById('lightbox').classList.remove('open');

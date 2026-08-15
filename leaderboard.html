@@ -101,6 +101,14 @@
   .score-team{padding:0.85rem 1rem;text-align:center;}
   .score-team.baber{background:rgba(30,90,140,0.5);}
   .score-team.weff{background:rgba(47,125,79,0.35);}
+  .score-team.score-flash{animation:bci-score-flash 900ms ease;}
+  @keyframes bci-score-flash{
+    0%{box-shadow:inset 0 0 0 2px rgba(201,168,76,0.9);}
+    100%{box-shadow:inset 0 0 0 2px rgba(201,168,76,0);}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .score-team.score-flash{animation:none;}
+  }
   .score-team .t-label{font-family:var(--serif-display);font-size:0.56rem;letter-spacing:2px;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:2px;}
   .score-team .t-name{font-family:var(--serif-display);font-size:clamp(0.85rem,3.4vw,1.15rem);font-weight:700;color:white;letter-spacing:1.5px;margin-bottom:2px;}
   .score-team .t-score{font-family:var(--serif-display);font-size:clamp(1.8rem,8vw,2.6rem);font-weight:700;color:var(--gold);line-height:1;}
@@ -124,6 +132,24 @@
 
   .match-list{display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.5rem;}
   .match-card{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);transition:box-shadow 0.3s ease;}
+  .match-card.score-changed-flash{animation:bci-card-flash 1.1s ease;}
+  @keyframes bci-card-flash{
+    0%{box-shadow:0 0 0 2px rgba(201,168,76,0.9),0 2px 12px rgba(0,0,0,0.05);}
+    100%{box-shadow:0 0 0 0px rgba(201,168,76,0),0 2px 12px rgba(0,0,0,0.05);}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .match-card.score-changed-flash{animation:none;}
+  }
+  .skeleton-card{background:white;border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:0.9rem;}
+  .skeleton-line{height:14px;border-radius:4px;margin-bottom:0.6rem;
+    background:linear-gradient(90deg,#eee 25%,#f6f6f6 37%,#eee 63%);
+    background-size:400% 100%;animation:bci-shimmer 1.4s ease infinite;}
+  .skeleton-line.short{width:40%;}
+  .skeleton-line.tall{height:28px;width:60%;margin:0.4rem auto;}
+  @keyframes bci-shimmer{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
+  @media(prefers-reduced-motion:reduce){
+    .skeleton-line{animation:none;background:#eee;}
+  }
   .match-card.just-landed{box-shadow:0 0 0 3px var(--gold);}
   .match-top{display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.875rem;border-bottom:1px solid var(--border);background:var(--cream);}
   .match-label{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
@@ -317,7 +343,9 @@
   </div>
 
   <div class="match-list" id="match-list">
-    <div class="empty-note">Loading matches...</div>
+    <div class="skeleton-card"><div class="skeleton-line short"></div><div class="skeleton-line tall"></div><div class="skeleton-line" style="width:80%"></div></div>
+    <div class="skeleton-card"><div class="skeleton-line short"></div><div class="skeleton-line tall"></div><div class="skeleton-line" style="width:80%"></div></div>
+    <div class="skeleton-card"><div class="skeleton-line short"></div><div class="skeleton-line tall"></div><div class="skeleton-line" style="width:80%"></div></div>
   </div>
 
   <div class="win-note" id="win-note"></div>
@@ -460,25 +488,50 @@
   document.getElementById('tab-2').addEventListener('click',function(){switchDay(2);});
   function dayFormat(d){return d===1?'Better Ball':'Individual Matchplay';}
 
-  function switchDay(d){
+  function switchDay(d,onDone){
+    var el=document.getElementById('match-list');
+    var direction=d>state.day?1:-1;
+    var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     state.day=d;
     document.getElementById('tab-1').classList.toggle('active',d===1);
     document.getElementById('tab-2').classList.toggle('active',d===2);
-    renderMatches();
-    renderScorer(true);
+    if(reduceMotion||!el){
+      renderMatches();
+      renderScorer(true);
+      if(onDone)onDone();
+      return;
+    }
+    el.style.transition='opacity 0.16s ease,transform 0.16s ease';
+    el.style.opacity='0';
+    el.style.transform='translateX('+(direction*14)+'px)';
+    setTimeout(function(){
+      renderMatches();
+      renderScorer(true);
+      el.style.transition='none';
+      el.style.transform='translateX('+(-direction*14)+'px)';
+      requestAnimationFrame(function(){
+        el.style.transition='opacity 0.22s ease,transform 0.22s ease';
+        el.style.opacity='1';
+        el.style.transform='translateX(0)';
+      });
+      if(onDone)onDone();
+    },160);
   }
 
   function goToMatch(id){
     var m=findMatch(id);
     if(!m)return;
-    if(m.day!==state.day)switchDay(m.day);
-    requestAnimationFrame(function(){
-      var card=document.querySelector('.match-card[data-id="'+id+'"]');
-      if(!card)return;
-      card.scrollIntoView({behavior:'smooth',block:'center'});
-      card.classList.add('just-landed');
-      setTimeout(function(){card.classList.remove('just-landed');},1600);
-    });
+    function land(){
+      requestAnimationFrame(function(){
+        var card=document.querySelector('.match-card[data-id="'+id+'"]');
+        if(!card)return;
+        card.scrollIntoView({behavior:'smooth',block:'center'});
+        card.classList.add('just-landed');
+        setTimeout(function(){card.classList.remove('just-landed');},1600);
+      });
+    }
+    if(m.day!==state.day)switchDay(m.day,land);
+    else land();
   }
 
   /* ---------- act on a notification deep link (?match=id or ?day=1) ---------- */
@@ -757,6 +810,7 @@
 
   var TOTAL_POINTS=18,RETAIN_AT=9,WIN_AT=9.5;
 
+  var lastBarPcts=null;
   function renderPointsBar(){
     var p=points();
     var played=p.baber+p.weff;
@@ -795,16 +849,73 @@
     }
     document.getElementById('rc-bar-fills').innerHTML=html;
 
+    if(lastBarPcts&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      var baberEl=document.querySelector('.rc-fill.baber');
+      var undecidedEl=document.querySelector('.rc-fill.undecided');
+      var weffEl=document.querySelector('.rc-fill.weff');
+      if(baberEl)baberEl.style.width=lastBarPcts.baber+'%';
+      if(undecidedEl)undecidedEl.style.width=lastBarPcts.undecided+'%';
+      if(weffEl)weffEl.style.width=lastBarPcts.weff+'%';
+      // force a reflow so the browser registers the starting width before
+      // transitioning to the real target on the next frame — without this
+      // the width change would be batched with the one above and never
+      // actually animate
+      document.getElementById('rc-bar-fills').offsetWidth;
+      requestAnimationFrame(function(){
+        if(baberEl)baberEl.style.width=baberPct+'%';
+        if(undecidedEl)undecidedEl.style.width=undecidedPct+'%';
+        if(weffEl)weffEl.style.width=weffPct+'%';
+      });
+    }
+    lastBarPcts={baber:baberPct,undecided:undecidedPct,weff:weffPct};
+
     var footer=played+' / '+TOTAL_POINTS+' points played';
     if(weffWon)footer+=' &middot; Green win the BCI';
     else if(baberRetained)footer+=' &middot; Blue retain the BCI';
     document.getElementById('rc-footer').innerHTML=footer;
   }
 
+  var lastBaberScore=null,lastWeffScore=null;
+  function animateScoreNumber(el,from,to,duration){
+    var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduceMotion||from===null){el.textContent=fmtPts(to);return;}
+    var start=null;
+    function step(ts){
+      if(!start)start=ts;
+      var progress=Math.min((ts-start)/duration,1);
+      var eased=1-Math.pow(1-progress,3);
+      var current=from+(to-from)*eased;
+      el.textContent=fmtPts(Math.round(current*2)/2);
+      if(progress<1)requestAnimationFrame(step);
+      else el.textContent=fmtPts(to);
+    }
+    requestAnimationFrame(step);
+  }
+  function flashScoreCard(el){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    el.classList.remove('score-flash');
+    void el.offsetWidth;
+    el.classList.add('score-flash');
+  }
+
   function renderBanner(){
     var p=points();
-    document.getElementById('score-baber').textContent=fmtPts(p.baber);
-    document.getElementById('score-weff').textContent=fmtPts(p.weff);
+    var baberEl=document.getElementById('score-baber');
+    var weffEl=document.getElementById('score-weff');
+    if(lastBaberScore!==null&&p.baber!==lastBaberScore){
+      animateScoreNumber(baberEl,lastBaberScore,p.baber,600);
+      flashScoreCard(document.getElementById('banner-baber'));
+    } else {
+      baberEl.textContent=fmtPts(p.baber);
+    }
+    if(lastWeffScore!==null&&p.weff!==lastWeffScore){
+      animateScoreNumber(weffEl,lastWeffScore,p.weff,600);
+      flashScoreCard(document.getElementById('banner-weff'));
+    } else {
+      weffEl.textContent=fmtPts(p.weff);
+    }
+    lastBaberScore=p.baber;
+    lastWeffScore=p.weff;
     document.getElementById('banner-baber').classList.toggle('winning',p.baber>p.weff);
     document.getElementById('banner-weff').classList.toggle('winning',p.weff>p.baber);
     renderPointsBar();
@@ -825,6 +936,7 @@
     return '<div class="hole-strip">'+cells+'</div>';
   }
 
+  var lastMatchSignatures={};
   function renderMatches(){
     var list=dayMatches();
     var el=document.getElementById('match-list');
@@ -836,6 +948,15 @@
       el.innerHTML='<div class="empty-note">No matches yet for Day '+state.day+' &mdash; '+COURSES[state.day]+'.</div>';
       return;
     }
+    var changedIds=[];
+    list.forEach(function(m){
+      var c=calc(m);
+      var sig=c.status+'|'+c.leader+'|'+c.score+'|'+c.thru;
+      if(lastMatchSignatures[m.id]!==undefined&&lastMatchSignatures[m.id]!==sig){
+        changedIds.push(m.id);
+      }
+      lastMatchSignatures[m.id]=sig;
+    });
     el.innerHTML=list.map(function(m){
       var c=calc(m);
       var scoreB='',scoreW='',centre;
@@ -868,6 +989,17 @@
         +'<div class="card-actions"><button class="enter-score" data-id="'+esc(m.id)+'">Enter Score</button></div>'
       +'</div>';
     }).join('');
+
+    if(changedIds.length&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      changedIds.forEach(function(id){
+        var card=el.querySelector('.match-card[data-id="'+id+'"]');
+        if(card){
+          card.classList.remove('score-changed-flash');
+          void card.offsetWidth;
+          card.classList.add('score-changed-flash');
+        }
+      });
+    }
 
     Array.prototype.forEach.call(el.querySelectorAll('.enter-score'),function(btn){
       btn.addEventListener('click',function(){openScoreView(btn.dataset.id);});

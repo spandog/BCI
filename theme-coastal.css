@@ -140,3 +140,23 @@ a,button,.link-row,.player-card,.kit-card,.result-team,.comp-card,
   .entry-card,.history-item,.prizes-card{transition:none;}
 }
 
+/* Smooth slide/fade for the nav dropdown menu, overriding each page's own
+   instant display:none/block toggle — one shared rule rather than editing
+   the same pattern 12 times. */
+.dropdown{
+  display:block !important;
+  visibility:hidden;opacity:0;max-height:0;overflow:hidden;pointer-events:none;
+  transform:translateY(-6px);
+  transition:opacity 0.22s ease,transform 0.22s ease,max-height 0.22s ease,
+    visibility 0s linear 0.22s;
+}
+.dropdown.open{
+  visibility:visible;opacity:1;max-height:600px;pointer-events:auto;
+  transform:translateY(0);
+  transition:opacity 0.22s ease,transform 0.22s ease,max-height 0.22s ease,
+    visibility 0s linear 0s;
+}
+@media(prefers-reduced-motion:reduce){
+  .dropdown{transition:none;}
+}
+

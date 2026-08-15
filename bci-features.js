@@ -569,4 +569,33 @@
       });
     }).observe(document.body,{childList:true,subtree:true});
   })();
+
+  /* ---------- quick fade-out before internal navigation ----------
+     Every page already fades in on arrival (bci-page-in). This adds the
+     other half — a brief fade-out right before navigating away — so moving
+     between pages reads as one continuous motion rather than a hard cut.
+     Deliberately narrow about what it intercepts: only same-origin links,
+     no target=_blank, no modifier-clicks (people opening in a new tab),
+     no downloads, no in-page anchors — anything else just navigates
+     normally, untouched. */
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.addEventListener('click',function(e){
+      if(e.defaultPrevented)return;
+      var a=e.target.closest('a');
+      if(!a)return;
+      var href=a.getAttribute('href');
+      if(!href||href.charAt(0)==='#')return;
+      if(a.target&&a.target!==''&&a.target!=='_self')return;
+      if(a.hasAttribute('download'))return;
+      if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;
+      var url;
+      try{url=new URL(href,location.href);}catch(err){return;}
+      if(url.origin!==location.origin)return;
+      if(url.pathname===location.pathname&&url.hash)return; // in-page anchor
+      e.preventDefault();
+      document.body.style.transition='opacity 0.16s ease';
+      document.body.style.opacity='0';
+      setTimeout(function(){location.href=href;},150);
+    });
+  }
 })();

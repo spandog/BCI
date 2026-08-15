@@ -181,6 +181,28 @@
   document.addEventListener('click',function(e){
     if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){btn.classList.remove('open');dd.classList.remove('open');}
   });
+
+  /* Subtle parallax on the hero photo — the background shifts a little
+     slower than the page scrolls, a common quiet touch on higher-end
+     sites. Kept deliberately gentle (a fraction of scroll speed) rather
+     than a dramatic effect, to stay in keeping with the calm, restrained
+     feel of the rest of the site. */
+  (function(){
+    var hero=document.querySelector('.hero');
+    if(!hero||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    var ticking=false;
+    function apply(){
+      var heroBottom=hero.offsetTop+hero.offsetHeight;
+      if(window.scrollY<heroBottom+200){
+        hero.style.backgroundPositionY=(window.scrollY*0.25)+'px';
+      }
+      ticking=false;
+    }
+    window.addEventListener('scroll',function(){
+      if(!ticking){requestAnimationFrame(apply);ticking=true;}
+    },{passive:true});
+  })();
+
   function updateCountdown(){
     const target=new Date('2027-04-23T08:00:00');
     const now=new Date();

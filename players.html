@@ -79,6 +79,11 @@
   .player-photo{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--cream-dark);}
   .player-photo-placeholder{width:100%;aspect-ratio:3/4;background:var(--green-dark);display:flex;align-items:center;justify-content:center;}
   .player-photo-placeholder .icon{width:40px;height:40px;color:rgba(201,168,76,0.3);stroke-width:1;}
+  .player-photo{opacity:0;transition:opacity 0.35s ease;}
+  .player-photo.photo-loaded{opacity:1;}
+  @media(prefers-reduced-motion:reduce){
+    .player-photo{transition:none;opacity:1;}
+  }
   .player-body{padding:0.9rem 0.85rem;height:212px;min-height:0;overflow:hidden;display:flex;flex-direction:column;}
   .player-body>*{flex-shrink:0;}
   .player-team{font-family:var(--serif-display);font-size:0.54rem;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:4px;}
@@ -102,7 +107,30 @@
   @media(max-width:900px){.players-grid{grid-template-columns:repeat(3,1fr);}}
   @media(max-width:640px){.players-grid{grid-template-columns:repeat(2,1fr);gap:1rem;}}
   @media(max-width:380px){.players-grid{grid-template-columns:1fr;}}
+  .admin-section{max-width:500px;margin:3rem auto 0;padding:0 1.5rem;}
+  .admin-toggle{display:flex;align-items:center;gap:0.75rem;cursor:pointer;padding:0.5rem 0;border-top:1px solid var(--border);padding-top:1.5rem;}
+  .admin-toggle h3{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .admin-toggle .arrow{width:16px;height:16px;color:var(--text-muted);transition:transform 0.2s;margin-left:auto;}
+  .admin-toggle.open .arrow{transform:rotate(180deg);}
+  .admin-password-gate{background:white;border:1px solid var(--border);border-radius:6px;padding:1.5rem;text-align:center;max-width:320px;margin:1rem auto 0;}
+  .admin-password-gate h4{font-family:var(--serif-display);font-size:0.9rem;letter-spacing:2px;color:var(--green-dark);margin-bottom:0.75rem;text-transform:uppercase;}
+  .admin-password-gate input{width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:4px;font-size:1rem;margin-bottom:0.625rem;text-align:center;letter-spacing:4px;-webkit-appearance:none;}
+  .admin-password-gate input:focus{outline:none;border-color:var(--gold);}
+  .admin-password-gate button{width:100%;padding:0.875rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;cursor:pointer;text-transform:uppercase;}
+  .admin-pw-error{color:#b0532b;font-size:0.8rem;margin-top:0.5rem;min-height:1.1em;}
+  .upload-panel{display:none;background:white;border:1px solid var(--border);border-radius:6px;padding:1.5rem;margin-top:1rem;}
+  .upload-panel.visible{display:block;}
+  .upload-panel h4{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:1px;color:var(--green-dark);margin-bottom:1rem;text-transform:uppercase;}
+  .upload-panel label{display:block;font-family:var(--serif-display);font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.4rem;margin-top:0.9rem;}
+  .upload-panel label:first-of-type{margin-top:0;}
+  .upload-panel select,.upload-panel input[type=file]{width:100%;padding:0.65rem;border:1px solid var(--border);border-radius:4px;font-family:var(--serif-body);font-size:0.85rem;background:white;}
+  .upload-btn{width:100%;padding:0.875rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.8rem;letter-spacing:2px;cursor:pointer;text-transform:uppercase;margin-top:1.25rem;}
+  .upload-btn:disabled{opacity:0.6;cursor:default;}
+  .upload-status{font-size:0.82rem;margin-top:0.75rem;text-align:center;min-height:1.2em;}
+  .upload-status.success{color:var(--green-mid);}
+  .upload-status.error{color:#b0532b;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -151,6 +179,30 @@
     </select>
   </div>
   <div class="players-grid" id="players-grid"></div>
+
+  <div class="admin-section">
+    <div class="admin-toggle" id="admin-toggle">
+      <h3>Admin Access</h3>
+      <svg class="icon arrow" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div id="admin-password-gate" class="admin-password-gate" style="display:none;">
+      <h4>Admin Password</h4>
+      <input type="password" id="admin-pw-input" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;">
+      <button id="admin-pw-btn">Unlock</button>
+      <div class="admin-pw-error" id="admin-pw-error"></div>
+    </div>
+    <div class="upload-panel" id="upload-panel">
+      <h4>Upload Player Photo</h4>
+      <label for="upload-player-select">Player</label>
+      <select id="upload-player-select"></select>
+      <label for="upload-face-input">Face Photo</label>
+      <input type="file" id="upload-face-input" accept="image/*">
+      <label for="upload-action-input">Action Photo (optional)</label>
+      <input type="file" id="upload-action-input" accept="image/*">
+      <button class="upload-btn" id="upload-btn">Upload</button>
+      <div class="upload-status" id="upload-status"></div>
+    </div>
+  </div>
 </div>
 
 <footer><p><span>Book Club Invitational</span></p></footer>
@@ -335,6 +387,14 @@
       });
       grid.appendChild(card);
       setTimeout(function(c){c.classList.add('visible');},i*60,card);
+      Array.prototype.forEach.call(card.querySelectorAll('img.player-photo'),function(img){
+        if(img.complete){
+          img.classList.add('photo-loaded');
+        } else {
+          img.addEventListener('load',function(){img.classList.add('photo-loaded');});
+          img.addEventListener('error',function(){img.classList.add('photo-loaded');});
+        }
+      });
     });
   }
 
@@ -346,6 +406,121 @@
   });
 
   render(currentSort);
+
+  /* ---------- photo overrides from Supabase, uploaded via the admin panel below.
+     Hardcoded photo/actionPhoto paths above stay as the fallback — a row here
+     for a given player name overrides them, so photos can be added or swapped
+     without ever touching this file again. ---------- */
+  var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+  var sb=window.supabase?window.supabase.createClient(SB_URL,SB_KEY):null;
+
+  if(sb){
+    sb.from('bci_player_photos').select('*').then(function(res){
+      if(res.error||!res.data||!res.data.length)return;
+      res.data.forEach(function(row){
+        var p=players.find(function(pl){return pl.name===row.player_name;});
+        if(!p)return;
+        if(row.photo_url)p.photo=row.photo_url;
+        if(row.action_photo_url)p.actionPhoto=row.action_photo_url;
+      });
+      render(currentSort);
+    }).catch(function(){/* photo overrides are best-effort — hardcoded fallbacks still show */});
+  }
+
+  /* ---------- admin: upload player photos without touching site code ---------- */
+  var ADMIN_PASS='bciadmin2027';
+  var adminUnlocked=false;
+
+  function populatePlayerSelect(){
+    var sel=document.getElementById('upload-player-select');
+    sel.innerHTML=players.slice().sort(function(a,b){return a.name.localeCompare(b.name);})
+      .map(function(p){return '<option value="'+p.name.replace(/"/g,'&quot;')+'">'+p.name+'</option>';}).join('');
+  }
+
+  document.getElementById('admin-toggle').addEventListener('click',function(){
+    var toggle=this;
+    if(!adminUnlocked){
+      var g=document.getElementById('admin-password-gate');
+      var willOpen=g.style.display==='none';
+      g.style.display=willOpen?'block':'none';
+      toggle.classList.toggle('open',willOpen);
+    } else {
+      var panel=document.getElementById('upload-panel');
+      var willOpen=!panel.classList.contains('visible');
+      panel.classList.toggle('visible',willOpen);
+      toggle.classList.toggle('open',willOpen);
+    }
+  });
+
+  document.getElementById('admin-pw-btn').addEventListener('click',function(){
+    var v=document.getElementById('admin-pw-input').value;
+    if(v===ADMIN_PASS){
+      adminUnlocked=true;
+      document.getElementById('admin-password-gate').style.display='none';
+      document.getElementById('upload-panel').classList.add('visible');
+      document.getElementById('admin-toggle').classList.add('open');
+      populatePlayerSelect();
+    } else {
+      document.getElementById('admin-pw-error').textContent='Incorrect password.';
+    }
+  });
+  document.getElementById('admin-pw-input').addEventListener('keydown',function(e){
+    if(e.key==='Enter')document.getElementById('admin-pw-btn').click();
+  });
+
+  document.getElementById('upload-btn').addEventListener('click',function(){
+    if(!sb){alert('Not connected — try reloading the page.');return;}
+    var name=document.getElementById('upload-player-select').value;
+    var faceFile=document.getElementById('upload-face-input').files[0];
+    var actionFile=document.getElementById('upload-action-input').files[0];
+    var statusEl=document.getElementById('upload-status');
+    if(!faceFile&&!actionFile){
+      statusEl.textContent='Choose at least one photo.';
+      statusEl.className='upload-status error';
+      return;
+    }
+    var btn=this;
+    btn.disabled=true;btn.textContent='Uploading...';
+    statusEl.textContent='';statusEl.className='upload-status';
+
+    var slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+
+    function uploadOne(file,suffix){
+      var ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+      var path=slug+'-'+suffix+'-'+Date.now()+'.'+ext;
+      return sb.storage.from('player-photos').upload(path,file,{upsert:true})
+        .then(function(res){
+          if(res.error)throw new Error(res.error.message);
+          return sb.storage.from('player-photos').getPublicUrl(path).data.publicUrl;
+        });
+    }
+
+    var faceP=faceFile?uploadOne(faceFile,'face'):Promise.resolve(null);
+    var actionP=actionFile?uploadOne(actionFile,'action'):Promise.resolve(null);
+
+    Promise.all([faceP,actionP]).then(function(urls){
+      var update={player_name:name,updated_at:new Date().toISOString()};
+      if(urls[0])update.photo_url=urls[0];
+      if(urls[1])update.action_photo_url=urls[1];
+      return sb.from('bci_player_photos').upsert(update,{onConflict:'player_name'});
+    }).then(function(res){
+      btn.disabled=false;btn.textContent='Upload';
+      if(res.error){
+        statusEl.textContent='Could not save: '+res.error.message;
+        statusEl.className='upload-status error';
+        return;
+      }
+      statusEl.textContent='Uploaded \u2014 refresh the page to see it live.';
+      statusEl.className='upload-status success';
+      document.getElementById('upload-face-input').value='';
+      document.getElementById('upload-action-input').value='';
+    }).catch(function(err){
+      btn.disabled=false;btn.textContent='Upload';
+      statusEl.textContent='Upload failed: '+(err&&err.message?err.message:'unknown error');
+      statusEl.className='upload-status error';
+    });
+  });
 
   /* ---------- live records from the 2027 leaderboard ---------- */
   var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';

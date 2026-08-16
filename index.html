@@ -54,7 +54,7 @@
   .dropdown a.live{color:var(--gold-light);}
   .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
   .dropdown a.live .d-icon{color:var(--gold-light);}
-  .hero{background-color:var(--green-dark);background-image:linear-gradient(rgba(22,41,29,0.82),rgba(22,41,29,0.88)),url('BCI_club_pic.jpg');background-size:cover;background-position:center center;background-repeat:no-repeat;color:white;text-align:center;padding:5rem 1.5rem 4rem;position:relative;overflow:hidden;transition:background-position 0.2s linear;}
+  .hero{background-color:var(--green-dark);background-image:linear-gradient(rgba(22,41,29,0.82),rgba(22,41,29,0.88)),url('BCI_club_pic.jpg');background-size:cover;background-position:center center;background-repeat:no-repeat;color:white;text-align:center;padding:5rem 1.5rem 4rem;position:relative;overflow:hidden;}
   .hero-inner{position:relative;z-index:1;}
   .hero-eyebrow{font-family:var(--serif-body);font-size:0.72rem;letter-spacing:3px;color:var(--gold);margin-bottom:1.1rem;text-transform:uppercase;font-weight:600;}
   .hero h1{font-family:var(--serif-display);font-size:clamp(2.4rem,9vw,4.25rem);color:white;letter-spacing:0.5px;font-weight:700;line-height:1.05;margin-bottom:0.4rem;}
@@ -181,27 +181,6 @@
   document.addEventListener('click',function(e){
     if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){btn.classList.remove('open');dd.classList.remove('open');}
   });
-
-  /* Subtle parallax on the hero photo — the background shifts a little
-     slower than the page scrolls, a common quiet touch on higher-end
-     sites. Kept deliberately gentle (a fraction of scroll speed) rather
-     than a dramatic effect, to stay in keeping with the calm, restrained
-     feel of the rest of the site. */
-  (function(){
-    var hero=document.querySelector('.hero');
-    if(!hero||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-    var ticking=false;
-    function apply(){
-      var heroBottom=hero.offsetTop+hero.offsetHeight;
-      if(window.scrollY<heroBottom+200){
-        hero.style.backgroundPositionY=(window.scrollY*0.25)+'px';
-      }
-      ticking=false;
-    }
-    window.addEventListener('scroll',function(){
-      if(!ticking){requestAnimationFrame(apply);ticking=true;}
-    },{passive:true});
-  })();
 
   function updateCountdown(){
     const target=new Date('2027-04-23T08:00:00');

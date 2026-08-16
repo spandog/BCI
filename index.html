@@ -66,17 +66,6 @@
   .section{max-width:600px;margin:0 auto;padding:2.4rem 1.5rem;}
   .section-title{font-family:var(--serif-display);font-weight:600;font-size:0.72rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.1rem;text-align:center;}
   .link-list{border-top:1px solid var(--green-dark);}
-  .tour-widget{border-top:1px solid var(--border);padding-top:2.2rem;margin-top:0.5rem;}
-  .tour-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1rem;}
-  .tour-name{font-family:var(--serif-display);font-weight:600;font-size:0.95rem;color:var(--green-dark);}
-  .tour-status{font-family:var(--serif-body);font-size:0.72rem;color:var(--text-muted);font-style:italic;}
-  .tour-row{display:grid;grid-template-columns:1.5rem 1fr auto;gap:0.75rem;align-items:center;padding:0.55rem 0.1rem;border-bottom:1px solid var(--border);}
-  .tour-row:last-child{border-bottom:none;}
-  .tour-pos{font-family:var(--serif-display);font-size:0.78rem;color:var(--text-muted);}
-  .tour-player{font-family:var(--serif-body);font-size:0.88rem;color:var(--text-dark);}
-  .tour-score{font-family:var(--serif-display);font-weight:700;font-size:0.9rem;color:var(--green-mid);}
-  .tour-loading{font-family:var(--serif-body);font-size:0.85rem;color:var(--text-muted);font-style:italic;padding:1rem 0;}
-  .tour-note{font-family:var(--serif-body);font-size:0.7rem;color:var(--text-muted);margin-top:0.9rem;opacity:0.7;}
   @media(min-width:860px){
     .section{max-width:1000px;}
     .link-list{display:grid;grid-template-columns:1fr 1fr;column-gap:4rem;border-top:none;}
@@ -179,15 +168,6 @@
       <span><span class="link-row-title">Leaderboard</span></span>
       <span class="link-row-arrow">&rarr;</span>
     </a>
-  </div>
-
-  <div class="tour-widget">
-    <div class="tour-header">
-      <div class="tour-name" id="tour-name">On Tour</div>
-      <div class="tour-status" id="tour-status">Loading&hellip;</div>
-    </div>
-    <div id="tour-body"><div class="tour-loading">Checking the leaderboard&hellip;</div></div>
-    <div class="tour-note">Live PGA Tour standings.</div>
   </div>
 </div>
 
@@ -312,46 +292,6 @@
 
   refreshStrip();
   setInterval(refreshStrip,60000);
-
-  /* ---------- live PGA Tour leaderboard ----------
-     Uses ESPN's public golf scoreboard endpoint — no API key needed, but
-     it's an unofficial, undocumented endpoint (not something ESPN
-     publishes or supports), so it could change or go away without
-     notice. Everything here fails quietly if that happens; the rest of
-     the page is completely unaffected either way. */
-  function escTour(s){
-    return String(s).replace(/[&<>"']/g,function(c){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
-    });
-  }
-  function loadTourWidget(){
-    fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard')
-      .then(function(r){return r.json();})
-      .then(function(data){
-        var event=data&&data.events&&data.events[0];
-        if(!event)throw new Error('no event data');
-        var comp=event.competitions&&event.competitions[0];
-        var competitors=(comp&&comp.competitors)||[];
-        var top5=competitors.slice(0,5);
-        if(!top5.length)throw new Error('no competitors');
-        document.getElementById('tour-name').textContent=event.shortName||event.name||'PGA Tour';
-        var statusDesc=(comp&&comp.status&&comp.status.type&&comp.status.type.description)||'';
-        document.getElementById('tour-status').textContent=statusDesc;
-        document.getElementById('tour-body').innerHTML=top5.map(function(c,i){
-          var name=escTour((c.athlete&&c.athlete.displayName)||'\u2014');
-          var score=escTour(c.score!==undefined&&c.score!==null?c.score:'\u2014');
-          return '<div class="tour-row"><span class="tour-pos">'+(i+1)+'</span>'+
-            '<span class="tour-player">'+name+'</span>'+
-            '<span class="tour-score">'+score+'</span></div>';
-        }).join('');
-      })
-      .catch(function(){
-        document.getElementById('tour-status').textContent='';
-        document.getElementById('tour-body').innerHTML='<div class="tour-loading">Tour scores aren\'t available right now.</div>';
-      });
-  }
-  loadTourWidget();
-  setInterval(loadTourWidget,300000);
 })();
 </script>
 <script src="hero-gallery.js"></script>

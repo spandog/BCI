@@ -123,7 +123,11 @@
   .upload-panel h4{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:1px;color:var(--green-dark);margin-bottom:1rem;text-transform:uppercase;}
   .upload-panel label{display:block;font-family:var(--serif-display);font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.4rem;margin-top:0.9rem;}
   .upload-panel label:first-of-type{margin-top:0;}
-  .upload-panel select,.upload-panel input[type=file]{width:100%;padding:0.65rem;border:1px solid var(--border);border-radius:4px;font-family:var(--serif-body);font-size:0.85rem;background:white;}
+  .upload-panel select,.upload-panel input[type=file],.upload-panel input[type=text]{width:100%;padding:0.65rem;border:1px solid var(--border);border-radius:4px;font-family:var(--serif-body);font-size:0.85rem;background:white;}
+  .trip-row{display:flex;align-items:center;gap:0.75rem;}
+  .trip-row select{width:auto;flex:1;}
+  .trip-check{display:flex;align-items:center;gap:0.4rem;font-family:var(--serif-body);font-size:0.85rem;color:var(--text-dark);white-space:nowrap;}
+  .trip-check input{width:auto;}
   .upload-btn{width:100%;padding:0.875rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.8rem;letter-spacing:2px;cursor:pointer;text-transform:uppercase;margin-top:1.25rem;}
   .upload-btn:disabled{opacity:0.6;cursor:default;}
   .upload-status{font-size:0.82rem;margin-top:0.75rem;text-align:center;min-height:1.2em;}
@@ -192,14 +196,46 @@
       <div class="admin-pw-error" id="admin-pw-error"></div>
     </div>
     <div class="upload-panel" id="upload-panel">
-      <h4>Upload Player Photo</h4>
+      <h4>Edit Player</h4>
       <label for="upload-player-select">Player</label>
       <select id="upload-player-select"></select>
+
       <label for="upload-face-input">Face Photo</label>
       <input type="file" id="upload-face-input" accept="image/*">
-      <label for="upload-action-input">Action Photo (optional)</label>
+      <label for="upload-action-input">Action Photo</label>
       <input type="file" id="upload-action-input" accept="image/*">
-      <button class="upload-btn" id="upload-btn">Upload</button>
+
+      <label for="edit-hcap">Handicap</label>
+      <input type="text" id="edit-hcap" placeholder="e.g. 12 or 8.9">
+
+      <label for="edit-team">Team</label>
+      <select id="edit-team">
+        <option value="baber">Blue Team</option>
+        <option value="weff">Green Team</option>
+        <option value="tbc">TBC</option>
+      </select>
+
+      <label>Marbella &middot; 2026</label>
+      <div class="trip-row">
+        <label class="trip-check"><input type="checkbox" id="trip-marbella-attended"> Attended</label>
+        <select id="trip-marbella-role">
+          <option value="">No role</option>
+          <option value="Captain">Captain</option>
+          <option value="VC">Vice-Captain</option>
+        </select>
+      </div>
+
+      <label>Algarve &middot; 2027</label>
+      <div class="trip-row">
+        <label class="trip-check"><input type="checkbox" id="trip-algarve-attended"> Attended</label>
+        <select id="trip-algarve-role">
+          <option value="">No role</option>
+          <option value="Captain">Captain</option>
+          <option value="VC">Vice-Captain</option>
+        </select>
+      </div>
+
+      <button class="upload-btn" id="upload-btn">Save Changes</button>
       <div class="upload-status" id="upload-status"></div>
     </div>
   </div>
@@ -423,9 +459,13 @@
         if(!p)return;
         if(row.photo_url)p.photo=row.photo_url;
         if(row.action_photo_url)p.actionPhoto=row.action_photo_url;
+        if(row.hcap)p.hcap=row.hcap;
+        if(row.team)p.team=row.team;
+        if(row.trips)p.trips=row.trips;
       });
       render(currentSort);
-    }).catch(function(){/* photo overrides are best-effort — hardcoded fallbacks still show */});
+      if(document.getElementById('upload-panel').classList.contains('visible'))fillEditForm();
+    }).catch(function(){/* overrides are best-effort — hardcoded fallbacks still show */});
   }
 
   /* ---------- admin: upload player photos without touching site code ---------- */
@@ -437,6 +477,25 @@
     sel.innerHTML=players.slice().sort(function(a,b){return a.name.localeCompare(b.name);})
       .map(function(p){return '<option value="'+p.name.replace(/"/g,'&quot;')+'">'+p.name+'</option>';}).join('');
   }
+
+  function fillEditForm(){
+    var name=document.getElementById('upload-player-select').value;
+    var p=players.find(function(pl){return pl.name===name;});
+    if(!p)return;
+    document.getElementById('edit-hcap').value=(p.hcap&&p.hcap!=='TBC')?p.hcap:'';
+    document.getElementById('edit-team').value=p.team||'tbc';
+    var marbella=(p.trips||[]).find(function(t){return t.location==='Marbella'&&t.year===2026;});
+    var algarve=(p.trips||[]).find(function(t){return t.location==='Algarve'&&t.year===2027;});
+    document.getElementById('trip-marbella-attended').checked=!!marbella;
+    document.getElementById('trip-marbella-role').value=(marbella&&marbella.role)||'';
+    document.getElementById('trip-algarve-attended').checked=!!algarve;
+    document.getElementById('trip-algarve-role').value=(algarve&&algarve.role)||'';
+    document.getElementById('upload-face-input').value='';
+    document.getElementById('upload-action-input').value='';
+    document.getElementById('upload-status').textContent='';
+    document.getElementById('upload-status').className='upload-status';
+  }
+  document.getElementById('upload-player-select').addEventListener('change',fillEditForm);
 
   document.getElementById('admin-toggle').addEventListener('click',function(){
     var toggle=this;
@@ -461,6 +520,7 @@
       document.getElementById('upload-panel').classList.add('visible');
       document.getElementById('admin-toggle').classList.add('open');
       populatePlayerSelect();
+      fillEditForm();
     } else {
       document.getElementById('admin-pw-error').textContent='Incorrect password.';
     }
@@ -475,13 +535,8 @@
     var faceFile=document.getElementById('upload-face-input').files[0];
     var actionFile=document.getElementById('upload-action-input').files[0];
     var statusEl=document.getElementById('upload-status');
-    if(!faceFile&&!actionFile){
-      statusEl.textContent='Choose at least one photo.';
-      statusEl.className='upload-status error';
-      return;
-    }
     var btn=this;
-    btn.disabled=true;btn.textContent='Uploading...';
+    btn.disabled=true;btn.textContent='Saving...';
     statusEl.textContent='';statusEl.className='upload-status';
 
     var slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
@@ -500,24 +555,57 @@
     var actionP=actionFile?uploadOne(actionFile,'action'):Promise.resolve(null);
 
     Promise.all([faceP,actionP]).then(function(urls){
-      var update={player_name:name,updated_at:new Date().toISOString()};
+      var trips=[];
+      if(document.getElementById('trip-marbella-attended').checked){
+        var mRole=document.getElementById('trip-marbella-role').value;
+        var mTrip={location:'Marbella',year:2026};
+        if(mRole)mTrip.role=mRole;
+        trips.push(mTrip);
+      }
+      if(document.getElementById('trip-algarve-attended').checked){
+        var aRole=document.getElementById('trip-algarve-role').value;
+        var aTrip={location:'Algarve',year:2027};
+        if(aRole)aTrip.role=aRole;
+        trips.push(aTrip);
+      }
+      var hcapVal=document.getElementById('edit-hcap').value.trim();
+      var teamVal=document.getElementById('edit-team').value;
+      var update={
+        player_name:name,
+        updated_at:new Date().toISOString(),
+        hcap:hcapVal||'TBC',
+        team:teamVal,
+        trips:trips
+      };
       if(urls[0])update.photo_url=urls[0];
       if(urls[1])update.action_photo_url=urls[1];
-      return sb.from('bci_player_photos').upsert(update,{onConflict:'player_name'});
-    }).then(function(res){
-      btn.disabled=false;btn.textContent='Upload';
-      if(res.error){
-        statusEl.textContent='Could not save: '+res.error.message;
+      return sb.from('bci_player_photos').upsert(update,{onConflict:'player_name'}).then(function(res){
+        return {res:res,update:update};
+      });
+    }).then(function(result){
+      btn.disabled=false;btn.textContent='Save Changes';
+      if(result.res.error){
+        statusEl.textContent='Could not save: '+result.res.error.message;
         statusEl.className='upload-status error';
         return;
       }
-      statusEl.textContent='Uploaded \u2014 refresh the page to see it live.';
+      // reflect the change immediately, rather than needing a page refresh to see it
+      var p=players.find(function(pl){return pl.name===name;});
+      if(p){
+        p.hcap=result.update.hcap;
+        p.team=result.update.team;
+        p.trips=result.update.trips;
+        if(result.update.photo_url)p.photo=result.update.photo_url;
+        if(result.update.action_photo_url)p.actionPhoto=result.update.action_photo_url;
+        render(currentSort);
+      }
+      statusEl.textContent='Saved.';
       statusEl.className='upload-status success';
       document.getElementById('upload-face-input').value='';
       document.getElementById('upload-action-input').value='';
     }).catch(function(err){
-      btn.disabled=false;btn.textContent='Upload';
-      statusEl.textContent='Upload failed: '+(err&&err.message?err.message:'unknown error');
+      btn.disabled=false;btn.textContent='Save Changes';
+      statusEl.textContent='Save failed: '+(err&&err.message?err.message:'unknown error');
       statusEl.className='upload-status error';
     });
   });

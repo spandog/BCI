@@ -74,6 +74,8 @@
   .paid-banner-text{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:0.5px;color:#2c5a63;}
   .paid-banner-text .undo{font-family:var(--serif-body);text-decoration:underline;cursor:pointer;color:var(--text-muted);margin-left:0.5rem;font-size:0.78rem;}
   .pay-subamount{font-family:var(--serif-body);font-size:0.78rem;color:rgba(255,255,255,0.5);margin-top:0.4rem;}
+  .pay-deadline{font-family:var(--serif-body);font-size:0.8rem;color:var(--gold-light);margin-top:0.9rem;padding-top:0.9rem;border-top:1px solid rgba(255,255,255,0.15);}
+  .pay-deadline strong{color:white;font-weight:600;}
   .log-payment-form{border-top:1px solid var(--border);padding:1.1rem 1.5rem;}
   .log-payment-form label{display:block;font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem;}
   .log-payment-form input{width:100%;padding:0.7rem 0.8rem;border:1px solid var(--border);border-radius:5px;font-family:var(--serif-body);font-size:0.95rem;margin-bottom:0.75rem;}
@@ -188,6 +190,7 @@
       <div class="pay-label">Balance Remaining</div>
       <div class="pay-amount" id="pay-amount">£284</div>
       <div class="pay-subamount" id="pay-subamount"></div>
+      <div class="pay-deadline" id="pay-deadline">Please settle by <strong>29 January 2027</strong></div>
     </div>
     <div class="pay-body">
       <div class="pay-includes">This covers your remaining balance for <strong>transfers</strong>, <strong>golf</strong> and <strong>hotel</strong> for the Algarve trip.</div>
@@ -285,6 +288,7 @@
     document.getElementById('pay-subamount').textContent=
       Number(row.amount_paid)>0 ? ('£'+Number(row.amount_paid).toFixed(2)+' of £'+Number(row.amount_owed).toFixed(2)+' logged so far') : '';
     document.getElementById('paid-banner').style.display=fullyPaid?'flex':'none';
+    document.getElementById('pay-deadline').style.display=fullyPaid?'none':'block';
   }
 
   function loadHistory(){

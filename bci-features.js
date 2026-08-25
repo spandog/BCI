@@ -598,4 +598,78 @@
       setTimeout(function(){location.href=href;},150);
     });
   }
+
+  /* ---------- add-to-home-screen nudge ----------
+     Only for anyone not already running the installed app, and not shown
+     again once dismissed once (remembered in localStorage). iOS has no
+     native install prompt at all — Add to Home Screen only exists inside
+     Safari's own Share sheet — so iOS gets short instructions instead of
+     a button. Android/Chrome does support a native prompt, so that one
+     gets a real one-tap Add button wired to it. */
+  (function(){
+    var isStandalone=window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches;
+    if(isStandalone)return;
+    if(localStorage.getItem('bci-a2hs-dismissed'))return;
+
+    var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    var deferredPrompt=null;
+    var banner=null;
+
+    function positionBanner(){
+      if(!banner)return;
+      var wrap=document.getElementById('bci-bottom-fixed-wrap');
+      var wrapH=wrap?wrap.getBoundingClientRect().height:0;
+      banner.style.bottom=(wrapH+12)+'px';
+    }
+
+    function dismiss(){
+      banner.classList.remove('visible');
+      localStorage.setItem('bci-a2hs-dismissed','1');
+      setTimeout(function(){if(banner)banner.remove();},300);
+    }
+
+    function showBanner(mode){
+      banner=document.createElement('div');
+      banner.id='bci-a2hs-banner';
+      banner.innerHTML=
+        '<div class="bci-a2hs-text">'+
+          (mode==='ios'
+            ?'Add BCI to your home screen \u2014 tap Share, then \u201cAdd to Home Screen\u201d'
+            :'Add BCI to your home screen for the full app experience')+
+        '</div>'+
+        (mode==='android'?'<button class="bci-a2hs-btn" id="bci-a2hs-install">Add</button>':'')+
+        '<button class="bci-a2hs-close" id="bci-a2hs-close" aria-label="Dismiss">&times;</button>';
+      document.body.appendChild(banner);
+      positionBanner();
+      if(window.ResizeObserver){
+        var wrap=document.getElementById('bci-bottom-fixed-wrap');
+        if(wrap)new ResizeObserver(positionBanner).observe(wrap);
+      }
+      window.addEventListener('resize',positionBanner);
+      requestAnimationFrame(function(){banner.classList.add('visible');});
+
+      document.getElementById('bci-a2hs-close').addEventListener('click',dismiss);
+
+      if(mode==='android'){
+        document.getElementById('bci-a2hs-install').addEventListener('click',function(){
+          if(!deferredPrompt){dismiss();return;}
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function(){
+            deferredPrompt=null;
+            dismiss();
+          });
+        });
+      }
+    }
+
+    if(isIOS){
+      setTimeout(function(){showBanner('ios');},2500);
+    } else {
+      window.addEventListener('beforeinstallprompt',function(e){
+        e.preventDefault();
+        deferredPrompt=e;
+        setTimeout(function(){showBanner('android');},1500);
+      });
+    }
+  })();
 })();

@@ -90,6 +90,9 @@
   .lightbox-close{position:absolute;top:1rem;right:1rem;color:white;cursor:pointer;opacity:0.6;background:rgba(0,0,0,0.4);padding:8px;border-radius:4px;line-height:0;}
   .lightbox-close .icon{width:20px;height:20px;}
   .lightbox-close:hover{opacity:1;}
+  .lightbox-share{position:absolute;top:1rem;right:3.75rem;color:white;cursor:pointer;opacity:0.6;background:rgba(0,0,0,0.4);padding:8px;border-radius:4px;line-height:0;}
+  .lightbox-share .icon{width:20px;height:20px;}
+  .lightbox-share:hover{opacity:1;}
   .lightbox-prev,.lightbox-next{position:absolute;top:50%;transform:translateY(-50%);color:white;cursor:pointer;opacity:0.5;padding:1rem;line-height:0;}
   .lightbox-prev .icon,.lightbox-next .icon{width:30px;height:30px;}
   .lightbox-prev{left:0.25rem;}
@@ -121,6 +124,8 @@
     <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
     <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l14-8z" fill="currentColor" stroke="none"/></symbol>
     <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
   </defs>
@@ -172,6 +177,7 @@
 
 <div class="lightbox" id="lightbox">
   <div class="lightbox-close" id="lightbox-close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></div>
+  <div class="lightbox-share" id="lightbox-share"><svg class="icon" aria-hidden="true"><use href="#i-share"/></svg></div>
   <div class="lightbox-prev" id="lightbox-prev"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg></div>
   <div class="lightbox-img-wrap">
     <img id="lightbox-img" src="" alt="">
@@ -375,6 +381,41 @@
   }
 
   document.getElementById('lightbox-close').addEventListener('click',closeLightbox);
+
+  /* Real native share sheet — tries to share the actual photo/video file
+     itself (so it shows up properly in the share sheet, not just a link),
+     falling back to sharing the link if file-sharing isn't supported, and
+     to copying the link if the Web Share API isn't available at all. */
+  document.getElementById('lightbox-share').addEventListener('click',function(){
+    var item=allImages[current];
+    if(!item)return;
+    var btn=this;
+    var shareUrl=new URL(item.src,location.href).href;
+
+    function shareLink(){
+      if(navigator.share){
+        navigator.share({title:'Book Club Invitational',url:shareUrl}).catch(function(){});
+      } else if(navigator.clipboard){
+        navigator.clipboard.writeText(shareUrl).then(function(){
+          var original=btn.innerHTML;
+          btn.innerHTML='<svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>';
+          setTimeout(function(){btn.innerHTML=original;},1400);
+        }).catch(function(){});
+      }
+    }
+
+    if(!navigator.share){shareLink();return;}
+
+    fetch(item.src).then(function(r){return r.blob();}).then(function(blob){
+      var ext=item.isVideo?'mp4':'jpg';
+      var file=new File([blob],'bci-photo.'+ext,{type:blob.type||(item.isVideo?'video/mp4':'image/jpeg')});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        navigator.share({files:[file],title:'Book Club Invitational'}).catch(function(){});
+      } else {
+        shareLink();
+      }
+    }).catch(shareLink);
+  });
   document.getElementById('lightbox-prev').addEventListener('click',function(){changePhoto(-1);});
   document.getElementById('lightbox-next').addEventListener('click',function(){changePhoto(1);});
   document.getElementById('lightbox').addEventListener('click',function(e){if(e.target===e.currentTarget)closeLightbox();});

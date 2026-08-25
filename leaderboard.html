@@ -84,6 +84,12 @@
   .rc-trophy{width:16px;height:16px;flex-shrink:0;}
   .rc-seam{position:absolute;top:0;bottom:0;width:2px;background:var(--green-dark);opacity:0.5;}
   .rc-footer{text-align:center;padding:0.5rem;font-family:var(--serif-display);font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);background:#fafaf7;}
+  .rc-share-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:0.5rem;
+    padding:0.7rem;background:white;border:none;border-top:1px solid var(--border);
+    font-family:var(--serif-display);font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--text-dark);cursor:pointer;}
+  .rc-share-btn .icon{width:15px;height:15px;}
+  .rc-share-btn:active{background:var(--cream);}
 
   .live-strip{display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.15rem 0 0.6rem;}
   .live-tile{flex:0 0 104px;width:104px;background:white;border:1px solid var(--border);border-top:3px solid var(--text-muted);border-radius:6px;padding:0.5rem 0.55rem;cursor:pointer;transition:transform 0.15s;}
@@ -119,11 +125,15 @@
   .score-divider .vs{font-family:var(--serif-display);font-size:0.75rem;letter-spacing:3px;color:rgba(255,255,255,0.3);text-transform:uppercase;}
   .win-note{text-align:center;font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);margin-top:0.5rem;text-transform:uppercase;}
 
-  .day-tabs{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:white;margin-bottom:0.6rem;}
-  .day-tab{flex:1;padding:0.6rem 0.5rem;text-align:center;font-family:var(--serif-display);font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);border-right:1px solid var(--border);transition:all 0.2s;}
+  .day-tabs{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:white;margin-bottom:0.6rem;position:relative;}
+  .day-tab-indicator{position:absolute;top:0;left:0;width:50%;height:100%;background:var(--green-dark);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);z-index:0;}
+  .day-tab{flex:1;padding:0.6rem 0.5rem;text-align:center;font-family:var(--serif-display);font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);border-right:1px solid var(--border);transition:color 0.2s;position:relative;z-index:1;}
   .day-tab-sub{font-size:0.52rem;letter-spacing:0.5px;text-transform:none;opacity:0.6;margin-top:2px;font-family:var(--serif-body);}
   .day-tab:last-child{border-right:none;}
-  .day-tab.active{background:var(--green-dark);color:var(--gold);}
+  .day-tab.active{color:var(--gold);}
+  @media(prefers-reduced-motion:reduce){
+    .day-tab-indicator{transition:none;}
+  }
 
   .hole-legend{display:flex;justify-content:center;gap:1.25rem;margin-bottom:0.6rem;font-family:var(--serif-display);font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
   .hole-legend span{display:flex;align-items:center;gap:5px;}
@@ -188,6 +198,8 @@
   .back-link{font-family:var(--serif-display);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);cursor:pointer;border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.875rem;background:white;}
   .back-link:hover{color:var(--gold);border-color:var(--gold);}
   .empty-note{text-align:center;font-style:italic;color:var(--text-muted);padding:2rem 1rem;}
+  .offline-banner{background:#fdf3e3;border:1px solid #e8c987;color:#7a5c1e;border-radius:6px;
+    padding:0.65rem 0.9rem;font-size:0.8rem;text-align:center;margin-bottom:0.9rem;}
 
   .scorer-section{border-top:1px solid var(--border);padding-top:1.5rem;margin-top:1rem;}
   .scorer-toggle{display:flex;align-items:center;gap:0.75rem;cursor:pointer;padding:0.5rem 0;}
@@ -275,6 +287,8 @@
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
     <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
   </defs>
 </svg>
 <nav>
@@ -334,11 +348,16 @@
     </div>
     <div class="rc-bar" id="rc-bar-fills"></div>
     <div class="rc-footer" id="rc-footer"></div>
+    <button class="rc-share-btn" id="rc-share-btn">
+      <svg class="icon" aria-hidden="true"><use href="#i-share"/></svg>
+      Share Standings
+    </button>
   </div>
 
   <div class="live-strip" id="live-strip" style="display:none;"></div>
 
   <div class="day-tabs">
+    <div class="day-tab-indicator" id="day-tab-indicator"></div>
     <div class="day-tab active" id="tab-1">Day 1 &middot; Pairs<div class="day-tab-sub">Quinta do Vale</div></div>
     <div class="day-tab" id="tab-2">Day 2 &middot; Singles<div class="day-tab-sub">Isla Canela</div></div>
   </div>
@@ -348,6 +367,8 @@
     <span><span class="legend-sq h"></span>Halved</span>
     <span><span class="legend-sq w"></span>Green</span>
   </div>
+
+  <div class="offline-banner" id="offline-banner" style="display:none;"></div>
 
   <div class="match-list" id="match-list">
     <div class="skeleton-card"><div class="skeleton-line short"></div><div class="skeleton-line tall"></div><div class="skeleton-line" style="width:80%"></div></div>
@@ -492,8 +513,52 @@
 
   /* ---------- day tabs ---------- */
   document.getElementById('tab-1').addEventListener('click',function(){switchDay(1);});
+
+  document.getElementById('rc-share-btn').addEventListener('click',function(){
+    var p=points();
+    var baberTotal=p.baber+p.baberLive;
+    var weffTotal=p.weff+p.weffLive;
+    var text='Book Club Invitational \u2014 Algarve 2027\n'
+      +'Blue '+fmtPts(baberTotal)+' \u2013 '+fmtPts(weffTotal)+' Green\n'
+      +'First to 9\u00BD points wins the BCI';
+    var url=location.origin+location.pathname;
+    var btn=this;
+
+    if(navigator.share){
+      navigator.share({title:'BCI Standings',text:text,url:url}).catch(function(){});
+    } else if(navigator.clipboard){
+      navigator.clipboard.writeText(text+'\n'+url).then(function(){
+        var original=btn.innerHTML;
+        btn.innerHTML='<svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> Copied';
+        setTimeout(function(){btn.innerHTML=original;},1600);
+      }).catch(function(){});
+    }
+  });
   document.getElementById('tab-2').addEventListener('click',function(){switchDay(2);});
   function dayFormat(d){return d===1?'Better Ball':'Individual Matchplay';}
+
+  /* Swipe left/right on the match list to move between days — the tab
+     buttons still work exactly as before, this is just an additional way
+     in for anyone used to swiping between tabs on a phone. Checks the
+     dominant direction of the gesture so a mostly-vertical scroll never
+     gets mistaken for a day switch. */
+  (function(){
+    var el=document.getElementById('match-list');
+    if(!el)return;
+    var startX=null,startY=null,tracking=false;
+    el.addEventListener('touchstart',function(e){
+      startX=e.touches[0].clientX;startY=e.touches[0].clientY;tracking=true;
+    },{passive:true});
+    el.addEventListener('touchend',function(e){
+      if(!tracking||startX===null)return;
+      tracking=false;
+      var dx=e.changedTouches[0].clientX-startX;
+      var dy=e.changedTouches[0].clientY-startY;
+      if(Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*1.5)return;
+      if(dx<0&&state.day===1)switchDay(2);
+      else if(dx>0&&state.day===2)switchDay(1);
+    },{passive:true});
+  })();
 
   function switchDay(d,onDone){
     var el=document.getElementById('match-list');
@@ -502,6 +567,8 @@
     state.day=d;
     document.getElementById('tab-1').classList.toggle('active',d===1);
     document.getElementById('tab-2').classList.toggle('active',d===2);
+    var indicator=document.getElementById('day-tab-indicator');
+    if(indicator)indicator.style.transform='translateX('+(d===2?'100%':'0%')+')';
     if(reduceMotion||!el){
       renderMatches();
       renderScorer(true);
@@ -562,10 +629,9 @@
     if(!sb)return;
     sb.from('bci_matches').select('*').order('day').order('match_no').order('created_at')
       .then(function(res){
-        if(res.error){
-          document.getElementById('match-list').innerHTML='<div class="empty-note">Could not load the leaderboard. Check the connection and refresh.</div>';
-          return;
-        }
+        if(res.error)throw new Error(res.error.message||'load failed');
+        state.lastFetchSuccess=Date.now();
+        setOfflineBanner(false);
         var fresh=JSON.stringify(res.data);
         if(fresh===state.lastData)return;
         state.lastData=fresh;
@@ -577,7 +643,37 @@
         if(state.scoringId)renderScoreView();
         if(triggerSheetCheck)checkMatchSheets();
         handleDeepLink();
+      })
+      .catch(function(){
+        // A genuine first load with nothing to show yet — there's nothing
+        // useful to keep on screen, so the plain message is the best we
+        // can do. But if real scores are already showing (very plausibly
+        // someone mid-round who's just lost signal), leave them exactly
+        // as they are rather than wiping out something still useful, and
+        // show a small offline note instead.
+        if(!state.matches.length){
+          document.getElementById('match-list').innerHTML='<div class="empty-note">Could not load the leaderboard. Check the connection and refresh.</div>';
+          return;
+        }
+        setOfflineBanner(true);
       });
+  }
+
+  function fmtTimeAgo(ts){
+    var secs=Math.floor((Date.now()-ts)/1000);
+    if(secs<60)return 'just now';
+    var mins=Math.floor(secs/60);
+    if(mins<60)return mins+' minute'+(mins===1?'':'s')+' ago';
+    var hrs=Math.floor(mins/60);
+    return hrs+' hour'+(hrs===1?'':'s')+' ago';
+  }
+
+  function setOfflineBanner(isOffline){
+    var el=document.getElementById('offline-banner');
+    if(!el)return;
+    if(!isOffline){el.style.display='none';return;}
+    el.style.display='block';
+    el.textContent='Offline \u2014 showing scores as of '+(state.lastFetchSuccess?fmtTimeAgo(state.lastFetchSuccess):'last connection');
   }
 
   function renderLiveStrip(){

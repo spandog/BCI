@@ -1,15 +1,17 @@
 /* ============================================================
    BCI service worker — caches the core shell (itinerary, home,
-   shared css/js) so the site still opens on patchy signal at
-   the course. Stale-while-revalidate: serves from cache first
-   for speed, then updates the cache in the background from the
-   network. Falls back to the cached itinerary page if a page
-   navigation fails entirely offline.
+   leaderboard, shared css/js) so the site still opens on patchy
+   signal at the course. Stale-while-revalidate: serves from cache
+   first for speed, then updates the cache in the background from
+   the network. Falls back to whichever page was actually being
+   navigated to, if it's cached — only drops back to the itinerary
+   page as a last resort if that specific page was never cached.
    ============================================================ */
-var CACHE_NAME='bci-cache-v118';
+var CACHE_NAME='bci-cache-v121';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
+  'leaderboard.html',
   'theme-coastal.css',
   'bci-features.js',
   'live-tracker.js',
@@ -49,6 +51,9 @@ self.addEventListener('fetch',function(e){
         return resp;
       }).catch(function(){
         if(cached)return cached;
+        // The specific page being navigated to was never cached (e.g. a
+        // first-ever visit while offline) — fall back to the itinerary
+        // page as a last resort rather than showing nothing at all.
         if(isNavigate)return caches.match('2027.html');
         return undefined;
       });

@@ -436,7 +436,7 @@
 
       function renderSignedOut(){
         panel.innerHTML=
-          '<p class="bci-ap-note">Sign in for betting, kit orders, and settling up — one code sent to your email, no password.</p>'+
+          '<p class="bci-ap-note">Sign in for kit orders and settling up — one code sent to your email, no password.</p>'+
           '<label class="bci-ap-label">Email</label>'+
           '<input type="email" id="bci-ap-email" placeholder="you@email.com">'+
           '<button class="bci-ap-btn" id="bci-ap-send">Send Me A Code</button>'+

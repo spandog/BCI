@@ -217,6 +217,27 @@
         <option value="tbc">TBC</option>
       </select>
 
+      <label for="edit-country">Nationality</label>
+      <select id="edit-country">
+        <option value="">No flag</option>
+        <option value="england">England</option>
+        <option value="scotland">Scotland</option>
+        <option value="wales">Wales</option>
+        <option value="IE">Ireland</option>
+        <option value="ES">Spain</option>
+        <option value="PT">Portugal</option>
+        <option value="FR">France</option>
+        <option value="DE">Germany</option>
+        <option value="IT">Italy</option>
+        <option value="NL">Netherlands</option>
+        <option value="PL">Poland</option>
+        <option value="US">United States</option>
+        <option value="AU">Australia</option>
+        <option value="NZ">New Zealand</option>
+        <option value="ZA">South Africa</option>
+        <option value="CA">Canada</option>
+      </select>
+
       <label>Marbella &middot; 2026</label>
       <div class="trip-row">
         <label class="trip-check"><input type="checkbox" id="trip-marbella-attended"> Attended</label>
@@ -463,6 +484,7 @@
         if(row.action_photo_url)p.actionPhoto=row.action_photo_url;
         if(row.hcap)p.hcap=row.hcap;
         if(row.team)p.team=row.team;
+        if(row.country!=null)p.country=row.country;
         if(row.trips)p.trips=row.trips;
       });
       render(currentSort);
@@ -486,6 +508,7 @@
     if(!p)return;
     document.getElementById('edit-hcap').value=(p.hcap&&p.hcap!=='TBC')?p.hcap:'';
     document.getElementById('edit-team').value=p.team||'tbc';
+    document.getElementById('edit-country').value=p.country||'';
     var marbella=(p.trips||[]).find(function(t){return t.location==='Marbella'&&t.year===2026;});
     var algarve=(p.trips||[]).find(function(t){return t.location==='Algarve'&&t.year===2027;});
     document.getElementById('trip-marbella-attended').checked=!!marbella;
@@ -572,11 +595,13 @@
       }
       var hcapVal=document.getElementById('edit-hcap').value.trim();
       var teamVal=document.getElementById('edit-team').value;
+      var countryVal=document.getElementById('edit-country').value;
       var update={
         player_name:name,
         updated_at:new Date().toISOString(),
         hcap:hcapVal||'TBC',
         team:teamVal,
+        country:countryVal,
         trips:trips
       };
       if(urls[0])update.photo_url=urls[0];
@@ -596,6 +621,7 @@
       if(p){
         p.hcap=result.update.hcap;
         p.team=result.update.team;
+        p.country=result.update.country;
         p.trips=result.update.trips;
         if(result.update.photo_url)p.photo=result.update.photo_url;
         if(result.update.action_photo_url)p.actionPhoto=result.update.action_photo_url;

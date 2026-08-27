@@ -98,6 +98,7 @@
     .entry-grid{grid-template-columns:1fr;}
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -168,13 +169,35 @@
 <script>
 (function(){
   var COURSES={1:'Quinta do Vale',2:'Isla Canela'};
-  var state={day:1,unlocked:true,data:{1:{ld:{entries:[]},ntp:{entries:[]}},2:{ld:{entries:[]},ntp:{entries:[]}}}};
+  var state={day:1,data:{1:{ld:{entries:[]},ntp:{entries:[]}},2:{ld:{entries:[]},ntp:{entries:[]}}}};
 
-  function saveState(){try{localStorage.setItem('bci_comps',JSON.stringify(state.data));}catch(e){}}
-  function loadState(){try{var s=localStorage.getItem('bci_comps');if(s)state.data=JSON.parse(s);}catch(e){}}
+  var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+  var sb=window.supabase?window.supabase.createClient(SB_URL,SB_KEY):null;
 
   function timeNow(){
     return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  /* Pulls every entry from the shared table and reshapes it into the same
+     state.data[day][type].entries structure the existing render functions
+     already expect — so entryCard/renderDisplay below needed no changes.
+     Ordered by created_at ascending; compCard below reads the LAST entry
+     as the current winner, since the newest logged score is assumed to be
+     whoever currently holds it — nobody would log a worse one. */
+  function fetchEntries(){
+    if(!sb)return;
+    sb.from('bci_side_competitions').select('*').order('created_at').then(function(res){
+      if(res.error||!res.data)return;
+      var fresh={1:{ld:{entries:[]},ntp:{entries:[]}},2:{ld:{entries:[]},ntp:{entries:[]}}};
+      res.data.forEach(function(row){
+        if(!fresh[row.day]||!fresh[row.day][row.type])return;
+        fresh[row.day][row.type].entries.push({id:row.id,name:row.name,time:row.logged_at});
+      });
+      state.data=fresh;
+      renderDisplay();
+      renderScorer();
+    });
   }
 
   document.getElementById('menu-btn').addEventListener('click',function(){
@@ -201,14 +224,15 @@
 
   function compCard(type,icon,title,course){
     var entries=state.data[state.day][type].entries;
-    var w=entries.length>0?entries[0]:null;
+    var w=entries.length>0?entries[entries.length-1]:null;
     var winner=w
       ?'<div class="crown"><svg class="icon crown-svg" aria-hidden="true"><use href="#i-trophy"/></svg></div><div class="winner-name">'+w.name+'</div>'
         +(w.time?'<div class="winner-detail">Logged '+w.time+'</div>':'')
       :'<div class="tbd">No entry yet</div>';
+    var newestFirst=entries.slice().reverse();
     var history=entries.length>1
       ?'<div class="comp-history"><div class="comp-history-title">All entries</div>'
-        +entries.map(function(e,i){
+        +newestFirst.map(function(e,i){
           return '<div class="history-item"><span class="pos">'+(i+1)+'.</span><span class="h-name">'+e.name+'</span><span class="h-detail">'+(e.time||'')+'</span></div>';
         }).join('')+'</div>'
       :'';
@@ -232,7 +256,6 @@
   }
 
   function renderScorer(){
-    if(!state.unlocked)return;
     var d=state.day;
     document.getElementById('entry-fields').innerHTML=
       entryCard('ld','i-driver','Longest Drive',d,'e.g. James Baber')+
@@ -249,25 +272,38 @@
   }
 
   function addEntry(type){
-    var name=document.getElementById(type+'-name').value.trim();
+    if(!sb){alert('Not connected — try reloading the page.');return;}
+    var input=document.getElementById(type+'-name');
+    var name=input.value.trim();
     if(!name){alert('Please enter a player name.');return;}
-    state.data[state.day][type].entries.push({name:name,time:timeNow()});
-    saveState();renderDisplay();renderScorer();
+    sb.from('bci_side_competitions').insert({day:state.day,type:type,name:name,logged_at:timeNow()}).then(function(res){
+      if(res.error){alert('Could not save: '+res.error.message);return;}
+      input.value='';
+      fetchEntries();
+    });
   }
 
   function clearEntries(type){
     if(!confirm('Clear all entries for this competition?'))return;
-    state.data[state.day][type].entries=[];
-    saveState();renderDisplay();renderScorer();
+    if(!sb)return;
+    sb.from('bci_side_competitions').delete().eq('day',state.day).eq('type',type).then(function(res){
+      if(res.error){alert('Could not clear: '+res.error.message);return;}
+      fetchEntries();
+    });
   }
 
   document.getElementById('scorer-toggle').addEventListener('click',function(){
-    this.classList.toggle('open');
-    document.getElementById('scorer-panel').classList.toggle('visible');
+    var toggle=this;
+    var panel=document.getElementById('scorer-panel');
+    var willOpen=!panel.classList.contains('visible');
+    panel.classList.toggle('visible',willOpen);
+    toggle.classList.toggle('open',willOpen);
+    if(willOpen)renderScorer();
   });
 
-  loadState();
+  fetchEntries();
   renderDisplay();
+  setInterval(fetchEntries,30000);
   renderScorer();
   setInterval(function(){loadState();renderDisplay();},30000);
 })();

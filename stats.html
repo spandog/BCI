@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Stats — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#16291d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BCI">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Lora:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme-coastal.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{-webkit-tap-highlight-color:transparent;animation:bci-page-in 0.35s ease both;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;}
+  @keyframes bci-page-in{from{opacity:0;}to{opacity:1;}}
+  ::selection{background:#c9a84c;color:#16291d;}
+  :focus-visible{outline:2px solid #c9a84c;outline-offset:2px;}
+  :root{
+    --green-dark:#16291d;--green-mid:#3d5c42;--gold:#c9a84c;--gold-light:#ddc27e;
+    --cream:#fbfaf7;--cream-dark:#f0ede4;--text-dark:#16291d;--text-muted:#5c6259;--border:#dcd6c8;
+    --baber-text:#1e5a8c;--weff-text:#2f7d4f;
+    --serif-display:'Lora',Georgia,serif;
+    --serif-body:'Public Sans',Arial,sans-serif;
+  }
+  body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  nav{background:var(--green-dark);padding:0 1.5rem;padding-top:env(safe-area-inset-top,0px);display:flex;align-items:center;justify-content:space-between;height:calc(60px + env(safe-area-inset-top,0px));position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .nav-back{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.6);font-family:var(--serif-display);font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:color 0.2s;}
+  .nav-back:hover{color:var(--gold);}
+  .nav-back .icon{width:14px;height:14px;}
+  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;transition:border-color 0.2s,transform 0.15s;}
+  .nav-menu-btn:hover{border-color:var(--gold);}
+  .nav-menu-btn:active{transform:scale(0.95);}
+  .nav-menu-btn span.menu-word{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;}
+  .nav-menu-btn .chevron{color:var(--gold);width:12px;height:12px;transition:transform 0.2s;}
+  .nav-menu-btn.open .chevron{transform:rotate(180deg);}
+  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(201,168,76,0.2);border-top:none;min-width:200px;z-index:199;}
+  .dropdown.open{display:block;}
+  .dropdown a{display:flex;align-items:center;gap:10px;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.15s;}
+  .dropdown a:last-child{border-bottom:none;}
+  .dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.03);padding-left:1.5rem;}
+  .dropdown a.active{color:var(--gold);}
+  .dropdown a.live{color:var(--gold-light);}
+  .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
+  .dropdown a.live .d-icon{color:var(--gold-light);}
+
+  .page-hero{background:var(--green-dark);padding:2.5rem 1.5rem 2rem;}
+  .page-hero-inner{max-width:900px;margin:0 auto;}
+  .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:0.6rem;}
+  .page-hero h1{font-family:var(--serif-display);font-weight:700;font-size:1.9rem;color:white;}
+
+  .page{max-width:900px;margin:0 auto;padding:2.5rem 1.5rem;flex:1 0 auto;}
+  .stats-note{font-family:var(--serif-body);font-size:0.82rem;color:var(--text-muted);font-style:italic;margin-bottom:2.2rem;line-height:1.5;}
+  .stats-note strong{color:var(--text-dark);font-style:normal;}
+
+  .stat-section{margin-bottom:2.5rem;}
+  .stat-section-title{font-family:var(--serif-display);font-weight:700;font-size:1.1rem;color:var(--green-dark);margin-bottom:0.3rem;}
+  .stat-section-sub{font-family:var(--serif-body);font-size:0.78rem;color:var(--text-muted);margin-bottom:1.1rem;}
+
+  .stat-loading{text-align:center;font-style:italic;color:var(--text-muted);padding:2.5rem 1rem;font-size:0.88rem;}
+
+  .stat-list{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .stat-row{display:flex;align-items:center;gap:0.9rem;padding:0.8rem 1.1rem;border-bottom:1px solid var(--border);}
+  .stat-row:last-child{border-bottom:none;}
+  .stat-rank{font-family:var(--serif-display);font-weight:700;font-size:0.85rem;color:var(--gold);width:1.3rem;flex-shrink:0;}
+  .stat-name{flex:1;font-family:var(--serif-body);font-size:0.9rem;color:var(--text-dark);}
+  .stat-value{font-family:var(--serif-display);font-weight:700;font-size:1.05rem;color:var(--green-dark);flex-shrink:0;}
+  .stat-value .unit{font-family:var(--serif-body);font-weight:400;font-size:0.68rem;color:var(--text-muted);margin-left:2px;text-transform:uppercase;}
+
+  .rivalry-card{background:white;border:1px solid var(--border);border-radius:8px;padding:1rem 1.1rem;margin-bottom:0.7rem;}
+  .rivalry-names{font-family:var(--serif-display);font-weight:700;font-size:0.92rem;color:var(--text-dark);margin-bottom:0.3rem;}
+  .rivalry-record{font-family:var(--serif-body);font-size:0.8rem;color:var(--text-muted);}
+
+  .margin-card{display:flex;justify-content:space-between;align-items:center;background:white;border:1px solid var(--border);border-radius:8px;padding:0.9rem 1.1rem;margin-bottom:0.7rem;}
+  .margin-teams{font-family:var(--serif-body);font-size:0.85rem;color:var(--text-dark);}
+  .margin-score{font-family:var(--serif-display);font-weight:700;font-size:1rem;color:var(--gold);flex-shrink:0;margin-left:1rem;}
+
+  .empty-stat{text-align:center;color:var(--text-muted);font-style:italic;padding:1.5rem;font-size:0.85rem;background:white;border:1px solid var(--border);border-radius:8px;}
+
+  .back-link{display:inline-flex;align-items:center;gap:8px;color:var(--text-muted);text-decoration:none;font-family:var(--serif-display);font-size:0.78rem;letter-spacing:1.5px;text-transform:uppercase;margin-top:1rem;}
+  .back-link:hover{color:var(--green-dark);}
+  .back-link .icon{width:14px;height:14px;}
+
+  .fade-up{opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease;}
+  .fade-up.visible{opacity:1;transform:translateY(0);}
+
+  footer{background:#141f26;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h2.2L8.8 4.5h6.4L16.8 6.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5z"/><circle cx="12" cy="12.5" r="3.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.7 5.6 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.6-3.7-9S9.6 5.6 12 3z"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-bar-chart" viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  </defs>
+</svg>
+
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <a href="2027.html" class="nav-back"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Back to Algarve &middot; 2027</a>
+    <div style="position:relative;">
+      <div class="nav-menu-btn" id="menu-btn">
+        <span class="menu-word">Menu</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+      </div>
+      <div class="dropdown" id="dropdown">
+        <a href="editions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-trophy"/></svg>Results</a>
+        <a href="gallery.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
+        <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve &middot; 2027</a>
+        <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
+        <a href="stats.html" class="active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>Stats</a>
+        <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+        <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
+        <a href="leaderboard.html" class="live"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-eyebrow">Algarve &middot; 2027</div>
+    <h1>Stats</h1>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="stats-note">Built from real, hole-by-hole results as they're entered on the <strong>leaderboard</strong> — everything below is live and updates as matches are played. Marbella 2026 only has final results recorded, not hole-by-hole detail, so these stats are Algarve 2027 only. For overall career win/loss records spanning both trips, see the <a href="players.html" style="color:var(--green-dark);">players page</a>.</div>
+
+  <div id="stats-body">
+    <div class="stat-loading">Crunching the numbers&hellip;</div>
+  </div>
+
+</div>
+
+<footer><p><span>Book Club Invitational</span></p></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  document.getElementById('menu-btn').addEventListener('click',function(){
+    document.getElementById('menu-btn').classList.toggle('open');
+    document.getElementById('dropdown').classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){
+      document.getElementById('menu-btn').classList.remove('open');
+      document.getElementById('dropdown').classList.remove('open');
+    }
+  });
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
+  document.querySelectorAll('.fade-up').forEach(function(el){obs.observe(el);});
+
+  var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+  var sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function namesFrom(str){
+    return (str||'').split('&').map(function(s){return s.trim();}).filter(Boolean);
+  }
+
+  function fmtPts(n){
+    var whole=Math.floor(n);
+    return (n%1===0.5)?(whole===0?'\u00BD':whole+'\u00BD'):String(n);
+  }
+
+  function computeStats(matches){
+    var finals=matches.filter(function(m){return m.status==='final';});
+    var holesWon={},holesHalved={};
+    var rivalryKey={};
+    var margins=[];
+
+    finals.forEach(function(m){
+      var holes=m.holes||'';
+      var baberNames=namesFrom(m.baber_players);
+      var weffNames=namesFrom(m.weff_players);
+      var isPlaceholder=/pair \d|player \d/i.test(m.baber_players||'')||/pair \d|player \d/i.test(m.weff_players||'');
+      if(isPlaceholder)return;
+
+      var bHoles=0,wHoles=0,halved=0;
+      for(var i=0;i<holes.length;i++){
+        if(holes[i]==='b'){bHoles++;baberNames.forEach(function(n){holesWon[n]=(holesWon[n]||0)+1;});}
+        else if(holes[i]==='w'){wHoles++;weffNames.forEach(function(n){holesWon[n]=(holesWon[n]||0)+1;});}
+        else if(holes[i]==='h'){
+          halved++;
+          baberNames.concat(weffNames).forEach(function(n){holesHalved[n]=(holesHalved[n]||0)+1;});
+        }
+      }
+
+      // Head-to-head — only meaningful for genuine 1v1 singles matches
+      if(baberNames.length===1&&weffNames.length===1){
+        var a=baberNames[0],b=weffNames[0];
+        var key=[a,b].sort().join(' vs ');
+        if(!rivalryKey[key])rivalryKey[key]={a:a,b:b,aWins:0,bWins:0,ties:0};
+        var r=rivalryKey[key];
+        var aIsBaber=(r.a===a);
+        if(m.leader==='tie')r.ties++;
+        else if((m.leader==='baber')===aIsBaber)r.aWins++;
+        else r.bWins++;
+      }
+
+      margins.push({
+        match_no:m.match_no,day:m.day,
+        baber:m.baber_players,weff:m.weff_players,
+        leader:m.leader,score:m.score,
+        margin:Math.abs(bHoles-wHoles)+(18-holes.length)
+      });
+    });
+
+    return {holesWon:holesWon,holesHalved:holesHalved,rivalries:Object.values(rivalryKey),margins:margins.filter(function(m){return m.leader!=='tie';})};
+  }
+
+  function topList(obj,label,unit){
+    var entries=Object.keys(obj).map(function(k){return {name:k,val:obj[k]};}).sort(function(a,b){return b.val-a.val;}).slice(0,5);
+    if(!entries.length)return '<div class="empty-stat">No completed matches yet \u2014 check back once scoring is under way.</div>';
+    return '<div class="stat-list">'+entries.map(function(e,i){
+      return '<div class="stat-row"><span class="stat-rank">'+(i+1)+'</span>'
+        +'<span class="stat-name">'+esc(e.name)+'</span>'
+        +'<span class="stat-value">'+e.val+'<span class="unit">'+unit+'</span></span></div>';
+    }).join('')+'</div>';
+  }
+
+  function renderRivalries(rivalries){
+    var real=rivalries.filter(function(r){return (r.aWins+r.bWins+r.ties)>1;})
+      .sort(function(a,b){return (b.aWins+b.bWins+b.ties)-(a.aWins+a.bWins+a.ties);});
+    if(!real.length)return '<div class="empty-stat">No rivalry has met more than once yet \u2014 check back as more singles matches are completed.</div>';
+    return real.slice(0,5).map(function(r){
+      return '<div class="rivalry-card"><div class="rivalry-names">'+esc(r.a)+' vs '+esc(r.b)+'</div>'
+        +'<div class="rivalry-record">'+r.aWins+' \u2013 '+r.bWins+(r.ties?' ('+r.ties+' halved)':'')+'</div></div>';
+    }).join('');
+  }
+
+  function renderMargins(margins){
+    var sorted=margins.slice().sort(function(a,b){return b.margin-a.margin;}).slice(0,5);
+    if(!sorted.length)return '<div class="empty-stat">No completed matches yet \u2014 check back once scoring is under way.</div>';
+    return sorted.map(function(m){
+      var winners=m.leader==='baber'?m.baber:m.weff;
+      var losers=m.leader==='baber'?m.weff:m.baber;
+      return '<div class="margin-card"><span class="margin-teams">'+esc(winners)+' beat '+esc(losers)+'</span>'
+        +'<span class="margin-score">'+esc(m.score)+'</span></div>';
+    }).join('');
+  }
+
+  function render(matches){
+    var s=computeStats(matches);
+    var html='';
+
+    html+='<div class="stat-section fade-up">'
+      +'<div class="stat-section-title">Most Holes Won</div>'
+      +'<div class="stat-section-sub">Across all completed Algarve 2027 matches</div>'
+      +topList(s.holesWon,'holes','holes')
+    +'</div>';
+
+    html+='<div class="stat-section fade-up">'
+      +'<div class="stat-section-title">Most Halved Holes</div>'
+      +'<div class="stat-section-sub">Neither side could shift these</div>'
+      +topList(s.holesHalved,'halves','halved')
+    +'</div>';
+
+    html+='<div class="stat-section fade-up">'
+      +'<div class="stat-section-title">Head-to-Head Rivalries</div>'
+      +'<div class="stat-section-sub">Day 2 singles opponents who\u2019ve met more than once</div>'
+      +renderRivalries(s.rivalries)
+    +'</div>';
+
+    html+='<div class="stat-section fade-up">'
+      +'<div class="stat-section-title">Biggest Wins</div>'
+      +'<div class="stat-section-sub">Largest winning margins so far</div>'
+      +renderMargins(s.margins)
+    +'</div>';
+
+    document.getElementById('stats-body').innerHTML=html;
+    document.querySelectorAll('.fade-up').forEach(function(el){
+      el.classList.add('visible');
+      obs.observe(el);
+    });
+  }
+
+  if(sb){
+    sb.from('bci_matches').select('*').then(function(res){
+      if(res.error||!res.data){
+        document.getElementById('stats-body').innerHTML='<div class="empty-stat">Could not load stats right now. Check the connection and refresh.</div>';
+        return;
+      }
+      render(res.data);
+    }).catch(function(){
+      document.getElementById('stats-body').innerHTML='<div class="empty-stat">Could not load stats right now. Check the connection and refresh.</div>';
+    });
+  } else {
+    document.getElementById('stats-body').innerHTML='<div class="empty-stat">Could not load stats right now. Check the connection and refresh.</div>';
+  }
+})();
+</script>
+<script src="hero-gallery.js"></script>
+<script src="live-tracker.js"></script>
+<script src="bci-features.js"></script>
+</body>
+</html>

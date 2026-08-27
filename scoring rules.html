@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Scoring Rules — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#16291d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BCI">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Lora:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme-coastal.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{-webkit-tap-highlight-color:transparent;animation:bci-page-in 0.35s ease both;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;}
+  @keyframes bci-page-in{from{opacity:0;}to{opacity:1;}}
+  ::selection{background:#c9a84c;color:#16291d;}
+  :focus-visible{outline:2px solid #c9a84c;outline-offset:2px;}
+  :root{
+    --green-dark:#16291d;--green-mid:#3d5c42;--gold:#c9a84c;--gold-light:#ddc27e;
+    --cream:#fbfaf7;--cream-dark:#f0ede4;--text-dark:#16291d;--text-muted:#5c6259;--border:#dcd6c8;
+    --serif-display:'Lora',Georgia,serif;
+    --serif-body:'Public Sans',Arial,sans-serif;
+  }
+  body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  nav{background:var(--green-dark);padding:0 1.5rem;padding-top:env(safe-area-inset-top,0px);display:flex;align-items:center;justify-content:space-between;height:calc(60px + env(safe-area-inset-top,0px));position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .nav-back{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.6);font-family:var(--serif-display);font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:color 0.2s;}
+  .nav-back:hover{color:var(--gold);}
+  .nav-back .icon{width:14px;height:14px;}
+  .nav-menu-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;transition:border-color 0.2s,transform 0.15s;}
+  .nav-menu-btn:hover{border-color:var(--gold);}
+  .nav-menu-btn:active{transform:scale(0.95);}
+  .nav-menu-btn span.menu-word{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;}
+  .nav-menu-btn .chevron{color:var(--gold);width:12px;height:12px;transition:transform 0.2s;}
+  .nav-menu-btn.open .chevron{transform:rotate(180deg);}
+  .dropdown{display:none;position:absolute;top:60px;right:0;background:var(--green-dark);border:1px solid rgba(201,168,76,0.2);border-top:none;min-width:200px;z-index:199;}
+  .dropdown.open{display:block;}
+  .dropdown a{display:flex;align-items:center;gap:10px;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.15s;}
+  .dropdown a:last-child{border-bottom:none;}
+  .dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.03);padding-left:1.5rem;}
+  .dropdown a.active{color:var(--gold);}
+  .dropdown a.live{color:var(--gold-light);}
+  .dropdown a .d-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;}
+  .dropdown a.live .d-icon{color:var(--gold-light);}
+
+  .page-hero{background:var(--green-dark);padding:3rem 1.5rem;text-align:center;border-bottom:1px solid rgba(201,168,76,0.15);position:relative;overflow:hidden;}
+  .page-hero::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(201,168,76,0.03) 0px,rgba(201,168,76,0.03) 1px,transparent 1px,transparent 50%);background-size:30px 30px;}
+  .page-hero-inner{position:relative;z-index:1;}
+  .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
+  .page-hero h1{font-family:var(--serif-display);font-size:clamp(2rem,8vw,2.8rem);color:white;letter-spacing:0.5px;font-weight:700;}
+  .page-hero h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;}
+  .page-hero p{font-family:var(--serif-body);font-size:1rem;color:rgba(255,255,255,0.4);font-style:italic;margin-top:0.75rem;}
+
+  .page{max-width:760px;margin:0 auto;padding:3rem 1.5rem;flex:1 0 auto;}
+
+  .points-banner{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(201,168,76,0.15);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:3rem;}
+  .points-box{background:white;padding:1.5rem 1rem;text-align:center;}
+  .points-val{font-family:var(--serif-display);font-size:2rem;font-weight:700;display:block;line-height:1;margin-bottom:4px;}
+  .points-val.win{color:var(--green-mid);}
+  .points-val.tie{color:var(--gold);}
+  .points-val.loss{color:#c0392b;}
+  .points-lbl{font-family:var(--serif-display);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
+
+  .rules-section{margin-bottom:2.5rem;}
+  .rules-section-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
+  .rules-day-badge{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;background:var(--green-dark);color:var(--gold);padding:4px 12px;border-radius:2px;flex-shrink:0;}
+  .rules-section-title{font-family:var(--serif-display);font-size:1.2rem;font-weight:600;color:var(--green-dark);letter-spacing:1px;}
+  .rules-section-sub{font-family:var(--serif-body);font-size:0.85rem;color:var(--text-muted);font-style:italic;margin-top:2px;}
+
+  .rule-list{list-style:none;display:flex;flex-direction:column;gap:0.875rem;}
+  .rule-list li{display:flex;gap:1rem;align-items:flex-start;padding:1rem 1.1rem;background:white;border:1px solid var(--border);border-radius:4px;}
+  .rule-list li .rule-icon{width:18px;height:18px;color:var(--gold);flex-shrink:0;margin-top:2px;stroke-width:1.5;}
+  .rule-list li p{font-family:var(--serif-body);font-size:0.95rem;color:var(--text-dark);line-height:1.6;}
+  .rule-list li strong{font-family:var(--serif-display);font-weight:600;color:var(--green-dark);}
+
+  .divider-rule{display:flex;align-items:center;gap:1rem;margin:2.5rem 0;}
+  .divider-rule::before,.divider-rule::after{content:'';flex:1;height:1px;background:var(--border);}
+  .divider-rule-gem{width:6px;height:6px;background:var(--gold);transform:rotate(45deg);flex-shrink:0;opacity:0.5;}
+
+  .overall-section{background:var(--green-dark);border-radius:4px;padding:1.75rem;margin-bottom:2.5rem;}
+  .overall-section h3{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:1.25rem;}
+  .overall-list{list-style:none;display:flex;flex-direction:column;gap:0.625rem;}
+  .overall-list li{font-family:var(--serif-body);font-size:0.95rem;color:rgba(255,255,255,0.65);line-height:1.5;display:flex;gap:0.75rem;}
+  .overall-list li::before{content:'·';color:var(--gold);flex-shrink:0;}
+
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--serif-display);font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);text-decoration:none;transition:color 0.2s;}
+  .back-link:hover{color:var(--green-mid);}
+  .back-link .icon{width:14px;height:14px;}
+
+  .fade-up{opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease;}
+  .fade-up.visible{opacity:1;transform:translateY(0);}
+  .fade-up-d1{transition-delay:0.1s;}
+  .fade-up-d2{transition-delay:0.2s;}
+  .fade-up-d3{transition-delay:0.3s;}
+
+  footer{background:#141f26;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+
+  @media(max-width:640px){.points-banner{grid-template-columns:repeat(3,1fr);}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h2.2L8.8 4.5h6.4L16.8 6.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5z"/><circle cx="12" cy="12.5" r="3.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.7 5.6 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.6-3.7-9S9.6 5.6 12 3z"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-bar-chart" viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  </defs>
+</svg>
+
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <a href="2027.html" class="nav-back"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Back to Algarve · 2027</a>
+    <div style="position:relative;">
+      <div class="nav-menu-btn" id="menu-btn">
+        <span class="menu-word">Menu</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+      </div>
+      <div class="dropdown" id="dropdown">
+        <a href="editions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-trophy"/></svg>Results</a>
+        <a href="gallery.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
+        <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
+        <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
+        <a href="stats.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>Stats</a>
+        <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+        <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
+        <a href="leaderboard.html" class="live"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-eyebrow">Algarve · 2027</div>
+    <h1>Scoring Rules</h1>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="points-banner fade-up">
+    <div class="points-box"><span class="points-val win">1</span><span class="points-lbl">Win</span></div>
+    <div class="points-box"><span class="points-val tie">½</span><span class="points-lbl">Tie</span></div>
+    <div class="points-box"><span class="points-val loss">0</span><span class="points-lbl">Loss</span></div>
+  </div>
+
+  <div class="rules-section fade-up fade-up-d1">
+    <div class="rules-section-header">
+      <span class="rules-day-badge">Day 1</span>
+      <div>
+        <div class="rules-section-title">Pairs Matchplay</div>
+        <div class="rules-section-sub">Quinta do Vale Golf Course</div>
+      </div>
+    </div>
+    <ul class="rule-list">
+      <li><svg class="icon rule-icon" aria-hidden="true"><use href="#i-check"/></svg><p>Each team fields <strong>six pairs</strong>, with each pair facing one pair from the opposing team — producing six matches in total.</p></li>
+      <li><svg class="icon rule-icon" aria-hidden="true"><use href="#i-check"/></svg><p>Each pair plays <strong>matchplay</strong> — holes are won, lost or halved rather than counting total strokes.</p></li>
+      <li><svg class="icon rule-icon" aria-hidden="true"><use href="#i-check"/></svg><p>The <strong>best nett score</strong> on each hole wins that hole for the pair. Handicap strokes are applied per the stroke index.</p></li>
+      <li><svg class="icon rule-icon" aria-hidden="true"><use href="#i-check"/></svg><p>The pair who wins the most holes wins the match. A match that is level after 18 holes is <strong>halved</strong>.</p></li>
+      <li><svg class="icon rule-icon" aria-hidden="true"><use href="#i-check"/></svg><p>A match may be conceded early once one pair cannot mathematically be caught.</p></li>
+    </ul>
+  </div>
+
+  <div class="divider-rule"><span class="divider-rule-gem"></span></div>
+
+  <div class="rules-section fade-up fade-up-d2">
+    <div class="rules-section-header">
+      <span class="rules-day-badge">Day 2</span>
+      <div>
+        <div class="rules-section-title">Individual Matchplay</div>
+        <div class="rules-section-sub">Isla Canela Links Course</div>
+      </div>
+    </div>
+    <ul class="rule-list">
+      <li><svg class="icon rule-icon" aria-hidden="true"><use href="#i-check"/></svg><p>Each player competes in their own <strong>singles matchplay</strong> match against an opponent from the opposing team.</p></li>
+      <li><svg class="icon rule-icon" aria-hidden="true"><use href="#i-check"/></svg><p>The <strong>best nett score</strong> on each hole wins that hole. Handicap strokes are applied per the stroke index.</p></li>
+      <li><svg class="icon rule-icon" aria-hidden="true"><use href="#i-check"/></svg><p>The player who wins the most holes wins the match. A match level after 18 holes is <strong>halved</strong>.</p></li>
+      <li><svg class="icon rule-icon" aria-hidden="true"><use href="#i-check"/></svg><p>With <strong>12 singles matches</strong>, there are 12 points available on Day 2.</p></li>
+    </ul>
+  </div>
+
+  <div class="divider-rule"><span class="divider-rule-gem"></span></div>
+
+  <div class="overall-section fade-up fade-up-d3">
+    <h3>Overall Result</h3>
+    <ul class="overall-list">
+      <li>18 points are available across the two days — 6 on Day 1, 12 on Day 2.</li>
+      <li>The team with the most points at the end of Day 2 wins the Book Club Invitational.</li>
+      <li>9.5 points are needed to win outright. A tie at 9–9 retains the trophy for the defending champions.</li>
+    </ul>
+  </div>
+
+  <a href="2027.html" class="back-link"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Back to Algarve · 2027</a>
+
+</div>
+
+<footer><p><span>Book Club Invitational</span></p></footer>
+
+<script>
+(function(){
+  document.getElementById('menu-btn').addEventListener('click',function(){
+    document.getElementById('menu-btn').classList.toggle('open');
+    document.getElementById('dropdown').classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){
+      document.getElementById('menu-btn').classList.remove('open');
+      document.getElementById('dropdown').classList.remove('open');
+    }
+  });
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
+  document.querySelectorAll('.fade-up').forEach(function(el){obs.observe(el);});
+})();
+</script>
+<script src="hero-gallery.js"></script>
+<script src="live-tracker.js"></script>
+<script src="bci-features.js"></script>
+</body>
+</html>

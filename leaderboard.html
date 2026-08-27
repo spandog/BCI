@@ -6,7 +6,7 @@
 <title>Live Leaderboard — Book Club Invitational</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#16291d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -90,6 +90,25 @@
     color:var(--text-dark);cursor:pointer;}
   .rc-share-btn .icon{width:15px;height:15px;}
   .rc-share-btn:active{background:var(--cream);}
+
+  #bci-celebration{position:fixed;inset:0;z-index:99999;pointer-events:none;opacity:0;
+    transition:opacity 0.4s ease;overflow:hidden;background:rgba(22,41,29,0.55);}
+  #bci-celebration.visible{opacity:1;pointer-events:auto;}
+  .bci-celebration-card{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    text-align:center;background:white;padding:2rem 2.25rem;border-radius:14px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.35);max-width:80vw;}
+  .bci-celebration-trophy{width:44px;height:44px;margin:0 auto 0.85rem;display:block;}
+  .bci-celebration-title{font-family:var(--serif-display);font-size:1.15rem;font-weight:700;
+    color:var(--green-dark);letter-spacing:0.3px;}
+  .bci-confetti-piece{position:absolute;top:-20px;width:9px;height:15px;opacity:0.9;
+    animation:bci-confetti-fall linear forwards;}
+  @keyframes bci-confetti-fall{
+    0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:1;}
+    100%{transform:translateY(110vh) translateX(var(--drift)) rotate(540deg);opacity:0.3;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    #bci-celebration{transition:none;}
+  }
 
   .live-strip{display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.15rem 0 0.6rem;}
   .live-tile{flex:0 0 104px;width:104px;background:white;border:1px solid var(--border);border-top:3px solid var(--text-muted);border-radius:6px;padding:0.5rem 0.55rem;cursor:pointer;transition:transform 0.15s;}
@@ -286,6 +305,7 @@
     <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-bar-chart" viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></symbol>
     <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
     <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
@@ -302,7 +322,8 @@
       <a href="gallery.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
       <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
       <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
-      <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+      <a href="stats.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>Stats</a>
+        <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
       <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
       <a href="leaderboard.html" class="live active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
     </div>
@@ -919,6 +940,51 @@
   var TOTAL_POINTS=18,RETAIN_AT=9,WIN_AT=9.5;
 
   var lastBarPcts=null;
+  /* One-time celebration the moment the BCI is actually won — a confetti
+     burst and a brief announcement. Tracked in localStorage so it can only
+     ever fire once for real, no matter how many times the page is
+     reloaded or revisited afterwards. */
+  function celebrate(winner){
+    var teamName=winner==='weff'?'Green Team':'Blue Team';
+    var teamColor=winner==='weff'?'#2f7d4f':'#1e5a8c';
+    var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var overlay=document.createElement('div');
+    overlay.id='bci-celebration';
+    overlay.innerHTML=
+      '<div class="bci-celebration-card">'+
+        '<svg class="bci-celebration-trophy" viewBox="0 0 24 24" fill="none" stroke="'+teamColor+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+
+          '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/>'+
+          '<path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/>'+
+        '</svg>'+
+        '<div class="bci-celebration-title">'+teamName+' win the BCI!</div>'+
+      '</div>';
+    document.body.appendChild(overlay);
+
+    if(!reduceMotion){
+      var colors=['#c9a84c','#16291d',teamColor,'#ffffff'];
+      for(var i=0;i<80;i++){
+        var piece=document.createElement('div');
+        piece.className='bci-confetti-piece';
+        piece.style.left=(Math.random()*100)+'vw';
+        piece.style.background=colors[Math.floor(Math.random()*colors.length)];
+        piece.style.animationDuration=(2.5+Math.random()*2)+'s';
+        piece.style.animationDelay=(Math.random()*0.6)+'s';
+        piece.style.setProperty('--drift',(Math.random()*140-70)+'px');
+        overlay.appendChild(piece);
+      }
+    }
+
+    requestAnimationFrame(function(){overlay.classList.add('visible');});
+
+    function dismiss(){
+      overlay.classList.remove('visible');
+      setTimeout(function(){overlay.remove();},500);
+    }
+    overlay.addEventListener('click',dismiss);
+    setTimeout(dismiss,5000);
+  }
+
   function renderPointsBar(){
     var p=points();
     var baberProj=p.baber+p.baberLive;
@@ -943,6 +1009,11 @@
     var weffWon=p.weff>=WIN_AT;
     var baberScoreLabel='<div class="rc-score" style="margin-left:12px;">'+(baberRetained?trophySvg:'')+fmtPts(baberProj)+'</div>';
     var weffScoreLabel='<div class="rc-score" style="margin-right:12px;">'+fmtPts(weffProj)+(weffWon?trophySvg:'')+'</div>';
+
+    if((baberRetained||weffWon)&&!localStorage.getItem('bci-celebrated')){
+      localStorage.setItem('bci-celebrated','1');
+      celebrate(weffWon?'weff':'baber');
+    }
 
     var html='';
     if(baberFinalPct>0){

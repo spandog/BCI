@@ -293,7 +293,7 @@
       var altText=img.caption||'BCI photo';
       var media=img.isVideo
         ? '<div class="video-tile"><video class="gallery-vid" src="'+img.url+'#t=0.5" preload="metadata" muted playsinline webkit-playsinline></video><div class="video-play-btn"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg></div></div>'
-        : '<img class="gallery-img" src="'+img.url+'" alt="'+altText+'"'+(hasCaption?' data-caption="'+img.caption+'"':'')+'>';
+        : '<img class="gallery-img" src="'+img.url+'" alt="'+altText+'" loading="lazy" decoding="async"'+(hasCaption?' data-caption="'+img.caption+'"':'')+'>';
       return '<figure class="plate">'+
         '<div class="frame">'+media+'</div>'+
         (hasCaption?'<div class="plate-caption">'+img.caption+'</div>':'')+

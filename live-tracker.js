@@ -8,6 +8,16 @@
 (function(){
   var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
   var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+
+  /* One real Supabase client shared across every script on the page,
+     rather than each of live-tracker.js, bci-features.js, and the page's
+     own inline script separately spinning up its own connection. Safe to
+     define identically in each file — whichever loads first genuinely
+     creates it, everything after just reuses the same cached instance. */
+  window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
+    return window.__bciSbClient;
+  };
   var POLL_MS=15000;
   var SELECT='id,match_no,day,format,status,leader,score,thru,holes,baber_players,weff_players';
   var PX_PER_SEC=55;          // ticker scroll speed
@@ -405,7 +415,7 @@
 
   function subscribeRealtime(){
     try{
-      var client=window.supabase.createClient(SB_URL,SB_KEY);
+      var client=window.bciGetSupabase(SB_URL,SB_KEY);
       client.channel('bci_tracker_'+Math.random().toString(36).slice(2))
         .on('postgres_changes',{event:'*',schema:'public',table:'bci_matches'},refresh)
         .subscribe();

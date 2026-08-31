@@ -6,6 +6,13 @@
    <script src="bci-features.js"></script>
    ============================================================ */
 (function(){
+  /* One real Supabase client shared across every script on the page —
+     see live-tracker.js for the full explanation. Identical definition,
+     safe either way round depending on which file actually loads first. */
+  window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
+    return window.__bciSbClient;
+  };
   var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var isCoarse=window.matchMedia('(pointer: coarse)').matches;
 
@@ -357,7 +364,7 @@
               });
             })
             .then(function(token){
-              var sb=window.supabase.createClient(SB_URL,SB_KEY);
+              var sb=window.bciGetSupabase(SB_URL,SB_KEY);
               return sb.from('bci_push_subscriptions').upsert({token:token},{onConflict:'token'}).then(function(result){
                 if(result.error)throw new Error(result.error.message||JSON.stringify(result.error));
                 return result;
@@ -404,7 +411,7 @@
 
     readyPromise.then(function(){
       if(!window.supabase)return;
-      var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+      var sb=window.bciGetSupabase(SUPABASE_URL,SUPABASE_ANON_KEY);
       var currentUser=null,currentName=null,pendingEmail=null;
 
       var wrap=document.createElement('div');

@@ -218,7 +218,9 @@
   .back-link:hover{color:var(--gold);border-color:var(--gold);}
   .empty-note{text-align:center;font-style:italic;color:var(--text-muted);padding:2rem 1rem;}
   .offline-banner{background:#fdf3e3;border:1px solid #e8c987;color:#7a5c1e;border-radius:6px;
-    padding:0.65rem 0.9rem;font-size:0.8rem;text-align:center;margin-bottom:0.9rem;}
+    padding:0.65rem 0.9rem;font-size:0.8rem;text-align:center;margin-bottom:0.9rem;
+    transition:background-color 0.3s ease,border-color 0.3s ease,color 0.3s ease;}
+  .offline-banner.reconnected{background:#eaf4ec;border-color:#a8d4b0;color:#2f6b3a;}
 
   .scorer-section{border-top:1px solid var(--border);padding-top:1.5rem;margin-top:1rem;}
   .scorer-toggle{display:flex;align-items:center;gap:0.75rem;cursor:pointer;padding:0.5rem 0;}
@@ -446,6 +448,15 @@
   /* ================= CONFIG ================= */
   var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
   var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+
+  /* This page's own script runs before live-tracker.js/bci-features.js
+     load, so the shared-client helper needs defining here too — same
+     idempotent pattern, safe regardless of which script actually runs
+     first. See live-tracker.js for the full explanation. */
+  window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
+    return window.__bciSbClient;
+  };
   var WIN_NOTE='First to 9\u00BD points wins the BCI';
   var POLL_MS=30000;
   /* ========================================== */
@@ -474,7 +485,7 @@
 
   var configured=SUPABASE_URL.indexOf('http')===0;
   if(configured){
-    sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+    sb=window.bciGetSupabase(SUPABASE_URL,SUPABASE_ANON_KEY);
   } else {
     document.getElementById('config-warning').classList.add('visible');
   }
@@ -692,7 +703,22 @@
   function setOfflineBanner(isOffline){
     var el=document.getElementById('offline-banner');
     if(!el)return;
-    if(!isOffline){el.style.display='none';return;}
+    if(!isOffline){
+      if(state.wasOffline){
+        state.wasOffline=false;
+        el.classList.add('reconnected');
+        el.textContent='Back online \u2014 scores updated';
+        setTimeout(function(){
+          el.style.display='none';
+          el.classList.remove('reconnected');
+        },2500);
+      } else {
+        el.style.display='none';
+      }
+      return;
+    }
+    state.wasOffline=true;
+    el.classList.remove('reconnected');
     el.style.display='block';
     el.textContent='Offline \u2014 showing scores as of '+(state.lastFetchSuccess?fmtTimeAgo(state.lastFetchSuccess):'last connection');
   }

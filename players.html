@@ -56,6 +56,18 @@
   .sort-control select:focus{outline:none;border-color:var(--gold);}
   .players-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;}
   .player-card{perspective:1200px;opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease;}
+  .skeleton-player-card{background:white;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+  .skeleton-player-photo{aspect-ratio:3/4;background:linear-gradient(90deg,#eee 25%,#f6f6f6 37%,#eee 63%);
+    background-size:400% 100%;animation:bci-shimmer 1.4s ease infinite;}
+  .skeleton-player-text{padding:0.75rem;}
+  .skeleton-player-line{height:12px;border-radius:4px;margin-bottom:0.5rem;
+    background:linear-gradient(90deg,#eee 25%,#f6f6f6 37%,#eee 63%);
+    background-size:400% 100%;animation:bci-shimmer 1.4s ease infinite;}
+  .skeleton-player-line.short{width:50%;margin-bottom:0;}
+  @keyframes bci-shimmer{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
+  @media(prefers-reduced-motion:reduce){
+    .skeleton-player-photo,.skeleton-player-line{animation:none;background:#eee;}
+  }
   .player-card.visible{opacity:1;transform:translateY(0);}
   .card-inner{display:grid;grid-template-areas:"stack";transform-style:preserve-3d;transition:transform 0.6s cubic-bezier(.4,.2,.2,1);cursor:pointer;}
   .player-card.flipped .card-inner{transform:rotateY(180deg);}
@@ -184,7 +196,14 @@
       <option value="hcap-desc">Handicap &mdash; High to Low</option>
     </select>
   </div>
-  <div class="players-grid" id="players-grid"></div>
+  <div class="players-grid" id="players-grid">
+    <div class="skeleton-player-card"><div class="skeleton-player-photo"></div><div class="skeleton-player-text"><div class="skeleton-player-line"></div><div class="skeleton-player-line short"></div></div></div>
+    <div class="skeleton-player-card"><div class="skeleton-player-photo"></div><div class="skeleton-player-text"><div class="skeleton-player-line"></div><div class="skeleton-player-line short"></div></div></div>
+    <div class="skeleton-player-card"><div class="skeleton-player-photo"></div><div class="skeleton-player-text"><div class="skeleton-player-line"></div><div class="skeleton-player-line short"></div></div></div>
+    <div class="skeleton-player-card"><div class="skeleton-player-photo"></div><div class="skeleton-player-text"><div class="skeleton-player-line"></div><div class="skeleton-player-line short"></div></div></div>
+    <div class="skeleton-player-card"><div class="skeleton-player-photo"></div><div class="skeleton-player-text"><div class="skeleton-player-line"></div><div class="skeleton-player-line short"></div></div></div>
+    <div class="skeleton-player-card"><div class="skeleton-player-photo"></div><div class="skeleton-player-text"><div class="skeleton-player-line"></div><div class="skeleton-player-line short"></div></div></div>
+  </div>
 
   <div class="admin-section">
     <div class="admin-toggle" id="admin-toggle">
@@ -591,10 +610,10 @@
     var filtered=sortPlayers(players,sortKey);
     filtered.forEach(function(p,i){
       var photoHTML=p.photo
-        ?'<img class="player-photo" src="'+p.photo+'" alt="'+p.name+'">'
+        ?'<img class="player-photo" src="'+p.photo+'" alt="'+p.name+'" loading="lazy" decoding="async">'
         :'<div class="player-photo-placeholder"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg></div>';
       var actionPhotoHTML=p.actionPhoto
-        ?'<img class="player-photo" src="'+p.actionPhoto+'" alt="'+p.name+' action shot">'
+        ?'<img class="player-photo" src="'+p.actionPhoto+'" alt="'+p.name+' action shot" loading="lazy" decoding="async">'
         :'<div class="player-photo-placeholder"><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg></div>';
       var card=document.createElement('div');
       card.className='player-card';

@@ -188,10 +188,10 @@
   .status-pill.live{background:var(--green-dark);color:var(--gold-light);border-color:var(--green-dark);}
   .status-pill.final{background:var(--gold);color:var(--green-dark);border-color:var(--gold);}
   .match-body{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;}
-  .match-side{padding:0.7rem 0.875rem;display:flex;flex-direction:column;justify-content:center;gap:2px;}
-  .match-side.baber{text-align:right;}
-  .match-side.weff{text-align:left;}
-  .match-side .player{font-size:0.95rem;color:var(--text-dark);}
+  .match-side{padding:0.7rem 0.875rem;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;}
+  .match-side.baber{text-align:center;}
+  .match-side.weff{text-align:center;}
+  .match-side .player{font-size:0.82rem;color:var(--text-dark);line-height:1.25;}
   .match-side.leading.baber{background:var(--baber-bg);}
   .match-side.leading.baber .player{color:var(--baber-text);font-weight:600;}
   .match-side.leading.weff{background:var(--weff-bg);}
@@ -250,10 +250,14 @@
 
   .edit-match{border-top:none;margin-top:1rem;}
   .score-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;margin:0.25rem 0 0.75rem;border:1px solid var(--border);border-radius:5px;overflow:hidden;background:white;}
-  .sr-side{padding:0.625rem 0.75rem;display:flex;flex-direction:column;gap:2px;justify-content:center;}
-  .sr-side.baber{text-align:right;}
-  .sr-side.weff{text-align:left;}
-  .sr-name{font-size:0.85rem;color:var(--text-dark);}
+  .sr-side{padding:0.625rem 0.75rem;display:flex;flex-direction:column;gap:2px;justify-content:center;align-items:center;}
+  .sr-side.baber{text-align:center;}
+  .sr-side.weff{text-align:center;}
+  .sr-photos{display:flex;justify-content:center;gap:4px;margin-bottom:0.35rem;}
+  .sr-photo{width:34px;height:34px;border-radius:7px;object-fit:cover;background:var(--cream-dark,#f0ede4);}
+  .sr-photo-fallback{display:flex;align-items:center;justify-content:center;background:var(--green-dark);color:var(--gold);
+    font-family:var(--serif-display);font-weight:700;font-size:0.6rem;}
+  .sr-name{font-size:0.72rem;color:var(--text-dark);line-height:1.25;}
   .sr-score{font-family:var(--serif-display);font-size:1.05rem;font-weight:700;letter-spacing:1px;}
   .sr-side.baber .sr-score{color:var(--baber-text);}
   .sr-side.weff .sr-score{color:var(--weff-text);}
@@ -1171,6 +1175,55 @@
     2:[565,449,191,359,453,331,243,492,398,335,462,205,454,240,546,416,417,598]
   };
 
+  /* Player face photos for the match-card thumbnails — same real photo
+     paths already used on players.html, kept here as a lean name-only
+     lookup rather than duplicating the whole player record. Admin-edited
+     photos from the players page's admin panel are merged in below once
+     fetched, so an updated photo shows here too, not just there. */
+  var PLAYER_PHOTOS={
+    'James Baber':'images/players/james-baber-face.jpg',
+    'Kane Bailey':'images/players/kane-bailey-face.jpg',
+    'Mark Brackenridge':'images/players/mark-brackenridge-face.jpg',
+    'Tony Bryant':'images/players/tony-bryant-face.jpg',
+    'Aaron Davies':'images/players/aaron-davies-face.jpg',
+    'Will Dodgson':'images/players/will-dodgson-face.jpg',
+    'Matt Higgins':'images/players/matt-higgins-face.jpg',
+    'Brian Hinojosa':'images/players/brian-hinojosa-face.jpg',
+    'Rich Horsley':'images/players/rich-horsley-face.jpg',
+    'Ted Keeling':'images/players/ted-keeling-face.jpg',
+    'Louis Kelly':'images/players/louis-kelly-face.jpg',
+    'Sean Mongan':'images/players/sean-mongan-face.jpg',
+    'Dan Simkin':'images/players/dan-simkin-face.jpg',
+    'Jack Taggart':'images/players/jack-taggart-face.jpg',
+    'Alex Tinawi':'images/players/alex-tinawi-face.jpg',
+    'Matt Wreford':'images/players/matt-wreford-face.jpg',
+    'Oscar Hinojosa':'images/players/oscar-hinojosa-face.jpg'
+  };
+  if(sb){
+    sb.from('bci_player_photos').select('player_name,photo_url').then(function(res){
+      if(res.error||!res.data)return;
+      res.data.forEach(function(row){
+        if(row.photo_url)PLAYER_PHOTOS[row.player_name]=row.photo_url;
+      });
+    }).catch(function(){/* photo overrides are best-effort — hardcoded fallbacks still show */});
+  }
+
+  function initials(name){
+    var parts=name.trim().split(/\s+/);
+    return ((parts[0]||'')[0]||'')+((parts[parts.length-1]||'')[0]||'');
+  }
+
+  function playerPhotosRow(pairText){
+    var names=(pairText||'').split('&').map(function(s){return s.trim();}).filter(Boolean);
+    if(!names.length)return '';
+    return '<div class="sr-photos">'+names.map(function(n){
+      var url=PLAYER_PHOTOS[n];
+      return url
+        ?'<img class="sr-photo" src="'+url+'" alt="'+esc(n)+'" loading="lazy" decoding="async">'
+        :'<div class="sr-photo sr-photo-fallback">'+esc(initials(n))+'</div>';
+    }).join('')+'</div>';
+  }
+
   function holeStrip(m){
     var holes=m.holes||'';
     if(!holes.length)return '';
@@ -1230,9 +1283,9 @@
           +'<span class="status-pill '+c.status+'">'+c.status+'</span>'
         +'</div>'
         +'<div class="match-body">'
-          +'<div class="match-side baber'+(baberLead?' leading':'')+'"><div class="player">'+esc(m.baber_players)+'</div>'+scoreB+'</div>'
+          +'<div class="match-side baber'+(baberLead?' leading':'')+'">'+playerPhotosRow(m.baber_players)+'<div class="player">'+esc(m.baber_players)+'</div>'+scoreB+'</div>'
           +'<div class="match-centre">'+centre+'</div>'
-          +'<div class="match-side weff'+(weffLead?' leading':'')+'"><div class="player">'+esc(m.weff_players)+'</div>'+scoreW+'</div>'
+          +'<div class="match-side weff'+(weffLead?' leading':'')+'">'+playerPhotosRow(m.weff_players)+'<div class="player">'+esc(m.weff_players)+'</div>'+scoreW+'</div>'
         +'</div>'
         +'<div class="card-actions"><button class="enter-score" data-id="'+esc(m.id)+'">Enter Score</button></div>'
       +'</div>';
@@ -1467,9 +1520,9 @@
     var baberLead=c.status!=='upcoming'&&c.leader==='baber';
     var weffLead=c.status!=='upcoming'&&c.leader==='weff';
     return '<div class="score-row">'
-      +'<div class="sr-side baber'+(baberLead?' leading':'')+'"><span class="sr-name">'+esc(m.baber_players)+'</span>'+srB+'</div>'
+      +'<div class="sr-side baber'+(baberLead?' leading':'')+'">'+playerPhotosRow(m.baber_players)+'<span class="sr-name">'+esc(m.baber_players)+'</span>'+srB+'</div>'
       +'<div class="sr-mid">'+mid+'</div>'
-      +'<div class="sr-side weff'+(weffLead?' leading':'')+'"><span class="sr-name">'+esc(m.weff_players)+'</span>'+srW+'</div>'
+      +'<div class="sr-side weff'+(weffLead?' leading':'')+'">'+playerPhotosRow(m.weff_players)+'<span class="sr-name">'+esc(m.weff_players)+'</span>'+srW+'</div>'
     +'</div>';
   }
 

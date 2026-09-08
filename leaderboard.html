@@ -442,7 +442,7 @@
     <div class="day-tab" id="tab-2">Day 2 &middot; Singles<div class="day-tab-sub">Isla Canela</div></div>
   </div>
 
-  <button class="day-recap-btn" id="day-recap-btn">
+  <button class="day-recap-btn" id="day-recap-btn" style="display:none;">
     <svg class="icon" aria-hidden="true"><use href="#i-share"/></svg>
     Day Recap
   </button>
@@ -1961,6 +1961,7 @@
     document.getElementById('scorer-toggle').classList.add('open');
     document.getElementById('announce-card').style.display='';
     document.getElementById('reset-card').style.display='';
+    document.getElementById('day-recap-btn').style.display='';
     renderScorer(true);
   }
 

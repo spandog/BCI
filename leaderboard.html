@@ -90,6 +90,13 @@
     color:var(--text-dark);cursor:pointer;}
   .rc-share-btn .icon{width:15px;height:15px;}
   .rc-share-btn:active{background:var(--cream);}
+  .day-recap-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:0.5rem;
+    padding:0.7rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:6px;
+    font-family:var(--serif-display);font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;
+    cursor:pointer;margin-bottom:0.9rem;}
+  .day-recap-btn .icon{width:15px;height:15px;}
+  .day-recap-btn:active{opacity:0.85;}
+  .day-recap-btn[disabled]{opacity:0.5;pointer-events:none;}
 
   #bci-celebration{position:fixed;inset:0;z-index:99999;pointer-events:none;opacity:0;
     transition:opacity 0.4s ease;overflow:hidden;background:rgba(22,41,29,0.55);}
@@ -197,6 +204,11 @@
   .match-side.leading.weff{background:var(--weff-bg);}
   .match-side.leading.weff .player{color:var(--weff-text);font-weight:600;}
   .match-centre{padding:0.7rem 0.875rem;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:92px;border-left:1px solid var(--border);border-right:1px solid var(--border);}
+  .momentum{display:flex;gap:3px;margin-top:0.4rem;}
+  .momentum-dot{width:7px;height:7px;border-radius:50%;background:var(--border);}
+  .momentum-dot.b{background:var(--baber-text);}
+  .momentum-dot.w{background:var(--weff-text);}
+  .momentum-dot.h{background:var(--gold);}
   .match-centre .m-score{font-family:var(--serif-display);font-size:1.15rem;font-weight:700;color:var(--green-dark);letter-spacing:1px;white-space:nowrap;}
   .match-centre .m-thru{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-top:3px;white-space:nowrap;}
   .match-centre .m-vs{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
@@ -270,6 +282,11 @@
   .edit-title{font-family:var(--serif-display);font-size:0.72rem;letter-spacing:2px;color:var(--green-dark);text-transform:uppercase;}
   .edit-state{font-family:var(--serif-display);font-size:0.72rem;letter-spacing:1px;color:var(--gold);}
   .next-hole{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin:0.625rem 0 0.375rem;}
+  .match-story{font-family:var(--serif-body);font-size:0.82rem;line-height:1.5;color:var(--text-dark);
+    font-style:italic;padding:0.7rem 0.85rem;margin-bottom:0.875rem;background:var(--cream);
+    border-left:2px solid var(--gold);border-radius:0 4px 4px 0;}
+  .card-story{font-family:var(--serif-body);font-size:0.7rem;line-height:1.4;color:var(--text-muted);
+    font-style:italic;padding:0 0.875rem 0.75rem;}
   .hole-detail-card{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:0.875rem;}
   .hd-item{background:white;padding:0.7rem 0.5rem;text-align:center;}
   .hd-label{font-family:var(--serif-body);font-size:0.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.25rem;}
@@ -388,6 +405,11 @@
     <div class="day-tab active" id="tab-1">Day 1 &middot; Pairs<div class="day-tab-sub">Quinta do Vale</div></div>
     <div class="day-tab" id="tab-2">Day 2 &middot; Singles<div class="day-tab-sub">Isla Canela</div></div>
   </div>
+
+  <button class="day-recap-btn" id="day-recap-btn">
+    <svg class="icon" aria-hidden="true"><use href="#i-share"/></svg>
+    Day Recap
+  </button>
 
   <div class="hole-legend">
     <span><span class="legend-sq b"></span>Blue</span>
@@ -572,6 +594,206 @@
   });
   document.getElementById('tab-2').addEventListener('click',function(){switchDay(2);});
   function dayFormat(d){return d===1?'Better Ball':'Individual Matchplay';}
+
+  /* ---------- day recap — a shareable image built from real results ----------
+     Every figure on this card comes straight from that day's finished
+     matches: the tally, the closest match, the biggest win, and whoever's
+     won the most holes. Nothing here is invented or estimated. */
+  function dayRecapData(day){
+    var finals=state.matches.filter(function(m){return m.day===day&&m.status==='final';});
+    var isPlaceholder=function(m){return /pair \d|player \d/i.test(m.baber_players||'')||/pair \d|player \d/i.test(m.weff_players||'');};
+    var real=finals.filter(function(m){return !isPlaceholder(m);});
+
+    var baberPts=0,weffPts=0;
+    var margins=[];
+    var holesWon={};
+    real.forEach(function(m){
+      var holes=m.holes||'';
+      var b=0,w=0;
+      for(var i=0;i<holes.length;i++){
+        if(holes[i]==='b'){b++;namesFrom(m.baber_players).forEach(function(n){holesWon[n]=(holesWon[n]||0)+1;});}
+        else if(holes[i]==='w'){w++;namesFrom(m.weff_players).forEach(function(n){holesWon[n]=(holesWon[n]||0)+1;});}
+      }
+      if(m.leader==='baber')baberPts+=1;
+      else if(m.leader==='weff')weffPts+=1;
+      else{baberPts+=0.5;weffPts+=0.5;}
+      if(m.leader!=='tie'){
+        margins.push({margin:Math.abs(b-w)+(18-holes.length),score:m.score,
+          winner:m.leader==='baber'?m.baber_players:m.weff_players,
+          loser:m.leader==='baber'?m.weff_players:m.baber_players});
+      }
+    });
+
+    var closest=margins.length?margins.slice().sort(function(a,b2){return a.margin-b2.margin;})[0]:null;
+    var biggest=margins.length?margins.slice().sort(function(a,b2){return b2.margin-a.margin;})[0]:null;
+    var inFormEntries=Object.keys(holesWon).map(function(k){return {name:k,val:holesWon[k]};}).sort(function(a,b2){return b2.val-a.val;});
+    var inForm=inFormEntries.length?inFormEntries[0]:null;
+
+    return {
+      played:real.length,total:finals.length,baberPts:baberPts,weffPts:weffPts,
+      closest:closest,biggest:biggest,inForm:inForm
+    };
+  }
+
+  function namesFrom(str){
+    return (str||'').split('&').map(function(s){return s.trim();}).filter(Boolean);
+  }
+
+  function drawDayRecap(day){
+    return document.fonts.ready.then(function(){
+      var data=dayRecapData(day);
+      var W=1080;
+      var maxWidth=W-280;
+
+      function wrapLines(ctx,text,font){
+        ctx.font=font;
+        var words=text.split(' ');
+        var lines=[];
+        var current='';
+        words.forEach(function(word){
+          var test=current?current+' '+word:word;
+          if(ctx.measureText(test).width>maxWidth&&current){
+            lines.push(current);
+            current=word;
+          } else {
+            current=test;
+          }
+        });
+        if(current)lines.push(current);
+        return lines;
+      }
+
+      // Draws the whole card onto whatever canvas/context is passed in,
+      // returning the final y position — run once against a throwaway
+      // canvas purely to measure how tall the real content needs, then
+      // run again for real on a canvas sized exactly to fit it. Text
+      // wrapping means the content height genuinely varies with how long
+      // real player names turn out to be, so a fixed canvas size would
+      // either cut things off or leave an awkward gap at the bottom.
+      function draw(ctx,H){
+        ctx.fillStyle='#16291d';
+        ctx.fillRect(0,0,W,H);
+
+        ctx.textAlign='center';
+        ctx.fillStyle='#c9a84c';
+        ctx.font='600 30px "Lora"';
+        ctx.fillText('ALGARVE \u00B7 2027',W/2,110);
+
+        ctx.fillStyle='#ffffff';
+        ctx.font='800 68px "Lora"';
+        ctx.fillText('Day '+day+' Recap',W/2,200);
+
+        ctx.fillStyle='rgba(255,255,255,0.55)';
+        ctx.font='400 28px "Public Sans"';
+        ctx.fillText(DAY_COURSE[day]||'',W/2,245);
+
+        ctx.strokeStyle='rgba(201,168,76,0.3)';
+        ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(140,300);ctx.lineTo(W-140,300);ctx.stroke();
+
+        ctx.fillStyle='#4a7fb5';
+        ctx.font='800 90px "Lora"';
+        ctx.textAlign='right';
+        ctx.fillText(fmtPts(data.baberPts),W/2-30,420);
+        ctx.fillStyle='#5a9c75';
+        ctx.textAlign='left';
+        ctx.fillText(fmtPts(data.weffPts),W/2+30,420);
+        ctx.fillStyle='rgba(255,255,255,0.4)';
+        ctx.font='400 32px "Public Sans"';
+        ctx.textAlign='center';
+        ctx.fillText('BLUE',W/2-155,420);
+        ctx.fillText('GREEN',W/2+165,420);
+        ctx.font='400 24px "Public Sans"';
+        ctx.fillStyle='rgba(255,255,255,0.45)';
+        ctx.fillText(data.played+' of '+data.total+' matches finished',W/2,475);
+
+        var y=580;
+        function section(label,value,sub){
+          ctx.textAlign='left';
+          ctx.fillStyle='#c9a84c';
+          ctx.font='600 24px "Lora"';
+          ctx.fillText(label.toUpperCase(),140,y);
+          y+=48;
+          var valueFont='700 34px "Lora"';
+          var lines=wrapLines(ctx,value,valueFont);
+          ctx.fillStyle='#ffffff';
+          ctx.font=valueFont;
+          lines.forEach(function(line){
+            ctx.fillText(line,140,y);
+            y+=40;
+          });
+          if(sub){
+            ctx.fillStyle='rgba(255,255,255,0.5)';
+            ctx.font='400 24px "Public Sans"';
+            ctx.fillText(sub,140,y+2);
+            y+=36;
+          }
+          y+=40;
+        }
+
+        if(data.closest){
+          section('Closest Match',data.closest.winner+' beat '+data.closest.loser,data.closest.score);
+        }
+        if(data.biggest&&data.biggest!==data.closest){
+          section('Biggest Win',data.biggest.winner+' beat '+data.biggest.loser,data.biggest.score);
+        }
+        if(data.inForm){
+          section('In Form',data.inForm.name,data.inForm.val+' holes won today');
+        }
+        if(!data.closest&&!data.inForm){
+          ctx.textAlign='center';
+          ctx.fillStyle='rgba(255,255,255,0.5)';
+          ctx.font='400 28px "Public Sans"';
+          ctx.fillText('No matches finished yet today.',W/2,y+20);
+          y+=60;
+        }
+
+        ctx.textAlign='center';
+        ctx.fillStyle='rgba(255,255,255,0.35)';
+        ctx.font='600 22px "Lora"';
+        ctx.fillText('BOOK CLUB INVITATIONAL',W/2,y+50);
+
+        return y+90;
+      }
+
+      var scratch=document.createElement('canvas');
+      scratch.width=W;scratch.height=2000;
+      var finalH=draw(scratch.getContext('2d'),2000);
+
+      var canvas=document.createElement('canvas');
+      canvas.width=W;canvas.height=finalH;
+      draw(canvas.getContext('2d'),finalH);
+
+      return new Promise(function(resolve){
+        canvas.toBlob(function(blob){resolve(blob);},'image/png');
+      });
+    });
+  }
+
+  document.getElementById('day-recap-btn').addEventListener('click',function(){
+    var btn=this;
+    var day=state.day;
+    btn.disabled=true;
+    var original=btn.innerHTML;
+    btn.innerHTML='Building recap&hellip;';
+
+    drawDayRecap(day).then(function(blob){
+      btn.disabled=false;btn.innerHTML=original;
+      var file=new File([blob],'bci-day-'+day+'-recap.png',{type:'image/png'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        navigator.share({files:[file],title:'BCI Day '+day+' Recap'}).catch(function(){});
+      } else {
+        var url=URL.createObjectURL(blob);
+        var a=document.createElement('a');
+        a.href=url;a.download='bci-day-'+day+'-recap.png';
+        document.body.appendChild(a);a.click();a.remove();
+        setTimeout(function(){URL.revokeObjectURL(url);},2000);
+      }
+    }).catch(function(){
+      btn.disabled=false;btn.innerHTML=original;
+      alert('Could not build the recap image — try again.');
+    });
+  });
 
   /* Swipe left/right on the match list to move between days — the tab
      buttons still work exactly as before, this is just an additional way
@@ -1224,6 +1446,90 @@
     }).join('')+'</div>';
   }
 
+  /* Small momentum sparkline — the last up to 5 holes for a live match,
+     so a run of form is visible at a glance rather than only the current
+     net score. Not shown for upcoming or finished matches, where it
+     wouldn't add anything the score itself doesn't already say. */
+  function momentumRow(holes){
+    if(!holes||holes.length<2)return '';
+    var recent=holes.slice(-5);
+    return '<div class="momentum">'+recent.split('').map(function(ch){
+      return '<span class="momentum-dot '+(ch==='b'||ch==='w'||ch==='h'?ch:'')+'"></span>';
+    }).join('')+'</div>';
+  }
+
+  /* Genuine, plain sports-reporting commentary — built entirely from the
+     actual hole-by-hole sequence, no AI call, no hype. Runs the sequence
+     through a simple run-length breakdown (e.g. "bbw" -> a run of two
+     Blue holes, then one Green hole) and narrates the last one or two
+     runs as a short "before/after" story, matching how real live-text
+     golf commentary reads. Falls back to a "back and forth" framing when
+     the recent holes have simply been traded one apiece. */
+  function ordinalWord(n){
+    var words={1:'first',2:'second',3:'third',4:'fourth',5:'fifth',6:'sixth',7:'seventh',8:'eighth',9:'ninth',10:'tenth',11:'eleventh',12:'twelfth',13:'thirteenth',14:'fourteenth',15:'fifteenth',16:'sixteenth',17:'seventeenth',18:'eighteenth'};
+    return words[n]||(n+'th');
+  }
+  function countWord(n){
+    var words={1:'one',2:'two',3:'three',4:'four',5:'five',6:'six',7:'seven',8:'eight',9:'nine'};
+    return words[n]||String(n);
+  }
+  function storyTeamName(ch){ return ch==='b'?'Blue':ch==='w'?'Green':null; }
+  function runLengthEncode(holes){
+    var runs=[];
+    for(var i=0;i<holes.length;i++){
+      var ch=holes[i];
+      if(runs.length&&runs[runs.length-1].side===ch){runs[runs.length-1].count++;}
+      else{runs.push({side:ch,count:1,startHole:i+1});}
+    }
+    return runs;
+  }
+  function openingClauseFor(run,team){
+    if(run.startHole===1){
+      return run.count===1?team+' win the first hole':team+' win the first '+countWord(run.count)+' holes';
+    }
+    return run.count===1?team+' had won the previous hole':team+' had won '+countWord(run.count)+' in a row';
+  }
+  function matchStory(holes){
+    if(!holes)return '';
+    var runs=runLengthEncode(holes);
+    if(!runs.length)return '';
+
+    var tailRuns=runs.slice(-4);
+    var isChoppy=tailRuns.length>=3&&tailRuns.every(function(r){return r.count===1&&r.side!=='h';});
+    if(isChoppy){
+      var lastTeamC=storyTeamName(tailRuns[tailRuns.length-1].side);
+      return 'The last '+countWord(tailRuns.length)+' holes have gone back and forth, '+lastTeamC+' shading the '+ordinalWord(tailRuns[tailRuns.length-1].startHole)+'.';
+    }
+
+    var last=runs[runs.length-1];
+    var prev=runs.length>1?runs[runs.length-2]:null;
+
+    if(!prev){
+      if(last.side==='h')return last.count>1?'The first '+countWord(last.count)+' holes have all been halved.':'The first hole was halved.';
+      var team=storyTeamName(last.side);
+      if(!team)return '';
+      return last.count===1?team+' win the first hole.':team+' have won the first '+countWord(last.count)+' holes.';
+    }
+
+    if(last.side==='h'){
+      var closingH=last.count===1?'the '+ordinalWord(last.startHole)+' was halved':'the last '+countWord(last.count)+' holes have been halved';
+      if(prev.side!=='h'){
+        return openingClauseFor(prev,storyTeamName(prev.side))+' before '+closingH+'.';
+      }
+      return last.count===1?'The '+ordinalWord(last.startHole)+' was halved.':'The last '+countWord(last.count)+' holes have all been halved.';
+    }
+    if(prev.side==='h'){
+      var lt=storyTeamName(last.side);
+      return lt+' have won '+(last.count===1?'the last hole':'the last '+countWord(last.count)+' holes')+' after a halve.';
+    }
+
+    var prevTeam=storyTeamName(prev.side),lastTeam=storyTeamName(last.side);
+    var closingClause=last.count===1
+      ?lastTeam+' hit back on the '+ordinalWord(last.startHole)
+      :lastTeam+' hit back, winning the last '+countWord(last.count)+' holes';
+    return openingClauseFor(prev,prevTeam)+' before '+closingClause+'.';
+  }
+
   function holeStrip(m){
     var holes=m.holes||'';
     if(!holes.length)return '';
@@ -1269,9 +1575,9 @@
         else if(c.leader==='weff')scoreW='<div class="side-score">Won '+esc(c.score)+'</div>';
         else {scoreB='<div class="side-score">&frac12;</div>';scoreW='<div class="side-score">&frac12;</div>';}
       } else if(c.leader==='tie'){
-        centre='<div class="m-score">AS</div><div class="m-thru">Thru '+esc(c.thru)+'</div>';
+        centre='<div class="m-score">AS</div><div class="m-thru">Thru '+esc(c.thru)+'</div>'+momentumRow(m.holes);
       } else {
-        centre='<div class="m-thru">Thru '+esc(c.thru)+'</div>';
+        centre='<div class="m-thru">Thru '+esc(c.thru)+'</div>'+momentumRow(m.holes);
         if(c.leader==='baber')scoreB='<div class="side-score">'+esc(c.score)+'</div>';
         else scoreW='<div class="side-score">'+esc(c.score)+'</div>';
       }
@@ -1287,6 +1593,7 @@
           +'<div class="match-centre">'+centre+'</div>'
           +'<div class="match-side weff'+(weffLead?' leading':'')+'">'+playerPhotosRow(m.weff_players)+'<div class="player">'+esc(m.weff_players)+'</div>'+scoreW+'</div>'
         +'</div>'
+        +(c.status==='live'&&matchStory(m.holes)?'<div class="card-story">'+esc(matchStory(m.holes))+'</div>':'')
         +'<div class="card-actions"><button class="enter-score" data-id="'+esc(m.id)+'">Enter Score</button></div>'
       +'</div>';
     }).join('');
@@ -1355,6 +1662,26 @@
     return {holes:holes,status:c.status,leader:c.leader,score:c.score,thru:c.thru};
   }
 
+  /* Checks whether every real match for a day is now final, right after
+     the one that was just closed — used to fire a one-off "upload your
+     photos" nudge exactly when a day genuinely wraps up, not before.
+     localStorage guards against the same device firing it twice; it
+     can't fully prevent two different devices both closing out the
+     last two matches at almost the same moment, but that's a rare,
+     low-stakes edge case worth accepting rather than building real
+     server-side locking for. */
+  function checkDayComplete(day,justClosedId){
+    var isPlaceholder=function(m){return /pair \d|player \d/i.test(m.baber_players||'')||/pair \d|player \d/i.test(m.weff_players||'');};
+    var real=state.matches.filter(function(m){return m.day===day&&!isPlaceholder(m);});
+    if(!real.length)return false;
+    var allFinal=real.every(function(m){return m.id===justClosedId||m.status==='final';});
+    if(!allFinal)return false;
+    var flagKey='bci-day-'+day+'-photos-nudge-sent';
+    if(localStorage.getItem(flagKey))return false;
+    localStorage.setItem(flagKey,'1');
+    return true;
+  }
+
   function handleAction(id,act,card,btn){
     var m=findMatch(id);
     if(!m)return;
@@ -1363,12 +1690,21 @@
     if(act==='b'||act==='w'||act==='h'){
       if(holes.length>=18)return;
       var newHoles=holes+act;
-      pushUpdate(id,derived(m,newHoles),btn);
-      if(newHoles.length%3===0){
+      var d=derived(m,newHoles);
+      pushUpdate(id,d,btn);
+      if(d.status==='final'){
+        sendPushEvent('match-final',{
+          matchId:id,day:m.day,matchNo:m.match_no,
+          leader:d.leader,score:d.score,baber:m.baber_players,weff:m.weff_players
+        });
+        if(checkDayComplete(m.day,id)){
+          sendPushEvent('day-photos-nudge',{day:m.day});
+        }
+      } else if(newHoles.length%3===0){
         var mc=calc({holes:newHoles,status:''});
         sendPushEvent('hole-milestone',{
           matchId:id,day:m.day,matchNo:m.match_no,thru:newHoles.length,
-          leader:mc.leader,score:mc.score,baber:m.baber_players,weff:m.weff_players
+          leader:mc.leader,score:mc.score,baber:m.baber_players,weff:m.weff_players,holes:newHoles
         });
       }
     }
@@ -1380,6 +1716,13 @@
       if(!confirm('End this match at its current score? Use this for concessions or matches called early.'))return;
       var c=calc({holes:holes,status:'final'});
       pushUpdate(id,{holes:holes,status:'final',leader:c.leader,score:holes.length?c.score:'Conceded',thru:c.thru},btn);
+      sendPushEvent('match-final',{
+        matchId:id,day:m.day,matchNo:m.match_no,
+        leader:c.leader,score:holes.length?c.score:'Conceded',baber:m.baber_players,weff:m.weff_players
+      });
+      if(checkDayComplete(m.day,id)){
+        sendPushEvent('day-photos-nudge',{day:m.day});
+      }
     }
     else if(act==='reopen'){
       pushUpdate(id,derived(m,holes),btn);
@@ -1562,6 +1905,7 @@
       +'</div>'
       +'<div class="entry-card" style="margin-top:0;">'
         +scoreRowHTML(m,c)
+        +(matchStory(m.holes)?'<div class="match-story">'+esc(matchStory(m.holes))+'</div>':'')
         +holeStrip(m)
         +controls
       +'</div>';

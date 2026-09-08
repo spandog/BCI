@@ -314,9 +314,45 @@
     .match-side .player{font-size:0.85rem;}
     .hole-strip{grid-template-columns:repeat(9,1fr);}
   }
+  /* ---------- Watch Mode — automatic landscape "propped on a table"
+     view. Reuses the exact same match cards already rendered for
+     portrait, just reflows them into a grid and hides everything that
+     isn't the live scores themselves. No separate rendering logic to
+     maintain or get out of sync with the real one. ---------- */
+  body.watch-mode nav,
+  body.watch-mode .page-hero,
+  body.watch-mode .score-banner,
+  body.watch-mode .live-strip,
+  body.watch-mode #points-bar,
+  body.watch-mode .day-tabs,
+  body.watch-mode .day-recap-btn,
+  body.watch-mode .hole-legend,
+  body.watch-mode .scorer-section,
+  body.watch-mode footer,
+  body.watch-mode #bci-bottom-fixed-wrap{
+    display:none!important;
+  }
+  body.watch-mode .page{padding:1rem;max-width:none;}
+  body.watch-mode .match-list{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+    gap:1rem;
+    align-content:start;
+    margin-top:2.5rem;
+  }
+  body.watch-mode .match-card{font-size:1.08em;}
+  body.watch-mode .sr-photo,body.watch-mode .match-side .sr-photo{width:46px;height:46px;}
+  body.watch-mode .card-story{font-size:0.85rem;}
+  .watch-mode-badge{position:fixed;top:0.75rem;right:0.75rem;z-index:9995;
+    background:rgba(22,41,29,0.85);color:var(--gold);font-family:var(--serif-display);
+    font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;
+    padding:0.4rem 0.7rem;border-radius:20px;display:none;align-items:center;gap:0.4rem;}
+  body.watch-mode .watch-mode-badge{display:flex;}
+  .watch-mode-badge .dot{width:6px;height:6px;border-radius:50%;background:#4ade80;}
 </style>
 </head>
 <body>
+<div class="watch-mode-badge"><span class="dot"></span>Watch Mode</div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -611,8 +647,8 @@
       var holes=m.holes||'';
       var b=0,w=0;
       for(var i=0;i<holes.length;i++){
-        if(holes[i]==='b'){b++;namesFrom(m.baber_players).forEach(function(n){holesWon[n]=(holesWon[n]||0)+1;});}
-        else if(holes[i]==='w'){w++;namesFrom(m.weff_players).forEach(function(n){holesWon[n]=(holesWon[n]||0)+1;});}
+        if(holes[i]==='b'){b++;holesWon[m.baber_players]=(holesWon[m.baber_players]||0)+1;}
+        else if(holes[i]==='w'){w++;holesWon[m.weff_players]=(holesWon[m.weff_players]||0)+1;}
       }
       if(m.leader==='baber')baberPts+=1;
       else if(m.leader==='weff')weffPts+=1;
@@ -738,7 +774,7 @@
           section('Biggest Win',data.biggest.winner+' beat '+data.biggest.loser,data.biggest.score);
         }
         if(data.inForm){
-          section('In Form',data.inForm.name,data.inForm.val+' holes won today');
+          section(day===1?'Best Pair':'In Form',data.inForm.name,data.inForm.val+' holes won today');
         }
         if(!data.closest&&!data.inForm){
           ctx.textAlign='center';
@@ -1986,6 +2022,46 @@
         .subscribe();
     }catch(e){/* realtime not enabled — polling covers it */}
   }
+
+  /* ---------- Watch Mode ----------
+     Turning the phone landscape switches to a "propped on the table"
+     view automatically — every match reflowed into a grid, everything
+     else hidden, and the screen kept from sleeping via a real Wake
+     Lock while it's active. Rotating back to portrait reverts
+     everything with no toggle needed. */
+  (function(){
+    var mq=window.matchMedia('(orientation: landscape)');
+    var wakeLock=null;
+
+    function releaseWakeLock(){
+      if(wakeLock){wakeLock.release().catch(function(){});wakeLock=null;}
+    }
+    function requestWakeLock(){
+      if(!('wakeLock' in navigator))return;
+      navigator.wakeLock.request('screen').then(function(lock){
+        wakeLock=lock;
+        wakeLock.addEventListener('release',function(){wakeLock=null;});
+      }).catch(function(){/* wake lock refused — watch mode still works, screen may just sleep normally */});
+    }
+
+    function applyMode(isLandscape){
+      document.body.classList.toggle('watch-mode',isLandscape);
+      if(isLandscape)requestWakeLock();
+      else releaseWakeLock();
+    }
+
+    mq.addEventListener('change',function(e){applyMode(e.matches);});
+    // a wake lock is automatically released by the browser whenever the
+    // page loses visibility (switching tabs/apps) — reacquire it if
+    // watch mode is still active once the page is visible again
+    document.addEventListener('visibilitychange',function(){
+      if(document.visibilityState==='visible'&&document.body.classList.contains('watch-mode')){
+        requestWakeLock();
+      }
+    });
+
+    applyMode(mq.matches);
+  })();
 })();
 </script>
 <script src="hero-gallery.js"></script>

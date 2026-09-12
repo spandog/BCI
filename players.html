@@ -119,9 +119,13 @@
   @media(max-width:900px){.players-grid{grid-template-columns:repeat(3,1fr);}}
   @media(max-width:640px){.players-grid{grid-template-columns:repeat(2,1fr);gap:1rem;}}
   @media(max-width:380px){.players-grid{grid-template-columns:1fr;}}
-  .admin-section{max-width:500px;margin:3rem auto 0;padding:0 1.5rem;}
-  .admin-toggle{display:flex;align-items:center;gap:0.75rem;cursor:pointer;padding:0.5rem 0;border-top:1px solid var(--border);padding-top:1.5rem;}
-  .admin-toggle h3{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .admin-section{max-width:500px;margin:2.5rem auto 0;padding:0 1.5rem;text-align:center;}
+  .admin-toggle{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;
+    border-radius:50%;border:1px solid var(--border);background:white;color:var(--text-muted);
+    cursor:pointer;opacity:0.55;transition:opacity 0.2s;}
+  .admin-toggle:hover{opacity:1;}
+  .admin-toggle .icon{width:16px;height:16px;}
+  .admin-toggle .arrow,.admin-toggle h3{display:none;}
   .admin-toggle .arrow{width:16px;height:16px;color:var(--text-muted);transition:transform 0.2s;margin-left:auto;}
   .admin-toggle.open .arrow{transform:rotate(180deg);}
   .admin-password-gate{background:white;border:1px solid var(--border);border-radius:6px;padding:1.5rem;text-align:center;max-width:320px;margin:1rem auto 0;}
@@ -211,9 +215,10 @@
   </div>
 
   <div class="admin-section">
-    <div class="admin-toggle" id="admin-toggle">
+    <div class="admin-toggle" id="admin-toggle" role="button" aria-label="Admin" title="Admin">
       <h3>Admin Access</h3>
       <svg class="icon arrow" aria-hidden="true"><use href="#i-chevron"/></svg>
+      <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
     </div>
     <div id="admin-password-gate" class="admin-password-gate" style="display:none;">
       <h4>Admin Password</h4>

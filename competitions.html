@@ -75,9 +75,13 @@
   .history-item .pos{font-family:var(--serif-display);color:var(--text-muted);min-width:20px;}
   .history-item .h-name{color:var(--text-dark);}
   .history-item .h-detail{font-family:var(--serif-display);font-size:0.75rem;color:var(--gold);}
-  .scorer-section{border-top:1px solid var(--border);padding-top:1.5rem;margin-top:1rem;}
-  .scorer-toggle{display:flex;align-items:center;gap:0.75rem;cursor:pointer;padding:0.5rem 0;}
-  .scorer-toggle h3{font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+  .scorer-section{margin-top:1.5rem;text-align:center;}
+  .scorer-toggle{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;
+    border-radius:50%;border:1px solid var(--border);background:white;color:var(--text-muted);
+    cursor:pointer;opacity:0.55;transition:opacity 0.2s;}
+  .scorer-toggle:hover{opacity:1;}
+  .scorer-toggle .icon{width:16px;height:16px;}
+  .scorer-toggle .arrow,.scorer-toggle h3{display:none;}
   .arrow{width:12px;height:12px;color:var(--text-muted);transition:transform 0.2s;}
   .scorer-toggle.open .arrow{width:12px;height:12px;color:var(--text-muted);transition:transform 0.2s;}
   .scorer-panel{display:none;}
@@ -154,9 +158,10 @@
   </div>
   <div id="comp-display"></div>
   <div class="scorer-section">
-    <div class="scorer-toggle" id="scorer-toggle">
+    <div class="scorer-toggle" id="scorer-toggle" role="button" aria-label="Admin" title="Admin">
       <h3>Scorer Access</h3>
       <svg class="icon arrow" aria-hidden="true"><use href="#i-chevron"/></svg>
+      <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
     </div>
     <div class="scorer-panel" id="scorer-panel">
       <div class="entry-grid" id="entry-fields"></div>

@@ -141,6 +141,11 @@
   .trip-check{display:flex;align-items:center;gap:0.4rem;font-family:var(--serif-body);font-size:0.85rem;color:var(--text-dark);white-space:nowrap;}
   .trip-check input{width:auto;}
   .upload-btn{width:100%;padding:0.875rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.8rem;letter-spacing:2px;cursor:pointer;text-transform:uppercase;margin-top:1.25rem;}
+  .new-player-row{display:flex;gap:0.5rem;}
+  .new-player-row input{flex:1;padding:0.65rem;border:1px solid var(--border);border-radius:4px;font-family:var(--serif-body);font-size:0.85rem;background:white;}
+  .new-player-btn{padding:0.65rem 1rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:4px;font-family:var(--serif-display);font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+  .new-player-status{font-family:var(--serif-body);font-size:0.78rem;margin-top:0.4rem;min-height:1.1em;}
+  .remove-player-btn{width:100%;padding:0.75rem;background:white;color:#b0532b;border:1px solid #e0a988;border-radius:4px;font-family:var(--serif-display);font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:0.6rem;}
   .upload-btn:disabled{opacity:0.6;cursor:default;}
   .upload-status{font-size:0.82rem;margin-top:0.75rem;text-align:center;min-height:1.2em;}
   .upload-status.success{color:var(--green-mid);}
@@ -218,7 +223,15 @@
     </div>
     <div class="upload-panel" id="upload-panel">
       <h4>Edit Player</h4>
-      <label for="upload-player-select">Player</label>
+
+      <label for="new-player-name">Add New Player</label>
+      <div class="new-player-row">
+        <input type="text" id="new-player-name" placeholder="Full name">
+        <button class="new-player-btn" id="new-player-btn">Add</button>
+      </div>
+      <div class="new-player-status" id="new-player-status"></div>
+
+      <label for="upload-player-select">Edit Existing Player</label>
       <select id="upload-player-select"></select>
 
       <label for="upload-face-input">Face Photo</label>
@@ -458,6 +471,7 @@
       </div>
 
       <button class="upload-btn" id="upload-btn">Save Changes</button>
+      <button class="remove-player-btn" id="remove-player-btn">Remove This Player</button>
       <div class="upload-status" id="upload-status"></div>
     </div>
   </div>
@@ -677,8 +691,18 @@
     sb.from('bci_player_photos').select('*').then(function(res){
       if(res.error||!res.data||!res.data.length)return;
       res.data.forEach(function(row){
+        if(row.hidden){
+          players=players.filter(function(pl){return pl.name!==row.player_name;});
+          return;
+        }
         var p=players.find(function(pl){return pl.name===row.player_name;});
-        if(!p)return;
+        if(!p){
+          // no hardcoded match — this is a genuinely new player, added
+          // entirely from the admin panel, not one of the original 26
+          p={name:row.player_name,team:'tbc',hcap:'TBC',country:'',trips:[],
+             wins:0,losses:0,ties:0,bio:'',photo:'',actionPhoto:''};
+          players.push(p);
+        }
         if(row.photo_url)p.photo=row.photo_url;
         if(row.action_photo_url)p.actionPhoto=row.action_photo_url;
         if(row.hcap)p.hcap=row.hcap;
@@ -687,6 +711,7 @@
         if(row.trips)p.trips=row.trips;
       });
       render(currentSort);
+      populatePlayerSelect();
       if(document.getElementById('upload-panel').classList.contains('visible'))fillEditForm();
     }).catch(function(){/* overrides are best-effort — hardcoded fallbacks still show */});
   }
@@ -751,6 +776,69 @@
   });
   document.getElementById('admin-pw-input').addEventListener('keydown',function(e){
     if(e.key==='Enter')document.getElementById('admin-pw-btn').click();
+  });
+
+  document.getElementById('new-player-btn').addEventListener('click',function(){
+    if(!sb){alert('Not connected — try reloading the page.');return;}
+    var input=document.getElementById('new-player-name');
+    var statusEl=document.getElementById('new-player-status');
+    var name=input.value.trim();
+    if(!name){
+      statusEl.textContent='Enter a name first.';
+      statusEl.style.color='#b0532b';
+      return;
+    }
+    var exists=players.some(function(p){return p.name.toLowerCase()===name.toLowerCase();});
+    if(exists){
+      statusEl.textContent='A player with that name already exists.';
+      statusEl.style.color='#b0532b';
+      return;
+    }
+    var btn=this;
+    btn.disabled=true;btn.textContent='Adding...';
+    sb.from('bci_player_photos').upsert({
+      player_name:name,updated_at:new Date().toISOString(),
+      hcap:'TBC',team:'tbc',country:'',trips:[],hidden:false
+    },{onConflict:'player_name'}).then(function(res){
+      btn.disabled=false;btn.textContent='Add';
+      if(res.error){
+        statusEl.textContent='Could not add: '+res.error.message;
+        statusEl.style.color='#b0532b';
+        return;
+      }
+      players.push({name:name,team:'tbc',hcap:'TBC',country:'',trips:[],
+        wins:0,losses:0,ties:0,bio:'',photo:'',actionPhoto:''});
+      render(currentSort);
+      populatePlayerSelect();
+      document.getElementById('upload-player-select').value=name;
+      fillEditForm();
+      input.value='';
+      statusEl.textContent=name+' added — edit their details below.';
+      statusEl.style.color='#2f7d4f';
+    });
+  });
+
+  document.getElementById('remove-player-btn').addEventListener('click',function(){
+    var name=document.getElementById('upload-player-select').value;
+    if(!name)return;
+    if(!confirm('Remove '+name+' from the roster? This can be undone by adding them again, but their photos and details will need re-entering.'))return;
+    if(!sb){alert('Not connected — try reloading the page.');return;}
+    var btn=this;
+    btn.disabled=true;btn.textContent='Removing...';
+    sb.from('bci_player_photos').upsert({
+      player_name:name,updated_at:new Date().toISOString(),hidden:true
+    },{onConflict:'player_name'}).then(function(res){
+      btn.disabled=false;btn.textContent='Remove This Player';
+      if(res.error){
+        alert('Could not remove: '+res.error.message);
+        return;
+      }
+      players=players.filter(function(p){return p.name!==name;});
+      render(currentSort);
+      populatePlayerSelect();
+      var sel=document.getElementById('upload-player-select');
+      if(sel.options.length){sel.selectedIndex=0;fillEditForm();}
+    });
   });
 
   document.getElementById('upload-btn').addEventListener('click',function(){

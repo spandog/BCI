@@ -682,7 +682,12 @@
     render(currentSort);
   });
 
-  render(currentSort);
+  /* No render here on purpose — the skeleton stays up until the first
+     real render below, once the overrides fetch has actually resolved.
+     Rendering the raw hardcoded list immediately would mean a genuinely
+     hidden/removed player could still flash on screen for a moment,
+     since the hardcoded list has no idea anyone's been removed — only
+     the overrides fetch knows that. */
 
   /* ---------- photo overrides from Supabase, uploaded via the admin panel below.
      Hardcoded photo/actionPhoto paths above stay as the fallback — a row here
@@ -692,8 +697,9 @@
   var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
   var sb=window.supabase?window.supabase.createClient(SB_URL,SB_KEY):null;
 
+  var overridesReady=Promise.resolve();
   if(sb){
-    sb.from('bci_player_photos').select('*').then(function(res){
+    overridesReady=sb.from('bci_player_photos').select('*').then(function(res){
       if(res.error||!res.data||!res.data.length)return;
       res.data.forEach(function(row){
         if(row.hidden){
@@ -715,9 +721,6 @@
         if(row.country!=null)p.country=row.country;
         if(row.trips)p.trips=row.trips;
       });
-      render(currentSort);
-      populatePlayerSelect();
-      if(document.getElementById('upload-panel').classList.contains('visible'))fillEditForm();
     }).catch(function(){/* overrides are best-effort — hardcoded fallbacks still show */});
   }
 
@@ -931,10 +934,7 @@
   });
 
   /* ---------- live records from the 2027 leaderboard ---------- */
-  var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
-  var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
-
-  fetch(SB_URL+'/rest/v1/bci_matches?select=status,leader,baber_players,weff_players',{
+  var liveRecordsReady=fetch(SB_URL+'/rest/v1/bci_matches?select=status,leader,baber_players,weff_players',{
     headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}
   })
   .then(function(r){return r.json();})
@@ -956,9 +956,20 @@
         else p.losses++;
       });
     });
-    render(currentSort);
   })
   .catch(function(){/* leaderboard unreachable — baseline records still show */});
+
+  /* Both fetches run in parallel (no reason to make one wait on the
+     other), but the grid only renders once both have genuinely
+     settled — rather than once after each one independently, which
+     meant the whole grid could silently re-sort and repaint itself
+     more than once right after load, however briefly, since the two
+     had no way of knowing about each other. */
+  Promise.all([overridesReady,liveRecordsReady]).then(function(){
+    render(currentSort);
+    populatePlayerSelect();
+    if(document.getElementById('upload-panel').classList.contains('visible'))fillEditForm();
+  });
 })();
 </script>
 <script src="hero-gallery.js"></script>

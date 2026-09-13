@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Player Sign-Up — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#16291d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BCI">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Lora:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme-coastal.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;}
+  ::selection{background:#c9a84c;color:#16291d;}
+  :focus-visible{outline:2px solid #c9a84c;outline-offset:2px;}
+  :root{
+    --green-dark:#16291d;--green-mid:#3d5c42;--gold:#c9a84c;--gold-light:#ddc27e;
+    --cream:#fbfaf7;--cream-dark:#f0ede4;--text-dark:#16291d;--text-muted:#5c6259;--border:#dcd6c8;
+    --serif-display:'Lora',Georgia,serif;
+    --serif-body:'Public Sans',Arial,sans-serif;
+  }
+  body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+  nav{background:var(--green-dark);padding:0 1.5rem;padding-top:env(safe-area-inset-top,0px);display:flex;align-items:center;height:calc(60px + env(safe-area-inset-top,0px));border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;}
+
+  .page-hero{background:var(--green-dark);padding:2.5rem 1.5rem 2rem;text-align:center;}
+  .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:0.6rem;}
+  .page-hero h1{font-family:var(--serif-display);font-weight:700;font-size:1.7rem;color:white;}
+  .page-hero p{font-family:var(--serif-body);font-size:0.85rem;color:rgba(255,255,255,0.55);margin-top:0.6rem;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.5;}
+
+  .page{max-width:480px;margin:0 auto;padding:2rem 1.5rem 3rem;flex:1 0 auto;width:100%;}
+
+  .form-card{background:white;border:1px solid var(--border);border-radius:10px;padding:1.5rem;}
+  label{display:block;font-family:var(--serif-display);font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.4rem;margin-top:1.1rem;}
+  label:first-child{margin-top:0;}
+  input[type=text],select{width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:5px;font-family:var(--serif-body);font-size:0.95rem;background:white;-webkit-appearance:none;}
+  input[type=text]:focus,select:focus{outline:none;border-color:var(--gold);}
+  input[type=file]{width:100%;padding:0.6rem 0;font-family:var(--serif-body);font-size:0.85rem;}
+  .field-hint{font-family:var(--serif-body);font-size:0.75rem;color:var(--text-muted);margin-top:0.3rem;line-height:1.4;}
+  .submit-btn{width:100%;padding:0.95rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:5px;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:1.75rem;}
+  .submit-btn[disabled]{opacity:0.6;pointer-events:none;}
+  .form-status{font-family:var(--serif-body);font-size:0.85rem;margin-top:0.9rem;text-align:center;min-height:1.2em;}
+  .form-status.error{color:#b0532b;}
+  .form-status.success{color:#2f7d4f;}
+
+  .success-card{background:white;border:1px solid var(--border);border-radius:10px;padding:2.5rem 1.5rem;text-align:center;}
+  .success-card svg{width:44px;height:44px;color:#2f7d4f;margin-bottom:1rem;}
+  .success-card h2{font-family:var(--serif-display);font-size:1.2rem;margin-bottom:0.6rem;}
+  .success-card p{font-family:var(--serif-body);font-size:0.9rem;color:var(--text-muted);line-height:1.5;}
+
+  footer{background:#141f26;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+</nav>
+
+<div class="page-hero">
+  <div class="page-eyebrow">Algarve &middot; 2027</div>
+  <h1>Player Sign-Up</h1>
+  <p>Add your name, nationality, handicap, and a couple of photos, and you'll show up properly on the players page.</p>
+</div>
+
+<div class="page">
+
+  <div class="form-card" id="form-card">
+    <label for="su-name">Full Name</label>
+    <input type="text" id="su-name" placeholder="e.g. James Baber">
+    <div class="field-hint">Enter it exactly how you'd like it to appear on the site.</div>
+
+    <label for="su-country">Nationality</label>
+    <select id="su-country">
+      <option value="">No flag</option>
+      <option value="england">England</option>
+      <option value="scotland">Scotland</option>
+      <option value="wales">Wales</option>
+<option value="AF">Afghanistan</option>
+        <option value="AL">Albania</option>
+        <option value="DZ">Algeria</option>
+        <option value="AD">Andorra</option>
+        <option value="AO">Angola</option>
+        <option value="AG">Antigua and Barbuda</option>
+        <option value="AR">Argentina</option>
+        <option value="AM">Armenia</option>
+        <option value="AU">Australia</option>
+        <option value="AT">Austria</option>
+        <option value="AZ">Azerbaijan</option>
+        <option value="BS">Bahamas</option>
+        <option value="BH">Bahrain</option>
+        <option value="BD">Bangladesh</option>
+        <option value="BB">Barbados</option>
+        <option value="BY">Belarus</option>
+        <option value="BE">Belgium</option>
+        <option value="BZ">Belize</option>
+        <option value="BJ">Benin</option>
+        <option value="BT">Bhutan</option>
+        <option value="BO">Bolivia</option>
+        <option value="BA">Bosnia and Herzegovina</option>
+        <option value="BW">Botswana</option>
+        <option value="BR">Brazil</option>
+        <option value="BN">Brunei</option>
+        <option value="BG">Bulgaria</option>
+        <option value="BF">Burkina Faso</option>
+        <option value="BI">Burundi</option>
+        <option value="CV">Cabo Verde</option>
+        <option value="KH">Cambodia</option>
+        <option value="CM">Cameroon</option>
+        <option value="CA">Canada</option>
+        <option value="CF">Central African Republic</option>
+        <option value="TD">Chad</option>
+        <option value="CL">Chile</option>
+        <option value="CN">China</option>
+        <option value="CO">Colombia</option>
+        <option value="KM">Comoros</option>
+        <option value="CG">Congo</option>
+        <option value="CR">Costa Rica</option>
+        <option value="HR">Croatia</option>
+        <option value="CU">Cuba</option>
+        <option value="CY">Cyprus</option>
+        <option value="CZ">Czechia</option>
+        <option value="CD">DR Congo</option>
+        <option value="DK">Denmark</option>
+        <option value="DJ">Djibouti</option>
+        <option value="DM">Dominica</option>
+        <option value="DO">Dominican Republic</option>
+        <option value="EC">Ecuador</option>
+        <option value="EG">Egypt</option>
+        <option value="SV">El Salvador</option>
+        <option value="GQ">Equatorial Guinea</option>
+        <option value="ER">Eritrea</option>
+        <option value="EE">Estonia</option>
+        <option value="SZ">Eswatini</option>
+        <option value="ET">Ethiopia</option>
+        <option value="FJ">Fiji</option>
+        <option value="FI">Finland</option>
+        <option value="FR">France</option>
+        <option value="GA">Gabon</option>
+        <option value="GM">Gambia</option>
+        <option value="GE">Georgia</option>
+        <option value="DE">Germany</option>
+        <option value="GH">Ghana</option>
+        <option value="GR">Greece</option>
+        <option value="GD">Grenada</option>
+        <option value="GT">Guatemala</option>
+        <option value="GN">Guinea</option>
+        <option value="GW">Guinea-Bissau</option>
+        <option value="GY">Guyana</option>
+        <option value="HT">Haiti</option>
+        <option value="HN">Honduras</option>
+        <option value="HU">Hungary</option>
+        <option value="IS">Iceland</option>
+        <option value="IN">India</option>
+        <option value="ID">Indonesia</option>
+        <option value="IR">Iran</option>
+        <option value="IQ">Iraq</option>
+        <option value="IE">Ireland</option>
+        <option value="IL">Israel</option>
+        <option value="IT">Italy</option>
+        <option value="JM">Jamaica</option>
+        <option value="JP">Japan</option>
+        <option value="JO">Jordan</option>
+        <option value="KZ">Kazakhstan</option>
+        <option value="KE">Kenya</option>
+        <option value="KI">Kiribati</option>
+        <option value="KW">Kuwait</option>
+        <option value="KG">Kyrgyzstan</option>
+        <option value="LA">Laos</option>
+        <option value="LV">Latvia</option>
+        <option value="LB">Lebanon</option>
+        <option value="LS">Lesotho</option>
+        <option value="LR">Liberia</option>
+        <option value="LY">Libya</option>
+        <option value="LI">Liechtenstein</option>
+        <option value="LT">Lithuania</option>
+        <option value="LU">Luxembourg</option>
+        <option value="MG">Madagascar</option>
+        <option value="MW">Malawi</option>
+        <option value="MY">Malaysia</option>
+        <option value="MV">Maldives</option>
+        <option value="ML">Mali</option>
+        <option value="MT">Malta</option>
+        <option value="MH">Marshall Islands</option>
+        <option value="MR">Mauritania</option>
+        <option value="MU">Mauritius</option>
+        <option value="MX">Mexico</option>
+        <option value="FM">Micronesia</option>
+        <option value="MD">Moldova</option>
+        <option value="MC">Monaco</option>
+        <option value="MN">Mongolia</option>
+        <option value="ME">Montenegro</option>
+        <option value="MA">Morocco</option>
+        <option value="MZ">Mozambique</option>
+        <option value="MM">Myanmar</option>
+        <option value="NA">Namibia</option>
+        <option value="NR">Nauru</option>
+        <option value="NP">Nepal</option>
+        <option value="NL">Netherlands</option>
+        <option value="NZ">New Zealand</option>
+        <option value="NI">Nicaragua</option>
+        <option value="NE">Niger</option>
+        <option value="NG">Nigeria</option>
+        <option value="KP">North Korea</option>
+        <option value="MK">North Macedonia</option>
+        <option value="NO">Norway</option>
+        <option value="OM">Oman</option>
+        <option value="PK">Pakistan</option>
+        <option value="PW">Palau</option>
+        <option value="PA">Panama</option>
+        <option value="PG">Papua New Guinea</option>
+        <option value="PY">Paraguay</option>
+        <option value="PE">Peru</option>
+        <option value="PH">Philippines</option>
+        <option value="PL">Poland</option>
+        <option value="PT">Portugal</option>
+        <option value="QA">Qatar</option>
+        <option value="RO">Romania</option>
+        <option value="RU">Russia</option>
+        <option value="RW">Rwanda</option>
+        <option value="KN">Saint Kitts and Nevis</option>
+        <option value="LC">Saint Lucia</option>
+        <option value="VC">Saint Vincent and the Grenadines</option>
+        <option value="WS">Samoa</option>
+        <option value="SM">San Marino</option>
+        <option value="ST">Sao Tome and Principe</option>
+        <option value="SA">Saudi Arabia</option>
+        <option value="SN">Senegal</option>
+        <option value="RS">Serbia</option>
+        <option value="SC">Seychelles</option>
+        <option value="SL">Sierra Leone</option>
+        <option value="SG">Singapore</option>
+        <option value="SK">Slovakia</option>
+        <option value="SI">Slovenia</option>
+        <option value="SB">Solomon Islands</option>
+        <option value="SO">Somalia</option>
+        <option value="ZA">South Africa</option>
+        <option value="KR">South Korea</option>
+        <option value="SS">South Sudan</option>
+        <option value="ES">Spain</option>
+        <option value="LK">Sri Lanka</option>
+        <option value="SD">Sudan</option>
+        <option value="SR">Suriname</option>
+        <option value="SE">Sweden</option>
+        <option value="CH">Switzerland</option>
+        <option value="SY">Syria</option>
+        <option value="TW">Taiwan</option>
+        <option value="TJ">Tajikistan</option>
+        <option value="TZ">Tanzania</option>
+        <option value="TH">Thailand</option>
+        <option value="TL">Timor-Leste</option>
+        <option value="TG">Togo</option>
+        <option value="TO">Tonga</option>
+        <option value="TT">Trinidad and Tobago</option>
+        <option value="TN">Tunisia</option>
+        <option value="TR">Turkey</option>
+        <option value="TM">Turkmenistan</option>
+        <option value="TV">Tuvalu</option>
+        <option value="UG">Uganda</option>
+        <option value="UA">Ukraine</option>
+        <option value="AE">United Arab Emirates</option>
+        <option value="US">United States</option>
+        <option value="UY">Uruguay</option>
+        <option value="UZ">Uzbekistan</option>
+        <option value="VU">Vanuatu</option>
+        <option value="VA">Vatican City</option>
+        <option value="VE">Venezuela</option>
+        <option value="VN">Vietnam</option>
+        <option value="YE">Yemen</option>
+        <option value="ZM">Zambia</option>
+        <option value="ZW">Zimbabwe</option>
+      
+    </select>
+
+    <label for="su-hcap">Handicap</label>
+    <input type="text" id="su-hcap" placeholder="e.g. 12 or 8.9">
+
+    <label for="su-face">Face Photo</label>
+    <input type="file" id="su-face" accept="image/*">
+
+    <label for="su-action">Action Photo (optional)</label>
+    <input type="file" id="su-action" accept="image/*">
+
+    <button class="submit-btn" id="su-submit">Submit</button>
+    <div class="form-status" id="su-status"></div>
+  </div>
+
+  <div class="success-card" id="success-card" style="display:none;">
+    <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4 10-11"/></svg>
+    <h2>You're on the roster</h2>
+    <p>Thanks — your details are saved. You can check the <a href="players.html" style="color:var(--green-dark);">players page</a> to see yourself there.</p>
+  </div>
+
+</div>
+
+<footer><p><span>Book Club Invitational</span></p></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+  var sb=window.supabase?window.supabase.createClient(SB_URL,SB_KEY):null;
+
+  document.getElementById('su-submit').addEventListener('click',function(){
+    if(!sb){alert('Not connected — try reloading the page.');return;}
+    var name=document.getElementById('su-name').value.trim();
+    var country=document.getElementById('su-country').value;
+    var hcap=document.getElementById('su-hcap').value.trim();
+    var faceFile=document.getElementById('su-face').files[0];
+    var actionFile=document.getElementById('su-action').files[0];
+    var statusEl=document.getElementById('su-status');
+    var btn=this;
+
+    if(!name){
+      statusEl.textContent='Please enter your name.';
+      statusEl.className='form-status error';
+      return;
+    }
+    if(!faceFile){
+      statusEl.textContent='Please choose a face photo.';
+      statusEl.className='form-status error';
+      return;
+    }
+
+    btn.disabled=true;btn.textContent='Submitting...';
+    statusEl.textContent='';statusEl.className='form-status';
+
+    var slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+
+    function uploadOne(file,suffix){
+      var ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+      var path=slug+'-'+suffix+'-'+Date.now()+'.'+ext;
+      return sb.storage.from('player-photos').upload(path,file,{upsert:true})
+        .then(function(res){
+          if(res.error)throw new Error(res.error.message);
+          return sb.storage.from('player-photos').getPublicUrl(path).data.publicUrl;
+        });
+    }
+
+    var faceP=uploadOne(faceFile,'face');
+    var actionP=actionFile?uploadOne(actionFile,'action'):Promise.resolve(null);
+
+    Promise.all([faceP,actionP]).then(function(urls){
+      var update={
+        player_name:name,
+        updated_at:new Date().toISOString(),
+        hcap:hcap||'TBC',
+        team:'tbc',
+        country:country,
+        trips:[],
+        hidden:false,
+        photo_url:urls[0]
+      };
+      if(urls[1])update.action_photo_url=urls[1];
+      return sb.from('bci_player_photos').upsert(update,{onConflict:'player_name'});
+    }).then(function(res){
+      if(res.error){
+        btn.disabled=false;btn.textContent='Submit';
+        statusEl.textContent='Could not submit: '+res.error.message;
+        statusEl.className='form-status error';
+        return;
+      }
+      document.getElementById('form-card').style.display='none';
+      document.getElementById('success-card').style.display='block';
+    }).catch(function(err){
+      btn.disabled=false;btn.textContent='Submit';
+      statusEl.textContent='Something went wrong: '+(err&&err.message?err.message:'please try again.');
+      statusEl.className='form-status error';
+    });
+  });
+})();
+</script>
+</body>
+</html>

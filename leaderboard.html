@@ -116,6 +116,8 @@
   .bb-log-row .bb-log-what{color:var(--text-muted);font-size:0.72rem;}
   .bb-log-row .bb-log-amt{color:var(--gold-light);background:var(--green-dark);border-radius:10px;padding:0.1rem 0.5rem;font-family:var(--serif-display);font-size:0.72rem;flex-shrink:0;margin-left:0.5rem;}
   .bb-empty{text-align:center;font-style:italic;color:var(--text-muted);font-size:0.82rem;padding:0.75rem;}
+  .bb-log-delete{color:var(--text-muted);font-size:1.1rem;line-height:1;cursor:pointer;padding:0 0.25rem;flex-shrink:0;}
+  .bb-log-delete:hover{color:#b0532b;}
 
   #bci-celebration{position:fixed;inset:0;z-index:99999;pointer-events:none;opacity:0;
     transition:opacity 0.4s ease;overflow:hidden;background:rgba(22,41,29,0.55);}
@@ -758,9 +760,25 @@
       ? sorted.map(function(r){
           return '<div class="bb-log-row"><div><div class="bb-log-who">'+esc(r.player_name)+'</div>'
             +'<div class="bb-log-what">Day '+r.day+' &middot; Hole '+r.hole+'</div></div>'
-            +'<div class="bb-log-amt">'+(BB_TYPE_LABEL[r.achievement_type]||r.achievement_type)+'</div></div>';
+            +'<div style="display:flex;align-items:center;gap:0.4rem;">'
+            +'<div class="bb-log-amt">'+(BB_TYPE_LABEL[r.achievement_type]||r.achievement_type)+'</div>'
+            +'<span class="bb-log-delete" data-id="'+esc(r.id)+'" title="Remove — mislogged">&times;</span>'
+            +'</div></div>';
         }).join('')
       : '<div class="bb-empty">Nothing logged yet.</div>';
+
+    Array.prototype.forEach.call(logEl.querySelectorAll('.bb-log-delete'),function(btn){
+      btn.addEventListener('click',function(){
+        var id=btn.dataset.id;
+        if(!confirm('Remove this entry? Use this if it was logged by mistake.'))return;
+        if(!sb)return;
+        sb.from('bci_kitty_log').delete().eq('id',id).then(function(res){
+          if(res.error){alert('Could not remove: '+res.error.message);return;}
+          if(window.bciToast)window.bciToast('Entry removed.');
+          loadBirdieBoard();
+        });
+      });
+    });
   }
 
   function loadBirdieBoard(){

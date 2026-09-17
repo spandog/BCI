@@ -7,7 +7,7 @@
    navigated to, if it's cached — only drops back to the itinerary
    page as a last resort if that specific page was never cached.
    ============================================================ */
-var CACHE_NAME='bci-cache-v149';
+var CACHE_NAME='bci-cache-v151';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
@@ -67,9 +67,17 @@ self.addEventListener('push',function(e){
   var raw=e.data?e.data.text():'[[no e.data]]';
   var parsed=null;
   try{parsed=JSON.parse(raw);}catch(err){parsed=null;}
-  /* FCM sometimes nests our fields one level deeper under a "data" key —
-     unwrap it if present, otherwise use the top level as-is. */
-  var payload=(parsed&&parsed.data&&typeof parsed.data==='object')?parsed.data:parsed;
+  /* FCM delivers our title/body nested under a "notification" key in
+     practice — this was previously only checking a "data" key, which
+     real messages never actually use, so every push fell through to
+     the diagnostic branch below instead of showing the real text.
+     Still checks "data" too, and falls back to the top level, in case
+     a message ever arrives shaped either of those other ways. */
+  var payload=parsed;
+  if(parsed){
+    if(parsed.notification&&typeof parsed.notification==='object')payload=parsed.notification;
+    else if(parsed.data&&typeof parsed.data==='object')payload=parsed.data;
+  }
 
   var title,body;
   if(payload&&typeof payload.title==='string'&&payload.title.length>0){
@@ -85,7 +93,7 @@ self.addEventListener('push',function(e){
     body:body,
     icon:'icon-192.png',
     badge:'icon-192.png',
-    data:{url:(payload&&payload.url)||'leaderboard.html'}
+    data:{url:(payload&&(payload.click_action||payload.url))||'leaderboard.html'}
   };
   e.waitUntil(self.registration.showNotification(title,options));
 

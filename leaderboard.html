@@ -97,6 +97,25 @@
   .day-recap-btn .icon{width:15px;height:15px;}
   .day-recap-btn:active{opacity:0.85;}
   .day-recap-btn[disabled]{opacity:0.5;pointer-events:none;}
+  .birdie-board{margin-bottom:0.9rem;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--card-bg);}
+  .birdie-board-toggle{display:flex;align-items:center;gap:0.6rem;padding:0.8rem 1rem;cursor:pointer;}
+  .birdie-board-toggle span{flex:1;font-family:var(--serif-display);font-size:0.82rem;letter-spacing:1px;color:var(--text-dark);}
+  .birdie-board-toggle .icon:first-child{color:var(--gold);width:16px;height:16px;}
+  .birdie-board-toggle .arrow{width:14px;height:14px;color:var(--text-muted);transition:transform 0.2s;}
+  .birdie-board-toggle.open .arrow{transform:rotate(180deg);}
+  .birdie-board-panel{display:none;padding:0 1rem 1rem;border-top:1px solid var(--border);}
+  .birdie-board-panel.visible{display:block;}
+  .bb-section-label{font-family:var(--serif-display);font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin:0.9rem 0 0.5rem;}
+  .bb-tally-row{display:flex;align-items:center;gap:0.6rem;padding:0.4rem 0;font-size:0.85rem;}
+  .bb-tally-row .bb-rank{color:var(--gold);font-family:var(--serif-display);font-weight:700;width:1.1rem;flex-shrink:0;}
+  .bb-tally-row .bb-name{flex:1;}
+  .bb-tally-row .bb-amt{font-family:var(--serif-display);font-weight:700;color:var(--green-mid);}
+  .bb-log-row{display:flex;justify-content:space-between;align-items:baseline;padding:0.35rem 0;font-size:0.8rem;border-top:1px solid var(--border);}
+  .bb-log-row:first-child{border-top:none;}
+  .bb-log-row .bb-log-who{font-weight:600;}
+  .bb-log-row .bb-log-what{color:var(--text-muted);font-size:0.72rem;}
+  .bb-log-row .bb-log-amt{color:var(--gold-light);background:var(--green-dark);border-radius:10px;padding:0.1rem 0.5rem;font-family:var(--serif-display);font-size:0.72rem;flex-shrink:0;margin-left:0.5rem;}
+  .bb-empty{text-align:center;font-style:italic;color:var(--text-muted);font-size:0.82rem;padding:0.75rem;}
 
   #bci-celebration{position:fixed;inset:0;z-index:99999;pointer-events:none;opacity:0;
     transition:opacity 0.4s ease;overflow:hidden;background:rgba(22,41,29,0.55);}
@@ -405,9 +424,7 @@
       <a href="gallery.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-camera"/></svg>Gallery</a>
       <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
       <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
-      <a href="stats.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>Stats</a>
-        <a href="birdies.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-coin"/></svg>The Kitty</a>
-        <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
+      <a href="stats.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>Stats</a>        <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
       <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
       <a href="leaderboard.html" class="live active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
     </div>
@@ -471,6 +488,20 @@
     <svg class="icon" aria-hidden="true"><use href="#i-share"/></svg>
     Day Recap
   </button>
+
+  <div class="birdie-board">
+    <div class="birdie-board-toggle" id="birdie-board-toggle">
+      <svg class="icon" aria-hidden="true"><use href="#i-coin"/></svg>
+      <span>Birdie Board</span>
+      <svg class="icon arrow" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div class="birdie-board-panel" id="birdie-board-panel">
+      <div class="bb-section-label">Owed So Far</div>
+      <div id="bb-tally"><div class="bb-empty">Nothing logged yet.</div></div>
+      <div class="bb-section-label" style="margin-top:1rem;">Recent</div>
+      <div id="bb-log"><div class="bb-empty">Nothing logged yet.</div></div>
+    </div>
+  </div>
 
   <div class="hole-legend">
     <span><span class="legend-sq b"></span>Blue</span>
@@ -700,6 +731,52 @@
   function namesFrom(str){
     return (str||'').split('&').map(function(s){return s.trim();}).filter(Boolean);
   }
+
+  /* ---------- Birdie Board — open to everyone, no admin needed. Shows
+     the running tally and recent log for every birdie/eagle/hole in one
+     logged from the score-entry screen, right on the leaderboard itself
+     rather than a separate page. */
+  var BB_TYPE_LABEL={birdie:'Birdie',eagle:'Eagle',hole_in_one:'Hole in One'};
+
+  function renderBirdieBoard(rows){
+    var totals={};
+    rows.forEach(function(r){totals[r.player_name]=(totals[r.player_name]||0)+Number(r.amount);});
+    var entries=Object.keys(totals).map(function(name){return {name:name,total:totals[name]};})
+      .sort(function(a,b){return b.total-a.total;});
+    var tallyEl=document.getElementById('bb-tally');
+    tallyEl.innerHTML=entries.length
+      ? entries.map(function(e,i){
+          return '<div class="bb-tally-row"><span class="bb-rank">'+(i+1)+'</span>'
+            +'<span class="bb-name">'+esc(e.name)+'</span>'
+            +'<span class="bb-amt">\u00A3'+e.total.toFixed(2).replace(/\.00$/,'')+'</span></div>';
+        }).join('')
+      : '<div class="bb-empty">Nothing logged yet.</div>';
+
+    var logEl=document.getElementById('bb-log');
+    var sorted=rows.slice().sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at);}).slice(0,8);
+    logEl.innerHTML=sorted.length
+      ? sorted.map(function(r){
+          return '<div class="bb-log-row"><div><div class="bb-log-who">'+esc(r.player_name)+'</div>'
+            +'<div class="bb-log-what">Day '+r.day+' &middot; Hole '+r.hole+'</div></div>'
+            +'<div class="bb-log-amt">'+(BB_TYPE_LABEL[r.achievement_type]||r.achievement_type)+'</div></div>';
+        }).join('')
+      : '<div class="bb-empty">Nothing logged yet.</div>';
+  }
+
+  function loadBirdieBoard(){
+    if(!sb)return;
+    sb.from('bci_kitty_log').select('*').then(function(res){
+      if(res.error||!res.data)return;
+      renderBirdieBoard(res.data);
+    }).catch(function(){/* best effort — the toggle still opens either way */});
+  }
+
+  document.getElementById('birdie-board-toggle').addEventListener('click',function(){
+    var willOpen=!document.getElementById('birdie-board-panel').classList.contains('visible');
+    document.getElementById('birdie-board-panel').classList.toggle('visible',willOpen);
+    this.classList.toggle('open',willOpen);
+    if(willOpen)loadBirdieBoard();
+  });
 
   function drawDayRecap(day){
     return document.fonts.ready.then(function(){
@@ -2004,10 +2081,13 @@
           return;
         }
         statusEl.textContent='';statusEl.className='kitty-status';
-        if(window.bciToast){
-          var label=KITTY_TYPES.filter(function(t){return t[0]===kittyState.type;})[0][1];
-          window.bciToast(label+' logged for '+kittyState.player+'.');
-        }
+        var label=KITTY_TYPES.filter(function(t){return t[0]===kittyState.type;})[0][1];
+        if(window.bciToast)window.bciToast(label+' logged for '+kittyState.player+'.');
+        sendPushEvent('kitty-achievement',{
+          player:kittyState.player,day:m.day,hole:hole,
+          achievementType:kittyState.type,amount:kittyState.amount
+        });
+        loadBirdieBoard();
         document.getElementById('kitty-panel').classList.remove('visible');
         Array.prototype.forEach.call(panel.querySelectorAll('.kitty-chip, .kitty-achievements .achievement-btn'),function(el){el.classList.remove('selected');});
         kittyState={hole:null,player:null,type:null};

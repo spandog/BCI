@@ -25,7 +25,13 @@
     --cream:#fbfaf7;--cream-dark:#f0ede4;--text-dark:#16291d;--text-muted:#5c6259;--border:#dcd6c8;
     --baber-text:#1e5a8c;--weff-text:#2f7d4f;
     --serif-display:'Lora',Georgia,serif;
-    --serif-body:'Public Sans',Arial,sans-serif;
+    --serif-body:'Public Sans',Arial,sans-serif;--card-bg:white;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --cream:#10190f;--cream-dark:#182219;--card-bg:#1b2a1f;
+      --text-dark:#e9e6db;--text-muted:#8b9186;--border:#2c3d30;
+    }
   }
   body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);}
   .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
@@ -65,7 +71,7 @@
 
   .stat-loading{text-align:center;font-style:italic;color:var(--text-muted);padding:2.5rem 1rem;font-size:0.88rem;}
 
-  .stat-list{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .stat-list{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
   .stat-row{display:flex;align-items:center;gap:0.9rem;padding:0.8rem 1.1rem;border-bottom:1px solid var(--border);}
   .stat-row:last-child{border-bottom:none;}
   .stat-rank{font-family:var(--serif-display);font-weight:700;font-size:0.85rem;color:var(--gold);width:1.3rem;flex-shrink:0;}
@@ -73,15 +79,17 @@
   .stat-value{font-family:var(--serif-display);font-weight:700;font-size:1.05rem;color:var(--green-dark);flex-shrink:0;}
   .stat-value .unit{font-family:var(--serif-body);font-weight:400;font-size:0.68rem;color:var(--text-muted);margin-left:2px;text-transform:uppercase;}
 
-  .rivalry-card{background:white;border:1px solid var(--border);border-radius:8px;padding:1rem 1.1rem;margin-bottom:0.7rem;}
+  .rivalry-card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.1rem;margin-bottom:0.7rem;}
   .rivalry-names{font-family:var(--serif-display);font-weight:700;font-size:0.92rem;color:var(--text-dark);margin-bottom:0.3rem;}
   .rivalry-record{font-family:var(--serif-body);font-size:0.8rem;color:var(--text-muted);}
 
-  .margin-card{display:flex;justify-content:space-between;align-items:center;background:white;border:1px solid var(--border);border-radius:8px;padding:0.9rem 1.1rem;margin-bottom:0.7rem;}
+  .margin-card{display:flex;justify-content:space-between;align-items:center;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:0.9rem 1.1rem;margin-bottom:0.7rem;}
   .margin-teams{font-family:var(--serif-body);font-size:0.85rem;color:var(--text-dark);}
   .margin-score{font-family:var(--serif-display);font-weight:700;font-size:1rem;color:var(--gold);flex-shrink:0;margin-left:1rem;}
 
-  .empty-stat{text-align:center;color:var(--text-muted);font-style:italic;padding:1.5rem;font-size:0.85rem;background:white;border:1px solid var(--border);border-radius:8px;}
+  .empty-stat{text-align:center;color:var(--text-muted);font-style:italic;padding:1.75rem 1.5rem;font-size:0.85rem;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;}
+  .empty-illo{width:52px;height:52px;margin:0 auto 0.75rem;display:block;color:var(--border);}
+  .empty-illo .flag-part{color:var(--gold);}
 
   .back-link{display:inline-flex;align-items:center;gap:8px;color:var(--text-muted);text-decoration:none;font-family:var(--serif-display);font-size:0.78rem;letter-spacing:1.5px;text-transform:uppercase;margin-top:1rem;}
   .back-link:hover{color:var(--green-dark);}
@@ -91,7 +99,7 @@
   .fade-up.visible{opacity:1;transform:translateY(0);}
 
   footer{background:#141f26;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
-  footer span{color:var(--gold);}  .side-comp-card{background:white;border:1px solid var(--border);border-radius:8px;padding:1rem 1.1rem;margin-bottom:0.7rem;display:flex;align-items:center;gap:0.9rem;}
+  footer span{color:var(--gold);}  .side-comp-card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.1rem;margin-bottom:0.7rem;display:flex;align-items:center;gap:0.9rem;}
   .side-comp-icon{width:34px;height:34px;flex-shrink:0;color:var(--gold);}
   .side-comp-day{font-family:var(--serif-body);font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.15rem;}
   .side-comp-title{font-family:var(--serif-display);font-weight:700;font-size:0.88rem;color:var(--text-dark);}
@@ -182,7 +190,15 @@
 
   var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
   var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
-  var sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+  
+  /* One real Supabase client shared across every script on this page —
+     see live-tracker.js for the full explanation. Identical, idempotent
+     definition, safe regardless of which file actually loads first. */
+  window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
+    return window.__bciSbClient;
+  };
+  var sb=window.supabase?window.bciGetSupabase(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 
   function esc(s){
     return String(s).replace(/[&<>"']/g,function(c){
@@ -230,7 +246,7 @@
 
   function topList(obj,label,unit){
     var entries=Object.keys(obj).map(function(k){return {name:k,val:obj[k]};}).sort(function(a,b){return b.val-a.val;}).slice(0,5);
-    if(!entries.length)return '<div class="empty-stat">No completed matches yet \u2014 check back once scoring is under way.</div>';
+    if(!entries.length)return '<div class="empty-stat"><svg class="empty-illo" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="32" cy="54" rx="22" ry="4"/><line x1="32" y1="54" x2="32" y2="14" class="flag-part"/><path d="M32 14 48 20 32 26Z" class="flag-part" fill="currentColor"/><circle cx="46" cy="48" r="4"/></svg>No completed matches yet \u2014 check back once scoring is under way.</div>';
     return '<div class="stat-list">'+entries.map(function(e,i){
       return '<div class="stat-row"><span class="stat-rank">'+(i+1)+'</span>'
         +'<span class="stat-name">'+esc(e.name)+'</span>'
@@ -240,7 +256,7 @@
 
   function renderMargins(margins){
     var sorted=margins.slice().sort(function(a,b){return b.margin-a.margin;}).slice(0,5);
-    if(!sorted.length)return '<div class="empty-stat">No completed matches yet \u2014 check back once scoring is under way.</div>';
+    if(!sorted.length)return '<div class="empty-stat"><svg class="empty-illo" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="32" cy="54" rx="22" ry="4"/><line x1="32" y1="54" x2="32" y2="14" class="flag-part"/><path d="M32 14 48 20 32 26Z" class="flag-part" fill="currentColor"/><circle cx="46" cy="48" r="4"/></svg>No completed matches yet \u2014 check back once scoring is under way.</div>';
     return sorted.map(function(m){
       var winners=m.leader==='baber'?m.baber:m.weff;
       var losers=m.leader==='baber'?m.weff:m.baber;
@@ -273,7 +289,7 @@
       });
     });
 
-    document.getElementById('side-comp-body').innerHTML=cards||'<div class="empty-stat">No entries logged yet.</div>';
+    document.getElementById('side-comp-body').innerHTML=cards||'<div class="empty-stat"><svg class="empty-illo" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="32" cy="54" rx="22" ry="4"/><line x1="32" y1="54" x2="32" y2="14" class="flag-part"/><path d="M32 14 48 20 32 26Z" class="flag-part" fill="currentColor"/><circle cx="46" cy="48" r="4"/></svg>No entries logged yet.</div>';
   }
 
   if(sb){

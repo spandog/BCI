@@ -23,7 +23,13 @@
     --green-dark:#16291d;--green-mid:#3d5c42;--gold:#c9a84c;--gold-light:#ddc27e;
     --cream:#fbfaf7;--cream-dark:#f0ede4;--text-dark:#16291d;--text-muted:#5c6259;--border:#dcd6c8;
     --serif-display:'Lora',Georgia,serif;
-    --serif-body:'Public Sans',Arial,sans-serif;
+    --serif-body:'Public Sans',Arial,sans-serif;--card-bg:white;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --cream:#10190f;--cream-dark:#182219;--card-bg:#1b2a1f;
+      --text-dark:#e9e6db;--text-muted:#8b9186;--border:#2c3d30;
+    }
   }
   body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);}
   .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
@@ -37,10 +43,10 @@
 
   .page{max-width:480px;margin:0 auto;padding:2rem 1.5rem 3rem;flex:1 0 auto;width:100%;}
 
-  .form-card{background:white;border:1px solid var(--border);border-radius:10px;padding:1.5rem;}
+  .form-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1.5rem;}
   label{display:block;font-family:var(--serif-display);font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.4rem;margin-top:1.1rem;}
   label:first-child{margin-top:0;}
-  input[type=text],select{width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:5px;font-family:var(--serif-body);font-size:0.95rem;background:white;-webkit-appearance:none;}
+  input[type=text],select{width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:5px;font-family:var(--serif-body);font-size:0.95rem;background:var(--card-bg);-webkit-appearance:none;}
   input[type=text]:focus,select:focus{outline:none;border-color:var(--gold);}
   input[type=file]{width:100%;padding:0.6rem 0;font-family:var(--serif-body);font-size:0.85rem;}
   .field-hint{font-family:var(--serif-body);font-size:0.75rem;color:var(--text-muted);margin-top:0.3rem;line-height:1.4;}
@@ -50,7 +56,7 @@
   .form-status.error{color:#b0532b;}
   .form-status.success{color:#2f7d4f;}
 
-  .success-card{background:white;border:1px solid var(--border);border-radius:10px;padding:2.5rem 1.5rem;text-align:center;}
+  .success-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:2.5rem 1.5rem;text-align:center;}
   .success-card svg{width:44px;height:44px;color:#2f7d4f;margin-bottom:1rem;}
   .success-card h2{font-family:var(--serif-display);font-size:1.2rem;margin-bottom:0.6rem;}
   .success-card p{font-family:var(--serif-body);font-size:0.9rem;color:var(--text-muted);line-height:1.5;}
@@ -307,7 +313,15 @@
 (function(){
   var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
   var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
-  var sb=window.supabase?window.supabase.createClient(SB_URL,SB_KEY):null;
+  
+  /* One real Supabase client shared across every script on this page —
+     see live-tracker.js for the full explanation. Identical, idempotent
+     definition, safe regardless of which file actually loads first. */
+  window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
+    return window.__bciSbClient;
+  };
+  var sb=window.supabase?window.bciGetSupabase(SB_URL,SB_KEY):null;
 
   document.getElementById('su-submit').addEventListener('click',function(){
     if(!sb){alert('Not connected — try reloading the page.');return;}

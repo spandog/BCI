@@ -24,7 +24,13 @@
     --green-dark:#16291d;--green-mid:#3d5c42;--gold:#c9a84c;--gold-light:#ddc27e;
     --cream:#fbfaf7;--cream-dark:#f0ede4;--text-dark:#16291d;--text-muted:#5c6259;--border:#dcd6c8;
     --serif-display:'Lora',Georgia,serif;
-    --serif-body:'Public Sans',Arial,sans-serif;
+    --serif-body:'Public Sans',Arial,sans-serif;--card-bg:white;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --cream:#10190f;--cream-dark:#182219;--card-bg:#1b2a1f;
+      --text-dark:#e9e6db;--text-muted:#8b9186;--border:#2c3d30;
+    }
   }
   body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);}
   .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
@@ -59,8 +65,8 @@
 
   .page{max-width:640px;margin:0 auto;padding:3rem 1.5rem;flex:1 0 auto;}
 
-  .pay-card{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.06);margin-bottom:2rem;}
-  .pay-signin-note{background:white;border:1px solid var(--border);border-radius:8px;padding:2rem 1.5rem;text-align:center;margin-bottom:2rem;}
+  .pay-card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.06);margin-bottom:2rem;}
+  .pay-signin-note{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:2rem 1.5rem;text-align:center;margin-bottom:2rem;}
   .pay-signin-note svg{width:32px;height:32px;color:var(--gold);stroke-width:1.25;margin-bottom:0.85rem;}
   .pay-signin-note h3{font-family:var(--serif-display);font-size:1rem;letter-spacing:1px;color:var(--green-dark);text-transform:uppercase;margin-bottom:0.5rem;}
   .pay-signin-note p{font-size:0.88rem;color:var(--text-muted);line-height:1.5;}
@@ -259,7 +265,15 @@
   var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
   var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
   if(!window.supabase)return;
-  var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  
+  /* One real Supabase client shared across every script on this page —
+     see live-tracker.js for the full explanation. Identical, idempotent
+     definition, safe regardless of which file actually loads first. */
+  window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
+    return window.__bciSbClient;
+  };
+  var sb=window.bciGetSupabase(SUPABASE_URL,SUPABASE_ANON_KEY);
   var currentUser=null;
 
   function showSignedOut(){

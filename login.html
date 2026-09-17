@@ -25,7 +25,13 @@
     --green-dark:#16291d;--green-mid:#3d5c42;--gold:#c9a84c;--gold-light:#ddc27e;
     --cream:#fbfaf7;--cream-dark:#f0ede4;--text-dark:#16291d;--text-muted:#5c6259;--border:#dcd6c8;
     --serif-display:'Lora',Georgia,serif;
-    --serif-body:'Public Sans',Arial,sans-serif;
+    --serif-body:'Public Sans',Arial,sans-serif;--card-bg:white;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --cream:#10190f;--cream-dark:#182219;--card-bg:#1b2a1f;
+      --text-dark:#e9e6db;--text-muted:#8b9186;--border:#2c3d30;
+    }
   }
   body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;}
   .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
@@ -38,10 +44,10 @@
   .login-title{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;}
   .login-sub{font-family:var(--serif-body);font-size:0.9rem;color:var(--text-muted);text-align:center;margin-bottom:2rem;line-height:1.5;}
 
-  .login-card{background:white;border:1px solid var(--border);border-radius:8px;padding:1.75rem 1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+  .login-card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:1.75rem 1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
   .login-label{display:block;font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem;}
-  .login-card input{width:100%;padding:0.8rem 0.9rem;border:1px solid var(--border);border-radius:6px;font-family:var(--serif-body);font-size:0.95rem;background:#fafaf7;margin-bottom:1rem;}
-  .login-card input:focus{outline:none;border-color:var(--gold);background:white;}
+  .login-card input{width:100%;padding:0.8rem 0.9rem;border:1px solid var(--border);border-radius:6px;font-family:var(--serif-body);font-size:0.95rem;background:var(--card-bg);margin-bottom:1rem;}
+  .login-card input:focus{outline:none;border-color:var(--gold);background:var(--card-bg);}
   .login-btn{width:100%;padding:0.85rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:6px;font-family:var(--serif-display);font-size:0.72rem;letter-spacing:2.5px;text-transform:uppercase;font-weight:700;cursor:pointer;transition:background 0.15s;}
   .login-btn:hover{background:#182530;}
   .login-btn:disabled{opacity:0.6;cursor:default;}
@@ -50,7 +56,7 @@
   .login-status.success{color:var(--green-mid);}
   .login-status.error{color:#b0532b;}
 
-  .signed-in-card{background:white;border:1px solid var(--border);border-radius:8px;padding:1.75rem 1.5rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+  .signed-in-card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:1.75rem 1.5rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
   .signed-in-name{font-family:var(--serif-display);font-size:1.3rem;font-weight:700;color:var(--text-dark);margin-bottom:0.35rem;}
   .signed-in-email{font-family:var(--serif-body);font-size:0.82rem;color:var(--text-muted);margin-bottom:1.25rem;}
   .signed-in-links{display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.25rem;}
@@ -102,7 +108,15 @@
 (function(){
   var SUPABASE_URL='https://ccczckdewwlpofgjigdi.supabase.co';
   var SUPABASE_ANON_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
-  var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  
+  /* One real Supabase client shared across every script on this page —
+     see live-tracker.js for the full explanation. Identical, idempotent
+     definition, safe regardless of which file actually loads first. */
+  window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
+    return window.__bciSbClient;
+  };
+  var sb=window.bciGetSupabase(SUPABASE_URL,SUPABASE_ANON_KEY);
 
   function showStatus(msg,cls){
     var el=document.getElementById('login-status');

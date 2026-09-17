@@ -181,3 +181,19 @@ a,button,.link-row,.player-card,.kit-card,.result-team,.comp-card,
   #bci-a2hs-banner{transition:none;}
 }
 
+/* Shared toast — built in bci-features.js, window.bciToast(msg, type) */
+#bci-toast{
+  position:fixed;left:50%;bottom:28px;z-index:99990;
+  transform:translate(-50%,12px);opacity:0;pointer-events:none;
+  background:var(--green-dark,#16291d);color:white;
+  font-family:var(--serif-display,inherit);font-size:0.82rem;
+  padding:0.7rem 1.2rem;border-radius:24px;box-shadow:0 6px 20px rgba(0,0,0,0.25);
+  max-width:85vw;text-align:center;
+  transition:opacity 0.25s ease,transform 0.25s ease;
+}
+#bci-toast.visible{opacity:1;transform:translate(-50%,0);}
+#bci-toast.error{background:#8a3a24;}
+@media(prefers-reduced-motion:reduce){
+  #bci-toast{transition:none;}
+}
+

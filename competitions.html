@@ -24,7 +24,13 @@
     --green-dark:#16291d;--green-mid:#3d5c42;--gold:#c9a84c;--gold-light:#ddc27e;
     --cream:#fbfaf7;--cream-dark:#f0ede4;--text-dark:#16291d;--text-muted:#5c6259;--border:#dcd6c8;
     --serif-display:'Lora',Georgia,serif;
-    --serif-body:'Public Sans',Arial,sans-serif;
+    --serif-body:'Public Sans',Arial,sans-serif;--card-bg:white;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --cream:#10190f;--cream-dark:#182219;--card-bg:#1b2a1f;
+      --text-dark:#e9e6db;--text-muted:#8b9186;--border:#2c3d30;
+    }
   }
   .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
   body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;}
@@ -50,12 +56,12 @@
   .page-hero h1{font-family:var(--serif-display);font-size:clamp(2rem,8vw,2.8rem);color:white;letter-spacing:0.5px;font-weight:700;}
   .page-hero h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;}
   .page{max-width:860px;margin:0 auto;padding:3rem 1.5rem;flex:1;}
-  .day-tabs{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:white;margin-bottom:2rem;}
+  .day-tabs{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--card-bg);margin-bottom:2rem;}
   .day-tab{flex:1;padding:0.75rem;text-align:center;font-family:var(--serif-display);font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);border-right:1px solid var(--border);transition:all 0.2s;}
   .day-tab:last-child{border-right:none;}
   .day-tab.active{background:var(--green-dark);color:var(--gold);}
   .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2.5rem;}
-  .comp-card{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+  .comp-card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
   .comp-card-header{background:var(--green-dark);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:0.75rem;}
   .comp-card-header .comp-icon{line-height:0;}
   .comp-svg{width:22px;height:22px;color:var(--gold);}
@@ -67,6 +73,8 @@
   .comp-result .winner-name{font-family:var(--serif-display);font-size:1.4rem;color:var(--green-mid);letter-spacing:2px;font-weight:600;margin-bottom:4px;}
   .comp-result .winner-detail{font-size:0.8rem;color:var(--text-muted);font-family:var(--serif-display);letter-spacing:1px;}
   .comp-result .tbd{font-family:var(--serif-body);font-size:1rem;color:var(--text-muted);font-style:italic;}
+  .empty-illo{width:44px;height:44px;margin:0 auto 0.5rem;display:block;color:var(--border);}
+  .empty-illo .flag-part{color:var(--gold);}
   .comp-result .crown{margin-bottom:0.5rem;line-height:0;}
   .comp-history{padding:0.75rem 1.5rem;}
   .comp-history-title{font-family:var(--serif-display);font-size:0.6rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.5rem;}
@@ -77,7 +85,7 @@
   .history-item .h-detail{font-family:var(--serif-display);font-size:0.75rem;color:var(--gold);}
   .scorer-section{margin-top:1.5rem;text-align:center;}
   .scorer-toggle{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;
-    border-radius:50%;border:1px solid var(--border);background:white;color:var(--text-muted);
+    border-radius:50%;border:1px solid var(--border);background:var(--card-bg);color:var(--text-muted);
     cursor:pointer;opacity:0.55;transition:opacity 0.2s;}
   .scorer-toggle:hover{opacity:1;}
   .scorer-toggle .icon{width:16px;height:16px;}
@@ -87,7 +95,7 @@
   .scorer-panel{display:none;}
   .scorer-panel.visible{display:block;}
   .entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:1.25rem;}
-  .entry-card{background:white;border:1px solid var(--border);border-radius:6px;padding:1.25rem;}
+  .entry-card{background:var(--card-bg);border:1px solid var(--border);border-radius:6px;padding:1.25rem;}
   .entry-card h4{font-family:var(--serif-display);font-size:0.8rem;letter-spacing:2px;color:var(--green-dark);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;}
   .entry-group{display:flex;flex-direction:column;gap:4px;margin-bottom:0.75rem;}
   .entry-group label{font-family:var(--serif-display);font-size:0.58rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
@@ -178,7 +186,15 @@
 
   var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
   var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
-  var sb=window.supabase?window.supabase.createClient(SB_URL,SB_KEY):null;
+  
+  /* One real Supabase client shared across every script on this page —
+     see live-tracker.js for the full explanation. Identical, idempotent
+     definition, safe regardless of which file actually loads first. */
+  window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
+    return window.__bciSbClient;
+  };
+  var sb=window.supabase?window.bciGetSupabase(SB_URL,SB_KEY):null;
 
   function timeNow(){
     return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
@@ -233,7 +249,7 @@
     var winner=w
       ?'<div class="crown"><svg class="icon crown-svg" aria-hidden="true"><use href="#i-trophy"/></svg></div><div class="winner-name">'+w.name+'</div>'
         +(w.time?'<div class="winner-detail">Logged '+w.time+'</div>':'')
-      :'<div class="tbd">No entry yet</div>';
+      :'<div class="tbd"><svg class="empty-illo" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="32" cy="54" rx="22" ry="4"/><line x1="32" y1="54" x2="32" y2="14" class="flag-part"/><path d="M32 14 48 20 32 26Z" class="flag-part" fill="currentColor"/><circle cx="46" cy="48" r="4"/></svg>No entry yet</div>';
     var newestFirst=entries.slice().reverse();
     var history=entries.length>1
       ?'<div class="comp-history"><div class="comp-history-title">All entries</div>'

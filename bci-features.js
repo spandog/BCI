@@ -679,4 +679,27 @@
       });
     }
   })();
+
+  /* ---------- shared toast ----------
+     One consistent, quiet confirmation used everywhere a save/action
+     succeeds, rather than each page inventing its own — an inline
+     status line here, a plain alert() there. Call window.bciToast(
+     'Saved.') from any page; it builds its own element on first use. */
+  window.bciToast=function(message,type){
+    var el=document.getElementById('bci-toast');
+    if(!el){
+      el=document.createElement('div');
+      el.id='bci-toast';
+      document.body.appendChild(el);
+    }
+    el.textContent=message;
+    el.className='';
+    void el.offsetWidth; // restart the animation if a toast is already mid-fade
+    el.classList.add(type==='error'?'error':'success');
+    requestAnimationFrame(function(){el.classList.add('visible');});
+    clearTimeout(el._bciToastTimer);
+    el._bciToastTimer=setTimeout(function(){
+      el.classList.remove('visible');
+    },2600);
+  };
 })();

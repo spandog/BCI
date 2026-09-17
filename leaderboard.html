@@ -302,6 +302,25 @@
   .card-story{font-family:var(--serif-body);font-size:0.7rem;line-height:1.4;color:var(--text-muted);
     font-style:italic;padding:0 0.875rem 0.75rem;}
   .hole-detail-card{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:0.875rem;}
+  .kitty-toggle{display:flex;align-items:center;gap:6px;font-family:var(--serif-display);font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);cursor:pointer;margin:0.9rem 0;}
+  .kitty-toggle .icon{width:14px;height:14px;}
+  .kitty-panel{display:none;background:var(--cream-dark,#f0ede4);border-radius:6px;padding:0.9rem;margin-bottom:0.9rem;}
+  .kitty-panel.visible{display:block;}
+  .kitty-row-label{font-family:var(--serif-display);font-size:0.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.4rem;}
+  .kitty-row-label:not(:first-child){margin-top:0.75rem;}
+  .kitty-players{display:flex;flex-wrap:wrap;gap:0.4rem;}
+  .kitty-chip{padding:0.4rem 0.7rem;border:1px solid var(--border);border-radius:16px;background:white;font-size:0.78rem;cursor:pointer;}
+  .kitty-chip.selected{background:var(--green-dark);border-color:var(--green-dark);color:var(--gold);}
+  .kitty-achievements{display:flex;gap:0.4rem;}
+  .kitty-achievements .achievement-btn{flex:1;padding:0.55rem 0.3rem;border:1px solid var(--border);border-radius:6px;background:white;font-family:var(--serif-display);font-size:0.7rem;cursor:pointer;text-align:center;}
+  .kitty-achievements .achievement-btn .amt{display:block;font-size:0.62rem;color:var(--text-muted);}
+  .kitty-achievements .achievement-btn.selected{background:var(--green-dark);border-color:var(--green-dark);color:var(--gold);}
+  .kitty-achievements .achievement-btn.selected .amt{color:var(--gold-light);}
+  .kitty-hole-select{width:100%;padding:0.55rem;border:1px solid var(--border);border-radius:5px;font-family:var(--serif-body);font-size:0.85rem;background:white;-webkit-appearance:none;}
+  .kitty-submit{width:100%;padding:0.7rem;background:var(--green-dark);color:var(--gold);border:none;border-radius:5px;font-family:var(--serif-display);font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:0.75rem;}
+  .kitty-submit[disabled]{opacity:0.6;pointer-events:none;}
+  .kitty-status{font-family:var(--serif-body);font-size:0.78rem;margin-top:0.5rem;text-align:center;min-height:1.1em;}
+  .kitty-status.error{color:#b0532b;}
   .hd-item{background:var(--card-bg);padding:0.7rem 0.5rem;text-align:center;}
   .hd-label{font-family:var(--serif-body);font-size:0.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.25rem;}
   .hd-val{font-family:var(--serif-display);font-weight:700;font-size:1.15rem;color:var(--green-dark);}
@@ -379,6 +398,7 @@
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
     <symbol id="i-bar-chart" viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 15.5c0 1 1 1.8 2.5 1.8s2.5-.7 2.5-1.6c0-2.4-5-1.2-5-3.6 0-.9 1-1.6 2.5-1.6s2.5.8 2.5 1.8M12 7.5v1M12 15.5v1"/></symbol>
     <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
     <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
@@ -396,6 +416,7 @@
       <a href="2027.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-globe"/></svg>Algarve · 2027</a>
       <a href="players.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-user"/></svg>Players</a>
       <a href="stats.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>Stats</a>
+        <a href="birdies.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-coin"/></svg>The Kitty</a>
         <a href="kit.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-shirt"/></svg>BCI Shop</a>
       <a href="competitions.html"><svg class="icon d-icon" aria-hidden="true"><use href="#i-target"/></svg>Competitions</a>
       <a href="leaderboard.html" class="live active"><svg class="icon d-icon" aria-hidden="true"><use href="#i-flag"/></svg>Leaderboard</a>
@@ -1921,6 +1942,89 @@
     +'</div>';
   }
 
+  var KITTY_TYPES=[['birdie','Birdie','2.50'],['eagle','Eagle','5'],['hole_in_one','Hole in One','50']];
+  var kittyState={hole:null,player:null,type:null};
+
+  function kittyToggleHTML(){
+    return '<div class="kitty-toggle" id="kitty-toggle">'
+      +'<svg class="icon" aria-hidden="true"><use href="#i-coin"/></svg>Log a birdie, eagle or ace'
+    +'</div>';
+  }
+
+  function kittyPanelHTML(m,c){
+    var names=namesFrom(m.baber_players).concat(namesFrom(m.weff_players));
+    var defaultHole=c.played||1;
+    var holeOptions=Array.from({length:18},function(_,i){
+      return '<option value="'+(i+1)+'"'+((i+1)===defaultHole?' selected':'')+'>Hole '+(i+1)+'</option>';
+    }).join('');
+    return '<div class="kitty-panel" id="kitty-panel">'
+      +'<div class="kitty-row-label">Which hole</div>'
+      +'<select class="kitty-hole-select" id="kitty-hole-select">'+holeOptions+'</select>'
+      +'<div class="kitty-row-label">Who</div>'
+      +'<div class="kitty-players">'+names.map(function(n){
+        return '<div class="kitty-chip" data-name="'+esc(n)+'">'+esc(n)+'</div>';
+      }).join('')+'</div>'
+      +'<div class="kitty-row-label">Achievement</div>'
+      +'<div class="kitty-achievements">'+KITTY_TYPES.map(function(t){
+        return '<div class="achievement-btn" data-type="'+t[0]+'" data-amount="'+t[2]+'">'+t[1]+'<span class="amt">\u00A3'+t[2]+'</span></div>';
+      }).join('')+'</div>'
+      +'<button class="kitty-submit" id="kitty-submit">Log It</button>'
+      +'<div class="kitty-status" id="kitty-status"></div>'
+    +'</div>';
+  }
+
+  function wireKittyPanel(m){
+    var toggle=document.getElementById('kitty-toggle');
+    var panel=document.getElementById('kitty-panel');
+    if(!toggle||!panel)return;
+    toggle.addEventListener('click',function(){
+      panel.classList.toggle('visible');
+    });
+    Array.prototype.forEach.call(panel.querySelectorAll('.kitty-chip'),function(chip){
+      chip.addEventListener('click',function(){
+        Array.prototype.forEach.call(panel.querySelectorAll('.kitty-chip'),function(c2){c2.classList.remove('selected');});
+        chip.classList.add('selected');
+        kittyState.player=chip.dataset.name;
+      });
+    });
+    Array.prototype.forEach.call(panel.querySelectorAll('.kitty-achievements .achievement-btn'),function(btn){
+      btn.addEventListener('click',function(){
+        Array.prototype.forEach.call(panel.querySelectorAll('.kitty-achievements .achievement-btn'),function(b2){b2.classList.remove('selected');});
+        btn.classList.add('selected');
+        kittyState.type=btn.dataset.type;
+        kittyState.amount=parseFloat(btn.dataset.amount);
+      });
+    });
+    document.getElementById('kitty-submit').addEventListener('click',function(){
+      var statusEl=document.getElementById('kitty-status');
+      var hole=parseInt(document.getElementById('kitty-hole-select').value,10);
+      if(!kittyState.player){statusEl.textContent='Choose who made it.';statusEl.className='kitty-status error';return;}
+      if(!kittyState.type){statusEl.textContent='Choose birdie, eagle, or hole in one.';statusEl.className='kitty-status error';return;}
+      if(!sb){alert('Not connected — try reloading the page.');return;}
+      var btn=this;
+      btn.disabled=true;btn.textContent='Logging...';
+      sb.from('bci_kitty_log').insert({
+        player_name:kittyState.player,day:m.day,hole:hole,
+        achievement_type:kittyState.type,amount:kittyState.amount
+      }).then(function(res){
+        btn.disabled=false;btn.textContent='Log It';
+        if(res.error){
+          statusEl.textContent='Could not log: '+res.error.message;
+          statusEl.className='kitty-status error';
+          return;
+        }
+        statusEl.textContent='';statusEl.className='kitty-status';
+        if(window.bciToast){
+          var label=KITTY_TYPES.filter(function(t){return t[0]===kittyState.type;})[0][1];
+          window.bciToast(label+' logged for '+kittyState.player+'.');
+        }
+        document.getElementById('kitty-panel').classList.remove('visible');
+        Array.prototype.forEach.call(panel.querySelectorAll('.kitty-chip, .kitty-achievements .achievement-btn'),function(el){el.classList.remove('selected');});
+        kittyState={hole:null,player:null,type:null};
+      });
+    });
+  }
+
   function renderScoreView(){
     var m=findMatch(state.scoringId);
     var el=document.getElementById('score-view');
@@ -1949,6 +2053,8 @@
           +'<button class="mini-btn" data-act="undo"'+(c.played===0?' disabled':'')+'>Undo hole</button>'
           +'<button class="mini-btn" data-act="'+(c.manualFinal?'reopen':'concede')+'">'+(c.manualFinal?'Reopen':'End match now')+'</button>'
         +'</div>'
+        +kittyToggleHTML()
+        +kittyPanelHTML(m,c)
         +'<button class="entry-btn" id="sv-done" style="margin-top:1rem;">Save &amp; Back to Leaderboard</button>';
 
     el.innerHTML='<div class="score-view-head">'
@@ -1968,6 +2074,7 @@
     Array.prototype.forEach.call(el.querySelectorAll('[data-act]'),function(btn){
       btn.addEventListener('click',function(){handleAction(state.scoringId,btn.dataset.act,null,btn);});
     });
+    wireKittyPanel(m);
   }
 
   function applyRole(){

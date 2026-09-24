@@ -1,13 +1,12 @@
 /* ============================================================
    BCI service worker — caches the core shell (itinerary, home,
    leaderboard, shared css/js) so the site still opens on patchy
-   signal at the course. Stale-while-revalidate: serves from cache
-   first for speed, then updates the cache in the background from
-   the network. Falls back to whichever page was actually being
-   navigated to, if it's cached — only drops back to the itinerary
-   page as a last resort if that specific page was never cached.
+   signal at the course. Page navigations are network-first — always
+   the live version when online, cache only as an offline fallback.
+   Everything else (css/js/images) is stale-while-revalidate: served
+   from cache first for speed, updated in the background.
    ============================================================ */
-var CACHE_NAME='bci-cache-v152';
+var CACHE_NAME='bci-cache-v161';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
@@ -41,6 +40,29 @@ self.addEventListener('fetch',function(e){
   if(e.request.method!=='GET')return;
   var isNavigate=e.request.mode==='navigate';
 
+  if(isNavigate){
+    /* Page loads always prefer the live network version when it's
+       available — the cache here is purely an offline fallback, not a
+       way to deliberately show yesterday's page while the real one
+       loads quietly behind it. Previously this used cache-first for
+       navigations too, which meant every page update was one reload
+       behind on a normal connection, not just when offline. */
+    e.respondWith(
+      fetch(e.request).then(function(resp){
+        if(resp&&resp.status===200&&resp.type==='basic'){
+          var copy=resp.clone();
+          caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,copy);});
+        }
+        return resp;
+      }).catch(function(){
+        return caches.match(e.request).then(function(cached){
+          return cached||caches.match('2027.html');
+        });
+      })
+    );
+    return;
+  }
+
   e.respondWith(
     caches.match(e.request).then(function(cached){
       var network=fetch(e.request).then(function(resp){
@@ -50,11 +72,6 @@ self.addEventListener('fetch',function(e){
         }
         return resp;
       }).catch(function(){
-        if(cached)return cached;
-        // The specific page being navigated to was never cached (e.g. a
-        // first-ever visit while offline) — fall back to the itinerary
-        // page as a last resort rather than showing nothing at all.
-        if(isNavigate)return caches.match('2027.html');
         return undefined;
       });
       return cached||network;

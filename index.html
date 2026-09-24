@@ -88,9 +88,116 @@
   .ls-detail{font-family:var(--serif-body);font-size:0.82rem;letter-spacing:1px;color:rgba(255,255,255,0.55);font-style:italic;}
   footer{background:#141f26;color:rgba(255,255,255,0.3);text-align:center;padding:1.5rem;font-family:var(--serif-body);font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;}
   footer span{color:var(--gold);}
+.welcome-overlay{
+  position:fixed;inset:0;z-index:99999;
+  background:
+    repeating-linear-gradient(100deg,rgba(255,255,255,0.015) 0px,rgba(255,255,255,0.015) 40px,transparent 40px,transparent 80px),
+    radial-gradient(ellipse at center,#152a1c 0%,#070d09 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity 0.9s cubic-bezier(0.4,0,0.2,1),visibility 0.9s cubic-bezier(0.4,0,0.2,1),
+    filter 0.9s cubic-bezier(0.4,0,0.2,1),transform 0.9s cubic-bezier(0.4,0,0.2,1);
+  overflow:hidden;transform:scale(1);filter:blur(0);
+}
+.welcome-overlay.dismissed{opacity:0;visibility:hidden;pointer-events:none;transform:scale(1.05);filter:blur(8px);}
+
+.welcome-glow{position:absolute;top:50%;left:50%;width:60px;height:60px;
+  transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,rgba(201,168,76,0.5) 0%,rgba(201,168,76,0) 70%);
+  opacity:0;filter:blur(4px);
+  animation:welcome-glow-breathe 0.75s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes welcome-glow-breathe{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(0.6);}
+  45%{opacity:0.55;transform:translate(-50%,-50%) scale(1.15);}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.5);}
+}
+.welcome-shimmer{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 45%,rgba(201,168,76,0.06) 0%,transparent 55%);
+  opacity:0;animation:welcome-shimmer-in 1.8s ease forwards,welcome-shimmer-drift 6s cubic-bezier(0.4,0,0.2,1) infinite;
+  animation-delay:1.8s,1.8s;}
+@keyframes welcome-shimmer-in{to{opacity:1;}}
+@keyframes welcome-shimmer-drift{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+
+.welcome-letters{position:relative;display:flex;gap:0.15em;font-family:var(--serif-display);font-weight:800;
+  font-size:5rem;color:var(--gold);line-height:1;z-index:2;}
+.welcome-letters span{display:inline-block;opacity:0;transform:translateY(14px);filter:blur(6px);
+  animation:welcome-letter-focus 1.0s cubic-bezier(0.16,1,0.3,1) forwards,welcome-letter-glow 4.5s ease-in-out infinite;
+  animation-delay:calc(var(--d) * 0.1s + 0.7s),2.4s;
+  text-shadow:0 0 35px rgba(201,168,76,0.35);}
+@keyframes welcome-letter-focus{
+  0%{opacity:0;transform:translateY(14px);filter:blur(6px);}
+  100%{opacity:1;transform:translateY(0);filter:blur(0);}
+}
+@keyframes welcome-letter-glow{
+  0%,100%{text-shadow:0 0 35px rgba(201,168,76,0.35);}
+  50%{text-shadow:0 0 46px rgba(221,194,126,0.5);}
+}
+
+.welcome-ornament{display:flex;align-items:center;gap:0.6rem;opacity:0;
+  margin:1.2rem 0 1rem;animation:welcome-fade-plain 0.6s ease forwards;animation-delay:1.35s;}
+.welcome-ornament .oline{width:56px;height:1px;background:var(--gold);transform:scaleX(0);
+  animation:welcome-oline-in 0.7s cubic-bezier(0.16,1,0.3,1) forwards;animation-delay:1.35s;}
+.welcome-ornament .oline.left{transform-origin:right center;}
+.welcome-ornament .oline.right{transform-origin:left center;}
+.welcome-ornament .odiamond{width:5px;height:5px;background:var(--gold);
+  transform:rotate(45deg) scale(0);animation:welcome-odiamond-in 0.5s cubic-bezier(0.16,1,0.3,1) forwards;animation-delay:1.85s;flex-shrink:0;}
+@keyframes welcome-fade-plain{to{opacity:1;}}
+@keyframes welcome-oline-in{to{transform:scaleX(1);}}
+@keyframes welcome-odiamond-in{to{transform:rotate(45deg) scale(1);}}
+
+.welcome-sub{font-family:var(--serif-display);font-size:1rem;letter-spacing:4px;
+  text-transform:uppercase;color:rgba(255,255,255,0.8);opacity:0;transform:translateY(8px);filter:blur(3px);
+  animation:welcome-rise-in 0.7s cubic-bezier(0.16,1,0.3,1) forwards;animation-delay:2.05s;}
+.welcome-eyebrow{font-family:var(--serif-body);font-size:0.78rem;letter-spacing:1px;
+  color:rgba(255,255,255,0.4);margin-top:0.4rem;opacity:0;transform:translateY(8px);filter:blur(3px);
+  animation:welcome-rise-in 0.7s cubic-bezier(0.16,1,0.3,1) forwards;animation-delay:2.2s;}
+@keyframes welcome-rise-in{to{opacity:1;transform:translateY(0);filter:blur(0);}}
+.welcome-btn{margin-top:2.5rem;padding:0.95rem 2.6rem;background:transparent;
+  border:1px solid var(--gold);color:var(--gold);border-radius:30px;
+  font-family:var(--serif-display);font-size:0.85rem;letter-spacing:2px;
+  text-transform:uppercase;cursor:pointer;opacity:0;transform:translateY(8px) scale(0.97);
+  transition:background 0.2s ease;
+  animation:welcome-btn-in 0.6s cubic-bezier(0.16,1,0.3,1) forwards,welcome-pulse 3.2s cubic-bezier(0.4,0,0.2,1) infinite;
+  animation-delay:2.5s,3.3s;}
+@keyframes welcome-btn-in{to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes welcome-pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.3);}50%{box-shadow:0 0 0 8px rgba(201,168,76,0);}}
+.welcome-btn:active{background:rgba(201,168,76,0.12);}
+@media(prefers-reduced-motion:reduce){
+  .welcome-glow,.welcome-shimmer{display:none;}
+  .welcome-letters span,.welcome-ornament,.welcome-ornament .oline,.welcome-ornament .odiamond,.welcome-sub,.welcome-eyebrow,.welcome-btn{
+    animation:none;opacity:1;transform:none;filter:none;}
+  .welcome-ornament .odiamond{transform:rotate(45deg);}
+  .welcome-overlay{transition:none;}
+}
+@media(max-width:420px){
+  .welcome-letters{font-size:3.6rem;}
+}
 </style>
 </head>
 <body>
+<div id="welcome-overlay" class="welcome-overlay">
+  <div class="welcome-glow" aria-hidden="true"></div>
+  <div class="welcome-shimmer" aria-hidden="true"></div>
+  <div class="welcome-letters" aria-hidden="true">
+    <span style="--d:0">B</span><span style="--d:1">C</span><span style="--d:2">I</span>
+  </div>
+  <div class="welcome-ornament"><span class="oline left"></span><span class="odiamond"></span><span class="oline right"></span></div>
+  <div class="welcome-sub">Book Club Invitational</div>
+  <div class="welcome-eyebrow">Algarve &middot; 2027</div>
+  <button class="welcome-btn" id="welcome-btn">Enter</button>
+</div>
+<script>
+  /* Runs immediately, before anything else on the page, so a repeat
+     visit within the same session skips straight past the overlay
+     with no flash of it appearing first — the animation is a proper
+     moment once, not something to sit through on every trip back to
+     Home from the menu. */
+  if(sessionStorage.getItem('bci-welcomed')){
+    var w=document.getElementById('welcome-overlay');
+    w.style.transition='none';
+    w.classList.add('dismissed');
+  }
+</script>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/></symbol>
@@ -180,6 +287,17 @@
 <footer><p><span>Book Club Invitational</span></p></footer>
 
 <script>
+(function(){
+  var overlay=document.getElementById('welcome-overlay');
+  if(!overlay.classList.contains('dismissed')){
+    document.body.style.overflow='hidden';
+  }
+  document.getElementById('welcome-btn').addEventListener('click',function(){
+    sessionStorage.setItem('bci-welcomed','1');
+    overlay.classList.add('dismissed');
+    document.body.style.overflow='';
+  });
+})();
 (function(){
   const btn=document.getElementById('menu-btn');
   const dd=document.getElementById('dropdown');

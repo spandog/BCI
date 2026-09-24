@@ -358,9 +358,25 @@
     .match-side .player{font-size:0.85rem;}
     .hole-strip{grid-template-columns:repeat(9,1fr);}
   }
+.day-welcome{position:fixed;top:18%;left:50%;transform:translate(-50%,-8px);z-index:9998;
+  pointer-events:none;opacity:0;transition:opacity 0.7s ease,transform 0.7s ease;
+  background:var(--green-dark);border:1px solid rgba(201,168,76,0.35);border-radius:10px;
+  padding:1.2rem 1.8rem;text-align:center;box-shadow:0 10px 35px rgba(0,0,0,0.3);max-width:82vw;}
+.day-welcome.visible{opacity:1;transform:translate(-50%,0);}
+.day-welcome .dw-title{font-family:var(--serif-display);font-weight:700;font-size:1.15rem;color:var(--gold);}
+.day-welcome .dw-ornament{display:flex;align-items:center;justify-content:center;gap:0.5rem;margin:0.5rem 0 0.4rem;}
+.day-welcome .dw-oline{width:28px;height:1px;background:var(--gold);opacity:0.6;}
+.day-welcome .dw-odiamond{width:4px;height:4px;background:var(--gold);transform:rotate(45deg);opacity:0.6;flex-shrink:0;}
+.day-welcome .dw-sub{font-family:var(--serif-body);font-size:0.78rem;letter-spacing:1px;color:rgba(255,255,255,0.6);text-transform:uppercase;}
+@media(prefers-reduced-motion:reduce){.day-welcome{transition:none;}}
 </style>
 </head>
 <body>
+<div class="day-welcome" id="day-welcome">
+  <div class="dw-title" id="dw-title"></div>
+  <div class="dw-ornament"><span class="dw-oline"></span><span class="dw-odiamond"></span><span class="dw-oline"></span></div>
+  <div class="dw-sub" id="dw-sub"></div>
+</div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -2203,6 +2219,32 @@
         .subscribe();
     }catch(e){/* realtime not enabled — polling covers it */}
   }
+
+  /* ---------- brief Day 1 / Day 2 welcome ----------
+     Tied to the real calendar date, not whichever tab happens to be
+     selected — showing once per person per day, using localStorage
+     (not sessionStorage) since this needs to persist across separate
+     visits within the same day but reset on the next one. Brief,
+     non-blocking, and dismisses itself — the leaderboard gets opened
+     constantly during a round, so this can never be a ceremony you
+     have to click through like the homepage's welcome. */
+  (function(){
+    var today=new Date();
+    var dateStr=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+    var DAY_INFO={'2027-04-23':{day:1,course:'Quinta do Vale'},'2027-04-24':{day:2,course:'Isla Canela'}};
+    var info=DAY_INFO[dateStr];
+    if(!info)return;
+
+    var flagKey='bci-day-welcome-'+dateStr;
+    if(localStorage.getItem(flagKey))return;
+    localStorage.setItem(flagKey,'1');
+
+    document.getElementById('dw-title').textContent='Welcome to Day '+info.day;
+    document.getElementById('dw-sub').textContent=info.course;
+    var banner=document.getElementById('day-welcome');
+    setTimeout(function(){banner.classList.add('visible');},400);
+    setTimeout(function(){banner.classList.remove('visible');},4000);
+  })();
 })();
 </script>
 <script src="hero-gallery.js"></script>

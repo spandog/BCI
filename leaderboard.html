@@ -120,22 +120,108 @@
   .bb-log-delete:hover{color:#b0532b;}
 
   #bci-celebration{position:fixed;inset:0;z-index:99999;pointer-events:none;opacity:0;
-    transition:opacity 0.4s ease;overflow:hidden;background:rgba(22,41,29,0.55);}
+    transition:opacity 0.5s cubic-bezier(0.4,0,0.2,1);overflow:hidden;background:rgba(10,16,11,0.72);}
   #bci-celebration.visible{opacity:1;pointer-events:auto;}
-  .bci-celebration-card{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-    text-align:center;background:var(--card-bg);padding:2rem 2.25rem;border-radius:14px;
-    box-shadow:0 24px 60px rgba(0,0,0,0.35);max-width:80vw;}
-  .bci-celebration-trophy{width:44px;height:44px;margin:0 auto 0.85rem;display:block;}
-  .bci-celebration-title{font-family:var(--serif-display);font-size:1.15rem;font-weight:700;
-    color:var(--green-dark);letter-spacing:0.3px;}
-  .bci-confetti-piece{position:absolute;top:-20px;width:9px;height:15px;opacity:0.9;
-    animation:bci-confetti-fall linear forwards;}
+  .bci-celebration-card{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.92);
+    opacity:0;filter:blur(6px);
+    text-align:center;background:var(--card-bg);padding:2.1rem 2.4rem;border-radius:14px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.4);max-width:80vw;
+    transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1),filter 0.7s cubic-bezier(0.16,1,0.3,1),transform 0.7s cubic-bezier(0.16,1,0.3,1);}
+  #bci-celebration.visible .bci-celebration-card{transform:translate(-50%,-50%) scale(1);opacity:1;filter:blur(0);}
+  .bci-celebration-trophy{width:42px;height:42px;margin:0 auto 0.7rem;display:block;
+    opacity:0;transform:translateY(10px);
+    transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1) 0.15s,transform 0.6s cubic-bezier(0.16,1,0.3,1) 0.15s;}
+  #bci-celebration.visible .bci-celebration-trophy{opacity:1;transform:translateY(0);}
+  .bci-celebration-ornament{display:flex;align-items:center;justify-content:center;gap:0.45rem;margin:0.6rem 0;
+    opacity:0;transition:opacity 0.5s ease 0.35s;}
+  #bci-celebration.visible .bci-celebration-ornament{opacity:1;}
+  .bci-celebration-ornament .cline{width:22px;height:1px;background:var(--gold);opacity:0.6;}
+  .bci-celebration-ornament .cdiamond{width:4px;height:4px;background:var(--gold);transform:rotate(45deg);opacity:0.6;flex-shrink:0;}
+  .bci-celebration-title{font-family:var(--serif-display);font-size:1.2rem;font-weight:700;
+    color:var(--green-dark);letter-spacing:0.3px;opacity:0;transform:translateY(8px);
+    transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1) 0.25s,transform 0.6s cubic-bezier(0.16,1,0.3,1) 0.25s;}
+  #bci-celebration.visible .bci-celebration-title{opacity:1;transform:translateY(0);}
+  .bci-confetti-piece{position:absolute;top:-24px;opacity:0.95;
+    animation:bci-confetti-fall cubic-bezier(0.45,0,0.55,1) forwards;}
   @keyframes bci-confetti-fall{
-    0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:1;}
-    100%{transform:translateY(110vh) translateX(var(--drift)) rotate(540deg);opacity:0.3;}
+    0%{transform:translate(0,0) rotate(0deg);opacity:1;}
+    35%{transform:translate(var(--drift1),42vh) rotate(var(--spin1));}
+    70%{transform:translate(var(--drift2),80vh) rotate(var(--spin2));}
+    100%{transform:translate(var(--drift3),112vh) rotate(var(--spin3));opacity:0.35;}
   }
   @media(prefers-reduced-motion:reduce){
     #bci-celebration{transition:none;}
+    .bci-celebration-card,.bci-celebration-trophy,.bci-celebration-ornament,.bci-celebration-title{transition:none;opacity:1;transform:none;filter:none;}
+  }
+
+  /* ---------- birdie / eagle fly-across ---------- */
+  .achievement-flyer{position:fixed;top:28%;left:-18%;z-index:99990;pointer-events:none;
+    animation:achievement-fly-across 1.5s cubic-bezier(0.4,0,0.6,1) forwards;}
+  .achievement-flyer.eagle{animation-duration:1.85s;top:24%;}
+  @keyframes achievement-fly-across{
+    0%{left:-18%;transform:translateY(0) scale(0.85);opacity:0;}
+    12%{opacity:1;}
+    50%{transform:translateY(-34px) scale(1);}
+    88%{opacity:1;}
+    100%{left:118%;transform:translateY(14px) scale(0.85);opacity:0;}
+  }
+  .achievement-flyer svg{width:58px;height:58px;color:var(--gold);display:block;
+    filter:drop-shadow(0 4px 14px rgba(201,168,76,0.35));}
+  .achievement-flyer.eagle svg{width:88px;height:88px;color:var(--gold-light);
+    filter:drop-shadow(0 6px 20px rgba(221,194,126,0.4));}
+  .achievement-flyer .wing{animation:wing-flap 0.28s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center;}
+  .achievement-flyer.eagle .wing{animation-duration:0.4s;}
+  @keyframes wing-flap{0%{transform:scaleY(1);}100%{transform:scaleY(0.45);}}
+  .achievement-caption{position:fixed;top:calc(28% + 60px);left:50%;transform:translateX(-50%);
+    z-index:99990;pointer-events:none;font-family:var(--serif-display);font-weight:700;
+    color:var(--gold);font-size:0.95rem;letter-spacing:1px;text-align:center;white-space:nowrap;
+    opacity:0;animation:achievement-caption-in 1.5s ease forwards;}
+  .achievement-caption.eagle{top:calc(24% + 88px);color:var(--gold-light);font-size:1.05rem;animation-duration:1.85s;}
+  @keyframes achievement-caption-in{
+    0%{opacity:0;transform:translateX(-50%) translateY(6px);}
+    18%{opacity:1;transform:translateX(-50%) translateY(0);}
+    80%{opacity:1;}
+    100%{opacity:0;}
+  }
+
+  /* ---------- hole in one — the big moment ---------- */
+  #ace-moment{position:fixed;inset:0;z-index:99995;pointer-events:none;opacity:0;
+    background:radial-gradient(ellipse at center,rgba(21,42,28,0.94) 0%,rgba(7,13,9,0.97) 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    transition:opacity 0.6s cubic-bezier(0.4,0,0.2,1);}
+  #ace-moment.visible{opacity:1;pointer-events:auto;}
+  .ace-glow{position:absolute;top:50%;left:50%;width:60px;height:60px;transform:translate(-50%,-50%);
+    border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.55) 0%,rgba(201,168,76,0) 70%);
+    opacity:0;filter:blur(4px);animation:ace-glow-breathe 1.1s cubic-bezier(0.4,0,0.2,1) forwards;}
+  @keyframes ace-glow-breathe{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(0.6);}
+    50%{opacity:0.6;transform:translate(-50%,-50%) scale(1.3);}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.7);}
+  }
+  .ace-title{position:relative;font-family:var(--serif-display);font-weight:800;font-size:4.2rem;
+    color:var(--gold);letter-spacing:2px;opacity:0;transform:translateY(12px);filter:blur(8px);
+    animation:ace-title-focus 1.0s cubic-bezier(0.16,1,0.3,1) forwards;animation-delay:0.9s;
+    text-shadow:0 0 45px rgba(201,168,76,0.55);}
+  @keyframes ace-title-focus{to{opacity:1;transform:translateY(0);filter:blur(0);}}
+  .ace-ornament{display:flex;align-items:center;justify-content:center;gap:0.5rem;margin:1rem 0 0.8rem;
+    opacity:0;animation:achievement-caption-in-static 0.6s ease forwards;animation-delay:1.6s;}
+  @keyframes achievement-caption-in-static{to{opacity:1;}}
+  .ace-ornament .aline{width:40px;height:1px;background:var(--gold);transform:scaleX(0);
+    animation:ace-line-in 0.6s cubic-bezier(0.16,1,0.3,1) forwards;animation-delay:1.6s;}
+  .ace-ornament .aline.left{transform-origin:right center;}
+  .ace-ornament .aline.right{transform-origin:left center;}
+  @keyframes ace-line-in{to{transform:scaleX(1);}}
+  .ace-ornament .adiamond{width:4px;height:4px;background:var(--gold);transform:rotate(45deg) scale(0);
+    animation:ace-diamond-in 0.4s cubic-bezier(0.16,1,0.3,1) forwards;animation-delay:2.05s;flex-shrink:0;}
+  @keyframes ace-diamond-in{to{transform:rotate(45deg) scale(1);}}
+  .ace-sub{font-family:var(--serif-body);font-size:0.92rem;color:rgba(255,255,255,0.75);
+    opacity:0;transform:translateY(6px);animation:achievement-rise-static 0.7s ease forwards;animation-delay:1.85s;text-align:center;}
+  @keyframes achievement-rise-static{to{opacity:1;transform:translateY(0);}}
+  @media(prefers-reduced-motion:reduce){
+    .achievement-flyer,.achievement-caption{animation:none;opacity:0;}
+    #ace-moment{transition:none;}
+    .ace-glow,.ace-title,.ace-ornament,.ace-ornament .aline,.ace-ornament .adiamond,.ace-sub{
+      animation:none;opacity:1;transform:none;filter:none;}
   }
 
   .live-strip{display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.15rem 0 0.6rem;}
@@ -363,16 +449,19 @@
     .hole-strip{grid-template-columns:repeat(9,1fr);}
   }
 .day-welcome{position:fixed;top:18%;left:50%;transform:translate(-50%,-8px);z-index:9998;
-  pointer-events:none;opacity:0;transition:opacity 0.7s ease,transform 0.7s ease;
+  pointer-events:none;opacity:0;
+  transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1),transform 0.7s cubic-bezier(0.16,1,0.3,1);
   background:var(--green-dark);border:1px solid rgba(201,168,76,0.35);border-radius:10px;
   padding:1.2rem 1.8rem;text-align:center;box-shadow:0 10px 35px rgba(0,0,0,0.3);max-width:82vw;}
 .day-welcome.visible{opacity:1;transform:translate(-50%,0);}
-.day-welcome .dw-title{font-family:var(--serif-display);font-weight:700;font-size:1.15rem;color:var(--gold);}
+.day-welcome .dw-title{font-family:var(--serif-display);font-weight:700;font-size:1.15rem;color:var(--gold);
+  opacity:0;filter:blur(4px);transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s,filter 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s;}
+.day-welcome.visible .dw-title{opacity:1;filter:blur(0);}
 .day-welcome .dw-ornament{display:flex;align-items:center;justify-content:center;gap:0.5rem;margin:0.5rem 0 0.4rem;}
 .day-welcome .dw-oline{width:28px;height:1px;background:var(--gold);opacity:0.6;}
 .day-welcome .dw-odiamond{width:4px;height:4px;background:var(--gold);transform:rotate(45deg);opacity:0.6;flex-shrink:0;}
 .day-welcome .dw-sub{font-family:var(--serif-body);font-size:0.78rem;letter-spacing:1px;color:rgba(255,255,255,0.6);text-transform:uppercase;}
-@media(prefers-reduced-motion:reduce){.day-welcome{transition:none;}}
+@media(prefers-reduced-motion:reduce){.day-welcome,.day-welcome .dw-title{transition:none;opacity:1;filter:none;}}
 </style>
 </head>
 <body>
@@ -1350,20 +1439,39 @@
           '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/>'+
           '<path d="M7 6H4.2a1 1 0 0 0-1 1.1c.2 1.9 1.6 3.2 3.8 3.3M17 6h2.8a1 1 0 0 1 1 1.1c-.2 1.9-1.6 3.2-3.8 3.3"/>'+
         '</svg>'+
+        '<div class="bci-celebration-ornament"><span class="cline"></span><span class="cdiamond"></span><span class="cline"></span></div>'+
         '<div class="bci-celebration-title">'+teamName+' win the BCI!</div>'+
       '</div>';
     document.body.appendChild(overlay);
 
     if(!reduceMotion){
+      /* Genuine confetti physics rather than a straight linear fall —
+         each piece gets its own three-waypoint drift and its own spin
+         speed, so the fall reads as tumbling and natural rather than
+         every piece moving in lockstep. A mix of rectangles and circles
+         adds a bit more visual variety too. */
       var colors=['#c9a84c','#16291d',teamColor,'#ffffff'];
       for(var i=0;i<80;i++){
         var piece=document.createElement('div');
         piece.className='bci-confetti-piece';
+        var isCircle=Math.random()<0.35;
+        var size=6+Math.random()*5;
+        piece.style.width=size+'px';
+        piece.style.height=isCircle?size+'px':(size*1.7)+'px';
+        piece.style.borderRadius=isCircle?'50%':'1px';
         piece.style.left=(Math.random()*100)+'vw';
         piece.style.background=colors[Math.floor(Math.random()*colors.length)];
-        piece.style.animationDuration=(2.5+Math.random()*2)+'s';
-        piece.style.animationDelay=(Math.random()*0.6)+'s';
-        piece.style.setProperty('--drift',(Math.random()*140-70)+'px');
+        piece.style.animationDuration=(2.6+Math.random()*2.2)+'s';
+        piece.style.animationDelay=(Math.random()*0.7)+'s';
+        var baseDrift=Math.random()*100-50;
+        piece.style.setProperty('--drift1',(baseDrift*0.4+(Math.random()*30-15))+'px');
+        piece.style.setProperty('--drift2',(baseDrift*0.8+(Math.random()*30-15))+'px');
+        piece.style.setProperty('--drift3',(baseDrift+(Math.random()*30-15))+'px');
+        var spinDir=Math.random()<0.5?1:-1;
+        var spinSpeed=(280+Math.random()*420)*spinDir;
+        piece.style.setProperty('--spin1',(spinSpeed*0.35)+'deg');
+        piece.style.setProperty('--spin2',(spinSpeed*0.7)+'deg');
+        piece.style.setProperty('--spin3',spinSpeed+'deg');
         overlay.appendChild(piece);
       }
     }
@@ -1372,10 +1480,50 @@
 
     function dismiss(){
       overlay.classList.remove('visible');
-      setTimeout(function(){overlay.remove();},500);
+      setTimeout(function(){overlay.remove();},700);
     }
     overlay.addEventListener('click',dismiss);
-    setTimeout(dismiss,5000);
+    setTimeout(dismiss,5500);
+  }
+
+  /* ---------- birdie / eagle fly-across ---------- */
+  var BIRD_SVG='<svg viewBox="0 0 100 40" fill="currentColor"><path class="wing" d="M50 20 C 35 5, 15 5, 0 15 C 20 15, 35 18, 50 20 Z"/><path class="wing" d="M50 20 C 65 5, 85 5, 100 15 C 80 15, 65 18, 50 20 Z"/></svg>';
+
+  function showBirdFlyer(kind,caption){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    var flyer=document.createElement('div');
+    flyer.className='achievement-flyer'+(kind==='eagle'?' eagle':'');
+    flyer.innerHTML=BIRD_SVG;
+    document.body.appendChild(flyer);
+    var cap=document.createElement('div');
+    cap.className='achievement-caption'+(kind==='eagle'?' eagle':'');
+    cap.textContent=caption;
+    document.body.appendChild(cap);
+    var duration=kind==='eagle'?1900:1550;
+    setTimeout(function(){flyer.remove();cap.remove();},duration);
+  }
+
+  /* ---------- hole in one — the big moment ---------- */
+  function showAceMoment(player){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      if(window.bciToast)window.bciToast('Hole in one for '+player+'!');
+      return;
+    }
+    var overlay=document.createElement('div');
+    overlay.id='ace-moment';
+    overlay.innerHTML=
+      '<div class="ace-glow"></div>'+
+      '<div class="ace-title">ACE</div>'+
+      '<div class="ace-ornament"><span class="aline left"></span><span class="adiamond"></span><span class="aline right"></span></div>'+
+      '<div class="ace-sub">'+player+' holes it in one.</div>';
+    document.body.appendChild(overlay);
+    requestAnimationFrame(function(){overlay.classList.add('visible');});
+    function dismiss(){
+      overlay.classList.remove('visible');
+      setTimeout(function(){overlay.remove();},700);
+    }
+    overlay.addEventListener('click',dismiss);
+    setTimeout(dismiss,4200);
   }
 
   function renderPointsBar(){
@@ -2085,6 +2233,13 @@
         statusEl.textContent='';statusEl.className='kitty-status';
         var label=KITTY_TYPES.filter(function(t){return t[0]===kittyState.type;})[0][1];
         if(window.bciToast)window.bciToast(label+' logged for '+kittyState.player+'.');
+        if(kittyState.type==='hole_in_one'){
+          showAceMoment(kittyState.player);
+        } else if(kittyState.type==='eagle'){
+          showBirdFlyer('eagle',kittyState.player+' — Eagle');
+        } else {
+          showBirdFlyer('birdie',kittyState.player+' — Birdie');
+        }
         sendPushEvent('kitty-achievement',{
           player:kittyState.player,day:m.day,hole:hole,
           achievementType:kittyState.type,amount:kittyState.amount

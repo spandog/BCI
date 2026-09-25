@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The Draft — Book Club Invitational</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#16291d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BCI">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Lora:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme-coastal.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;background:var(--green-dark,#16291d);}
+  body{-webkit-tap-highlight-color:transparent;animation:bci-page-in 0.35s ease both;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;}
+  @keyframes bci-page-in{from{opacity:0;}to{opacity:1;}}
+  ::selection{background:#c9a84c;color:#16291d;}
+  :focus-visible{outline:2px solid #c9a84c;outline-offset:2px;}
+  :root{
+    --green-dark:#16291d;--green-mid:#3d5c42;--gold:#c9a84c;--gold-light:#ddc27e;
+    --cream:#fbfaf7;--cream-dark:#f0ede4;--text-dark:#16291d;--text-muted:#5c6259;--border:#dcd6c8;
+    --serif-display:'Lora',Georgia,serif;--serif-body:'Public Sans',Arial,sans-serif;
+    --card-bg:white;--blue-bg:#dce8f3;--blue-border:#8ab0d4;--blue-text:#1e5a8c;
+    --green-team-bg:#e0f0e5;--green-team-border:#8fc7a3;--green-team-text:#2f7d4f;
+  }
+  body{font-family:var(--serif-body);background:var(--cream);color:var(--text-dark);}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;}
+
+  nav{background:var(--green-dark);padding:0 1.5rem;padding-top:env(safe-area-inset-top,0px);display:flex;align-items:center;justify-content:space-between;height:calc(60px + env(safe-area-inset-top,0px));position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .nav-logo{color:var(--gold);font-family:var(--serif-display);font-size:1.1rem;font-weight:700;letter-spacing:6px;text-decoration:none;flex-shrink:0;}
+  .nav-back{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.6);font-family:var(--serif-display);font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;}
+
+  .page-hero{background:var(--green-dark);padding:2.5rem 1.5rem 2rem;}
+  .page-eyebrow{font-family:var(--serif-display);font-size:0.65rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:0.6rem;}
+  .page-hero h1{font-family:var(--serif-display);font-weight:700;font-size:1.9rem;color:white;}
+  .page-hero p{font-family:var(--serif-body);font-size:0.85rem;color:rgba(255,255,255,0.55);margin-top:0.6rem;max-width:480px;line-height:1.5;}
+
+  .page{max-width:760px;margin:0 auto;padding:2rem 1.5rem 3rem;flex:1 0 auto;width:100%;}
+
+  .turn-banner{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;
+    text-align:center;margin-bottom:1.5rem;font-family:var(--serif-display);font-size:0.95rem;}
+  .turn-banner .team-word{font-weight:700;}
+  .turn-banner.blue .team-word{color:var(--blue-text);}
+  .turn-banner.green .team-word{color:var(--green-team-text);}
+  .turn-banner.done{color:var(--green-mid);}
+
+  .teams-row{display:flex;gap:1rem;margin-bottom:1.5rem;}
+  .team-col{flex:1;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .team-col-head{padding:1rem 1.1rem;text-align:center;}
+  .team-col.blue .team-col-head{background:var(--blue-bg);border-bottom:1px solid var(--blue-border);}
+  .team-col.green .team-col-head{background:var(--green-team-bg);border-bottom:1px solid var(--green-team-border);}
+  .team-col-name{font-family:var(--serif-display);font-weight:700;font-size:1.05rem;}
+  .team-col.blue .team-col-name{color:var(--blue-text);}
+  .team-col.green .team-col-name{color:var(--green-team-text);}
+  .team-col-captain{font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-top:0.2rem;}
+  .team-col-list{padding:0.9rem 1.1rem;}
+  .team-player{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;font-size:0.88rem;}
+  .team-player .tp-badge{font-size:0.62rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-muted);
+    background:var(--cream-dark);border-radius:8px;padding:0.1rem 0.45rem;flex-shrink:0;}
+  .team-player .tp-badge.picked{color:var(--gold);background:var(--green-dark);}
+
+  .pool-section{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:1.5rem;}
+  .pool-title{font-family:var(--serif-display);font-weight:700;font-size:1rem;margin-bottom:0.2rem;}
+  .pool-sub{font-size:0.78rem;color:var(--text-muted);margin-bottom:0.9rem;}
+  .pool-grid{display:flex;flex-wrap:wrap;gap:0.5rem;}
+  .pool-player{padding:0.5rem 0.9rem;border:1px solid var(--border);border-radius:20px;font-size:0.85rem;
+    background:var(--card-bg);cursor:default;}
+  .pool-player.pickable{cursor:pointer;transition:background-color 0.2s ease,border-color 0.2s ease;}
+  .pool-player.pickable:hover{border-color:var(--gold);}
+  .pool-empty{font-style:italic;color:var(--text-muted);font-size:0.85rem;text-align:center;padding:0.5rem;}
+
+  .admin-toggle{text-align:center;margin-top:0.5rem;}
+  .admin-toggle button{background:none;border:none;color:var(--text-muted);font-size:0.75rem;
+    text-decoration:underline;cursor:pointer;font-family:var(--serif-body);}
+  .admin-panel{display:none;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;
+    padding:1.25rem;margin-top:1rem;}
+  .admin-panel.visible{display:block;}
+  .admin-panel label{display:block;font-family:var(--serif-display);font-size:0.68rem;letter-spacing:1.5px;
+    text-transform:uppercase;color:var(--text-muted);margin-bottom:0.4rem;margin-top:1rem;}
+  .admin-panel label:first-of-type{margin-top:0;}
+  .admin-panel input,.admin-panel select{width:100%;padding:0.7rem;border:1px solid var(--border);border-radius:5px;
+    font-family:var(--serif-body);font-size:0.9rem;background:var(--card-bg);color:var(--text-dark);}
+  .admin-panel button.action-btn{margin-top:0.8rem;padding:0.7rem 1.2rem;background:var(--green-dark);color:var(--gold);
+    border:none;border-radius:6px;font-family:var(--serif-display);font-size:0.78rem;letter-spacing:1.5px;
+    text-transform:uppercase;cursor:pointer;}
+  .admin-status{font-size:0.8rem;margin-top:0.6rem;min-height:1.1em;}
+  .admin-status.error{color:#b0532b;}
+  .captain-row{display:flex;gap:0.6rem;}
+  .captain-row>div{flex:1;}
+  .undo-btn{background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:6px;
+    padding:0.6rem 1rem;font-family:var(--serif-body);font-size:0.8rem;cursor:pointer;margin-top:1.2rem;}
+
+  footer{background:#141f26;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;
+    font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
+  footer span{color:var(--gold);}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+  </defs>
+</svg>
+
+<nav>
+  <a href="index.html" class="nav-logo">BCI</a>
+  <a href="leaderboard.html" class="nav-back"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Leaderboard</a>
+</nav>
+
+<div class="page-hero">
+  <div class="page-eyebrow">Algarve &middot; 2027</div>
+  <h1>The Draft</h1>
+  <p>Anyone who played for a team before stays on that same team. What's left gets drafted between the two captains.</p>
+</div>
+
+<div class="page">
+
+  <div class="turn-banner" id="turn-banner"></div>
+
+  <div class="teams-row">
+    <div class="team-col blue">
+      <div class="team-col-head">
+        <div class="team-col-name">Blue Team</div>
+        <div class="team-col-captain" id="blue-captain-label">Captain: TBC</div>
+      </div>
+      <div class="team-col-list" id="blue-list"></div>
+    </div>
+    <div class="team-col green">
+      <div class="team-col-head">
+        <div class="team-col-name">Green Team</div>
+        <div class="team-col-captain" id="green-captain-label">Captain: TBC</div>
+      </div>
+      <div class="team-col-list" id="green-list"></div>
+    </div>
+  </div>
+
+  <div class="pool-section">
+    <div class="pool-title">Still to be Drafted</div>
+    <div class="pool-sub" id="pool-sub">Tap a name to pick — unlock draft controls below first.</div>
+    <div class="pool-grid" id="pool-grid"></div>
+  </div>
+
+  <div class="admin-toggle">
+    <button id="admin-toggle-btn">Draft controls</button>
+  </div>
+  <div class="admin-panel" id="admin-panel">
+    <label for="draft-pin">PIN</label>
+    <input type="password" id="draft-pin" placeholder="Enter PIN to unlock">
+    <button class="action-btn" id="draft-unlock-btn">Unlock</button>
+    <div class="admin-status" id="unlock-status"></div>
+
+    <div id="unlocked-controls" style="display:none;">
+      <label>Set Captains</label>
+      <div class="captain-row">
+        <div>
+          <input type="text" id="blue-captain-input" placeholder="Blue captain">
+        </div>
+        <div>
+          <input type="text" id="green-captain-input" placeholder="Green captain">
+        </div>
+      </div>
+      <button class="action-btn" id="save-captains-btn">Save Captains</button>
+      <div class="admin-status" id="captain-status"></div>
+
+      <button class="undo-btn" id="undo-pick-btn">Undo Last Pick</button>
+      <div class="admin-status" id="undo-status"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer><p><span>Book Club Invitational</span></p></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+  window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
+    return window.__bciSbClient;
+  };
+  var sb=window.supabase?window.bciGetSupabase(SB_URL,SB_KEY):null;
+  var ADMIN_PASS='bciadmin2027';
+  var unlocked=false;
+
+  var PUSH_ENDPOINT='https://ccczckdewwlpofgjigdi.supabase.co/functions/v1/clever-action';
+  var PUSH_SHARED_SECRET='7SjV_F5D-zpwPHUZ2uL7KLTnoxkTawiaeiTWILS6uA0';
+  function sendPushEvent(type,payload){
+    if(!PUSH_ENDPOINT)return;
+    fetch(PUSH_ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-BCI-Push-Secret':PUSH_SHARED_SECRET},
+      body:JSON.stringify({type:type,payload:payload})
+    }).catch(function(){/* push send failed — pick is already saved regardless */});
+  }
+
+  /* Real, current roster — same 25 names on the players page. Any
+     player added later, through the admin panel or the sign-up page,
+     simply won't be in this list yet on THIS particular deploy, but
+     since the pool is computed as "everyone minus whoever already has
+     a team", a freshly redeployed page picks up new names automatically
+     with no other change needed here. */
+  var ALL_PLAYERS=[
+    'Aaron Davies',
+    'Aaron Sonatun',
+    'Alex Tinawi',
+    'Angus Killin',
+    'Brian Hinojosa',
+    'Dan Burr',
+    'Dan Simkin',
+    'Emory Garrett',
+    'Jack Brown',
+    'Jack Taggart',
+    'James Baber',
+    'Joe Hollinworth',
+    'Kane Bailey',
+    'Louis Kelly',
+    'Luke Clark',
+    'Mark Brackenridge',
+    'Matt Higgins',
+    'Matt Wreford',
+    'Oscar Hinojosa',
+    'Phil Smith',
+    'Rich Horsley',
+    'Sean Mongan',
+    'Ted Keeling',
+    'Will Dodgson',
+    'Will Reed'
+  ];
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  var state={assignments:[],settings:null};
+
+  function render(){
+    var byName={};
+    state.assignments.forEach(function(a){byName[a.player_name]=a;});
+
+    var blue=state.assignments.filter(function(a){return a.team==='blue';})
+      .sort(function(a,b){return (a.pick_order||0)-(b.pick_order||0);});
+    var green=state.assignments.filter(function(a){return a.team==='green';})
+      .sort(function(a,b){return (a.pick_order||0)-(b.pick_order||0);});
+    var pool=ALL_PLAYERS.filter(function(n){return !byName[n];}).sort();
+
+    document.getElementById('blue-list').innerHTML=blue.length
+      ? blue.map(function(a){
+          return '<div class="team-player"><span class="tp-badge'+(a.locked?'':' picked')+'">'+(a.locked?'Returning':'#'+a.pick_order)+'</span>'+esc(a.player_name)+'</div>';
+        }).join('')
+      : '<div class="pool-empty">No players yet.</div>';
+    document.getElementById('green-list').innerHTML=green.length
+      ? green.map(function(a){
+          return '<div class="team-player"><span class="tp-badge'+(a.locked?'':' picked')+'">'+(a.locked?'Returning':'#'+a.pick_order)+'</span>'+esc(a.player_name)+'</div>';
+        }).join('')
+      : '<div class="pool-empty">No players yet.</div>';
+
+    document.getElementById('pool-grid').innerHTML=pool.length
+      ? pool.map(function(n){
+          return '<div class="pool-player'+(unlocked?' pickable':'')+'" data-name="'+esc(n)+'">'+esc(n)+'</div>';
+        }).join('')
+      : '<div class="pool-empty">Everyone has a team — the draft is complete.</div>';
+
+    if(unlocked){
+      Array.prototype.forEach.call(document.querySelectorAll('.pool-player.pickable'),function(el){
+        el.addEventListener('click',function(){makePick(el.dataset.name);});
+      });
+    }
+
+    var settings=state.settings||{};
+    document.getElementById('blue-captain-label').textContent='Captain: '+(settings.blue_captain||'TBC');
+    document.getElementById('green-captain-label').textContent='Captain: '+(settings.green_captain||'TBC');
+
+    var banner=document.getElementById('turn-banner');
+    var poolSub=document.getElementById('pool-sub');
+    if(!pool.length){
+      banner.className='turn-banner done';
+      banner.textContent='Draft complete — every player has a team.';
+      poolSub.textContent='Nothing left to draft.';
+    } else {
+      var turn=settings.current_turn||'blue';
+      banner.className='turn-banner '+turn;
+      banner.innerHTML='On the clock — <span class="team-word">'+(turn==='blue'?'Blue Team':'Green Team')+'</span>';
+      poolSub.textContent=unlocked?'Tap a name to pick for the team currently on the clock.':'Tap a name to pick — unlock draft controls below first.';
+    }
+  }
+
+  function loadAll(){
+    if(!sb)return;
+    Promise.all([
+      sb.from('bci_team_assignments').select('*'),
+      sb.from('bci_draft_settings').select('*').eq('id',1).single()
+    ]).then(function(results){
+      state.assignments=(results[0].data)||[];
+      state.settings=(results[1].data)||{};
+      render();
+    }).catch(function(){/* best effort */});
+  }
+  loadAll();
+  setInterval(loadAll,15000);
+
+  function makePick(name){
+    var turn=(state.settings&&state.settings.current_turn)||'blue';
+    var nextOrder=state.assignments.filter(function(a){return !a.locked;}).length+1;
+    var otherTurn=turn==='blue'?'green':'blue';
+    sb.from('bci_team_assignments').insert({player_name:name,team:turn,locked:false,pick_order:nextOrder})
+      .then(function(res){
+        if(res.error){alert('Could not save pick: '+res.error.message);return;}
+        return sb.from('bci_draft_settings').update({current_turn:otherTurn}).eq('id',1);
+      }).then(function(){
+        if(window.bciToast)window.bciToast(name+' picked for '+(turn==='blue'?'Blue':'Green')+' Team.');
+        if(typeof sendPushEvent==='function'){
+          sendPushEvent('draft-pick',{player:name,team:turn});
+        }
+        loadAll();
+      });
+  }
+
+  document.getElementById('admin-toggle-btn').addEventListener('click',function(){
+    document.getElementById('admin-panel').classList.toggle('visible');
+  });
+
+  document.getElementById('draft-unlock-btn').addEventListener('click',function(){
+    var val=document.getElementById('draft-pin').value;
+    var statusEl=document.getElementById('unlock-status');
+    if(val===ADMIN_PASS){
+      unlocked=true;
+      document.getElementById('unlocked-controls').style.display='block';
+      statusEl.textContent='Unlocked.';statusEl.className='admin-status';
+      var s=state.settings||{};
+      document.getElementById('blue-captain-input').value=s.blue_captain||'';
+      document.getElementById('green-captain-input').value=s.green_captain||'';
+      render();
+    } else {
+      statusEl.textContent='Incorrect PIN.';statusEl.className='admin-status error';
+    }
+  });
+
+  document.getElementById('save-captains-btn').addEventListener('click',function(){
+    var blueCap=document.getElementById('blue-captain-input').value.trim();
+    var greenCap=document.getElementById('green-captain-input').value.trim();
+    var statusEl=document.getElementById('captain-status');
+    sb.from('bci_draft_settings').update({blue_captain:blueCap||null,green_captain:greenCap||null}).eq('id',1)
+      .then(function(res){
+        if(res.error){statusEl.textContent='Could not save: '+res.error.message;statusEl.className='admin-status error';return;}
+        statusEl.textContent='Captains saved.';statusEl.className='admin-status';
+        if(window.bciToast)window.bciToast('Captains updated.');
+        loadAll();
+      });
+  });
+
+  document.getElementById('undo-pick-btn').addEventListener('click',function(){
+    var drafted=state.assignments.filter(function(a){return !a.locked;}).sort(function(a,b){return b.pick_order-a.pick_order;});
+    var statusEl=document.getElementById('undo-status');
+    if(!drafted.length){
+      statusEl.textContent='No picks to undo.';statusEl.className='admin-status error';
+      return;
+    }
+    var last=drafted[0];
+    if(!confirm('Undo the pick of '+last.player_name+'?'))return;
+    sb.from('bci_team_assignments').delete().eq('player_name',last.player_name)
+      .then(function(res){
+        if(res.error){statusEl.textContent='Could not undo: '+res.error.message;statusEl.className='admin-status error';return;}
+        return sb.from('bci_draft_settings').update({current_turn:last.team}).eq('id',1);
+      }).then(function(){
+        statusEl.textContent='Undone.';statusEl.className='admin-status';
+        loadAll();
+      });
+  });
+})();
+</script>
+<script src="bci-features.js"></script>
+</body>
+</html>

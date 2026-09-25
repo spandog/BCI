@@ -216,7 +216,8 @@
   .status-pill.live{background:var(--green-dark);color:var(--gold-light);border-color:var(--green-dark);}
   .status-pill.final{background:var(--gold);color:var(--green-dark);border-color:var(--gold);}
   .match-body{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;}
-  .match-side{padding:0.7rem 0.875rem;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;}
+  .match-side{padding:0.7rem 0.875rem;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;transition:background-color 0.5s ease;}
+  .match-side .player{transition:color 0.5s ease;}
   .match-side.baber{text-align:center;}
   .match-side.weff{text-align:center;}
   .match-side .player{font-size:0.82rem;color:var(--text-dark);line-height:1.25;}
@@ -250,6 +251,8 @@
   .back-link{font-family:var(--serif-display);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);cursor:pointer;border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.875rem;background:var(--card-bg);}
   .back-link:hover{color:var(--gold);border-color:var(--gold);}
   .empty-note{text-align:center;font-style:italic;color:var(--text-muted);padding:2rem 1rem;}
+  .empty-illo{width:48px;height:48px;margin:0 auto 0.6rem;display:block;color:var(--border);}
+  .empty-illo .flag-part{color:var(--gold);}
   .offline-banner{background:#fdf3e3;border:1px solid #e8c987;color:#7a5c1e;border-radius:6px;
     padding:0.65rem 0.9rem;font-size:0.8rem;text-align:center;margin-bottom:0.9rem;
     transition:background-color 0.3s ease,border-color 0.3s ease,color 0.3s ease;}
@@ -287,7 +290,8 @@
 
   .edit-match{border-top:none;margin-top:1rem;}
   .score-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;margin:0.25rem 0 0.75rem;border:1px solid var(--border);border-radius:5px;overflow:hidden;background:var(--card-bg);}
-  .sr-side{padding:0.625rem 0.75rem;display:flex;flex-direction:column;gap:2px;justify-content:center;align-items:center;}
+  .sr-side{padding:0.625rem 0.75rem;display:flex;flex-direction:column;gap:2px;justify-content:center;align-items:center;transition:background-color 0.5s ease;}
+  .sr-name{transition:color 0.5s ease;}
   .sr-side.baber{text-align:center;}
   .sr-side.weff{text-align:center;}
   .sr-photos{display:flex;justify-content:center;gap:4px;margin-bottom:0.35rem;}
@@ -1689,7 +1693,7 @@
       return;
     }
     if(list.length===0){
-      el.innerHTML='<div class="empty-note">No matches yet for Day '+state.day+' &mdash; '+COURSES[state.day]+'.</div>';
+      el.innerHTML='<div class="empty-note"><svg class="empty-illo" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="32" cy="54" rx="22" ry="4"/><line x1="32" y1="54" x2="32" y2="14" class="flag-part"/><path d="M32 14 48 20 32 26Z" class="flag-part" fill="currentColor"/><circle cx="46" cy="48" r="4"/></svg>No matches yet for Day '+state.day+' &mdash; '+COURSES[state.day]+'.</div>';
       return;
     }
     var changedIds=[];
@@ -1758,7 +1762,7 @@
     var list=dayMatches();
 
     if(!list.length){
-      el.innerHTML='<div class="empty-note">No matches yet for Day '+state.day+'.</div>';
+      el.innerHTML='<div class="empty-note"><svg class="empty-illo" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="32" cy="54" rx="22" ry="4"/><line x1="32" y1="54" x2="32" y2="14" class="flag-part"/><path d="M32 14 48 20 32 26Z" class="flag-part" fill="currentColor"/><circle cx="46" cy="48" r="4"/></svg>No matches yet for Day '+state.day+'.</div>';
       return;
     }
     el.innerHTML=list.map(function(m){

@@ -77,6 +77,8 @@
   .video-play-btn .icon{width:18px;height:18px;color:var(--gold);margin-left:2px;}
   .plate-caption{font-size:0.72rem;color:var(--text-muted);font-style:italic;text-align:center;padding-top:0.4rem;}
   .empty-note{font-size:0.85rem;color:var(--text-muted);font-style:italic;grid-column:1/-1;text-align:center;padding:1rem 0;}
+  .empty-illo{width:52px;height:52px;margin:0 auto 0.75rem;display:block;color:var(--border);}
+  .empty-illo .flag-part{color:var(--gold);}
 
   .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.94);z-index:1000;align-items:center;justify-content:center;touch-action:none;opacity:0;transition:opacity 0.28s ease;}
   .lightbox.open{display:flex;opacity:1;}
@@ -285,7 +287,7 @@
       return;
     }
     if(images.length===0){
-      grid.innerHTML='<p class="empty-note">No photos uploaded yet for this edition.</p>';
+      grid.innerHTML='<p class="empty-note"><svg class="empty-illo" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="32" cy="54" rx="22" ry="4"/><line x1="32" y1="54" x2="32" y2="14" class="flag-part"/><path d="M32 14 48 20 32 26Z" class="flag-part" fill="currentColor"/><circle cx="46" cy="48" r="4"/></svg>No photos uploaded yet for this edition.</p>';
       return;
     }
     grid.innerHTML=images.map(function(img){

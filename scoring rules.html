@@ -93,7 +93,7 @@
   .back-link:hover{color:var(--green-mid);}
   .back-link .icon{width:14px;height:14px;}
 
-  .fade-up{opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease;}
+  .fade-up{opacity:0;transform:translateY(20px);transition:opacity 0.5s cubic-bezier(0.16,1,0.3,1),transform 0.5s cubic-bezier(0.16,1,0.3,1);}
   .fade-up.visible{opacity:1;transform:translateY(0);}
   .fade-up-d1{transition-delay:0.1s;}
   .fade-up-d2{transition-delay:0.2s;}

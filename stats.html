@@ -89,7 +89,7 @@
   .back-link:hover{color:var(--green-dark);}
   .back-link .icon{width:14px;height:14px;}
 
-  .fade-up{opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease;}
+  .fade-up{opacity:0;transform:translateY(20px);transition:opacity 0.5s cubic-bezier(0.16,1,0.3,1),transform 0.5s cubic-bezier(0.16,1,0.3,1);}
   .fade-up.visible{opacity:1;transform:translateY(0);}
 
   footer{background:#141f26;color:rgba(255,255,255,0.25);text-align:center;padding:1.5rem;font-family:var(--serif-display);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;}
@@ -244,8 +244,32 @@
     return '<div class="stat-list">'+entries.map(function(e,i){
       return '<div class="stat-row"><span class="stat-rank">'+(i+1)+'</span>'
         +'<span class="stat-name">'+esc(e.name)+'</span>'
-        +'<span class="stat-value">'+e.val+'<span class="unit">'+unit+'</span></span></div>';
+        +'<span class="stat-value" data-val="'+e.val+'">0<span class="unit">'+unit+'</span></span></div>';
     }).join('')+'</div>';
+  }
+
+  function animateStatNumbers(container){
+    var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    Array.prototype.forEach.call(container.querySelectorAll('.stat-value[data-val]'),function(el){
+      var target=parseFloat(el.getAttribute('data-val'));
+      var unitEl=el.querySelector('.unit');
+      var unitHtml=unitEl?unitEl.outerHTML:'';
+      if(reduceMotion||!isFinite(target)){
+        el.innerHTML=target+unitHtml;
+        return;
+      }
+      var start=null,duration=700;
+      function step(ts){
+        if(start===null)start=ts;
+        var progress=Math.min((ts-start)/duration,1);
+        var eased=1-Math.pow(1-progress,3);
+        var current=Math.round(target*eased);
+        el.innerHTML=current+unitHtml;
+        if(progress<1)requestAnimationFrame(step);
+        else el.innerHTML=target+unitHtml;
+      }
+      requestAnimationFrame(step);
+    });
   }
 
   function renderMargins(margins){
@@ -310,6 +334,7 @@
     +'</div>';
 
     document.getElementById('stats-body').innerHTML=html;
+    animateStatNumbers(document.getElementById('stats-body'));
     document.querySelectorAll('.fade-up').forEach(function(el){
       el.classList.add('visible');
       obs.observe(el);

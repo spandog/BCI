@@ -106,7 +106,7 @@
   .scoring-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--serif-display);font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);text-decoration:none;border:1px solid rgba(201,168,76,0.2);padding:0.5rem 1rem;border-radius:2px;transition:all 0.2s;margin-top:1rem;}
   .scoring-link:hover{color:var(--gold);border-color:rgba(201,168,76,0.5);}
   .scoring-link .icon{width:14px;height:14px;}
-  .fade-up{opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease;}
+  .fade-up{opacity:0;transform:translateY(24px);transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1),transform 0.6s cubic-bezier(0.16,1,0.3,1);}
   .fade-up.visible{opacity:1;transform:translateY(0);}
   .fade-up-delay-1{transition-delay:0.1s;}
   .fade-up-delay-2{transition-delay:0.2s;}

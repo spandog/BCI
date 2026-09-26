@@ -139,15 +139,18 @@
     100%{box-shadow:inset 0 0 0 0px rgba(201,168,76,0);}
   }
   @media(prefers-reduced-motion:reduce){.summary-row.row-changed-flash{animation:none;}}
-  .summary-row .sr-pairing{line-height:1.35;color:var(--text-muted);}
+  .summary-row .sr-pairing{line-height:1.35;color:var(--text-muted);align-self:stretch;
+    display:flex;align-items:center;padding:0.3rem 0.6rem;border-radius:6px;}
+  .summary-row .sr-pairing.sr-right{justify-content:flex-end;text-align:right;}
   .summary-row .sr-pairing.leading{color:var(--text-dark);font-weight:600;}
+  .summary-row .sr-pairing.leading.lead-baber{background:var(--baber-bg);color:var(--baber-text);}
+  .summary-row .sr-pairing.leading.lead-weff{background:var(--weff-bg);color:var(--weff-text);}
   .summary-row .sr-mid{text-align:center;white-space:nowrap;}
   .summary-row .sr-thru{font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:0.15rem;}
   .summary-row .sr-margin{font-family:var(--serif-display);font-weight:700;font-size:0.85rem;padding:0.18rem 0.55rem;border-radius:5px;display:inline-block;}
   .summary-row .sr-margin.baber{background:var(--baber-bg);color:var(--baber-text);}
   .summary-row .sr-margin.weff{background:var(--weff-bg);color:var(--weff-text);}
   .summary-row .sr-margin.tie{background:var(--halve-bg);color:var(--halve-text);}
-  .summary-row .sr-right{text-align:right;}
   .sr-edit{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;
     border:1px solid var(--border);background:var(--cream);color:var(--text-muted);cursor:pointer;
     border-radius:50%;transition:border-color 0.15s ease,color 0.15s ease;}
@@ -863,6 +866,7 @@
   }
 
   function lastNames(str){
+    if(/pair \d|player \d/i.test(str||''))return 'TBC';
     return namesFrom(str).map(function(n){
       var parts=n.split(' ');
       return esc(parts[parts.length-1]);
@@ -901,9 +905,9 @@
       var baberLead=c.status!=='upcoming'&&c.leader==='baber';
       var weffLead=c.status!=='upcoming'&&c.leader==='weff';
       return '<div class="summary-row" data-id="'+esc(m.id)+'">'
-        +'<div class="sr-pairing'+(baberLead?' leading':'')+'">'+lastNames(m.baber_players)+'</div>'
+        +'<div class="sr-pairing'+(baberLead?' leading lead-baber':'')+'">'+lastNames(m.baber_players)+'</div>'
         +'<div class="sr-mid">'+mid+'</div>'
-        +'<div class="sr-pairing sr-right'+(weffLead?' leading':'')+'">'+lastNames(m.weff_players)+'</div>'
+        +'<div class="sr-pairing sr-right'+(weffLead?' leading lead-weff':'')+'">'+lastNames(m.weff_players)+'</div>'
         +'<button class="sr-edit" data-id="'+esc(m.id)+'" aria-label="Enter score" title="Enter score">'
           +'<svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg></button>'
         +'</div>';

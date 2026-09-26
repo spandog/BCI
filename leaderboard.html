@@ -77,9 +77,11 @@
   .rc-fill{display:flex;align-items:center;height:100%;position:relative;transition:width 0.6s ease;}
   .rc-fill.baber{background:linear-gradient(90deg,var(--baber-text),var(--green-mid));justify-content:flex-start;}
   .rc-fill.weff{background:linear-gradient(90deg,var(--gold),var(--weff-text));justify-content:flex-end;}
-  .rc-fill.undecided{background:repeating-linear-gradient(45deg,var(--cream-dark) 0 6px,var(--cream) 6px 12px);}
-  .rc-fill.baber-live{background:repeating-linear-gradient(45deg,var(--baber-text) 0 5px,rgba(30,90,140,0.55) 5px 10px);}
-  .rc-fill.weff-live{background:repeating-linear-gradient(45deg,var(--weff-text) 0 5px,rgba(47,125,79,0.55) 5px 10px);justify-content:flex-end;}
+  .rc-fill.undecided{background:repeating-linear-gradient(100deg,var(--cream-dark) 0px,var(--cream-dark) 30px,var(--cream) 30px,var(--cream) 60px);}
+  .rc-fill.baber-live{background:linear-gradient(90deg,var(--baber-text),#3f7bb0,var(--baber-text));background-size:200% 100%;animation:rc-live-shimmer 3s ease-in-out infinite;}
+  .rc-fill.weff-live{background:linear-gradient(90deg,var(--weff-text),#4a9a68,var(--weff-text));background-size:200% 100%;animation:rc-live-shimmer 3s ease-in-out infinite;justify-content:flex-end;}
+  @keyframes rc-live-shimmer{0%,100%{background-position:0% 0%;}50%{background-position:100% 0%;}}
+  @media(prefers-reduced-motion:reduce){.rc-fill.baber-live,.rc-fill.weff-live{animation:none;}}
   .rc-score{font-family:var(--serif-display);font-weight:800;font-size:1.4rem;color:white;padding:0 14px;text-shadow:0 1px 3px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;}
   .rc-trophy{width:16px;height:16px;flex-shrink:0;}
   .rc-seam{position:absolute;top:0;bottom:0;width:2px;background:var(--green-dark);opacity:0.5;}
@@ -122,35 +124,37 @@
      the pencil on a row opens the full scoring page for that match,
      completely unchanged from before. */
   .summary-table{margin-bottom:0.9rem;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--card-bg);}
-  .summary-head{display:flex;align-items:center;gap:0.6rem;padding:0.8rem 1rem;border-bottom:1px solid var(--border);}
-  .summary-head span{flex:1;font-family:var(--serif-display);font-size:0.82rem;letter-spacing:1px;color:var(--text-dark);}
+  .summary-head{display:flex;align-items:center;gap:0.6rem;padding:0.95rem 1.1rem;border-bottom:1px solid var(--border);}
+  .summary-head span{flex:1;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dark);}
   .summary-head .icon{color:var(--gold);width:16px;height:16px;}
-  .summary-panel{padding:0 0.9rem;}
-  .summary-row{display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:0.5rem;
-    padding:0.55rem 0.3rem;border-bottom:1px solid var(--border);font-size:0.76rem;
-    transition:box-shadow 0.3s ease;}
+  .summary-panel{padding:0 1.1rem;}
+  .summary-row{display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:0.7rem;
+    padding:0.9rem 0.2rem;border-bottom:1px solid var(--border);font-size:0.82rem;
+    transition:box-shadow 0.3s ease,background-color 0.15s ease;}
   .summary-row:last-of-type{border-bottom:none;}
+  .summary-row:active{background-color:var(--cream-dark);}
   .summary-row.row-changed-flash{animation:bci-row-flash 1.1s ease;}
   @keyframes bci-row-flash{
     0%{box-shadow:inset 0 0 0 2px rgba(201,168,76,0.9);}
     100%{box-shadow:inset 0 0 0 0px rgba(201,168,76,0);}
   }
   @media(prefers-reduced-motion:reduce){.summary-row.row-changed-flash{animation:none;}}
-  .summary-row .sr-pairing{line-height:1.3;color:var(--text-muted);}
+  .summary-row .sr-pairing{line-height:1.35;color:var(--text-muted);}
   .summary-row .sr-pairing.leading{color:var(--text-dark);font-weight:600;}
   .summary-row .sr-mid{text-align:center;white-space:nowrap;}
-  .summary-row .sr-thru{font-size:0.66rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
-  .summary-row .sr-margin{font-family:var(--serif-display);font-weight:700;font-size:0.78rem;padding:0.1rem 0.4rem;border-radius:4px;}
+  .summary-row .sr-thru{font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:0.15rem;}
+  .summary-row .sr-margin{font-family:var(--serif-display);font-weight:700;font-size:0.85rem;padding:0.18rem 0.55rem;border-radius:5px;display:inline-block;}
   .summary-row .sr-margin.baber{background:var(--baber-bg);color:var(--baber-text);}
   .summary-row .sr-margin.weff{background:var(--weff-bg);color:var(--weff-text);}
   .summary-row .sr-margin.tie{background:var(--halve-bg);color:var(--halve-text);}
   .summary-row .sr-right{text-align:right;}
-  .sr-edit{display:flex;align-items:center;justify-content:center;width:30px;height:30px;flex-shrink:0;
-    border:none;background:none;color:var(--text-muted);cursor:pointer;border-radius:50%;}
-  .sr-edit:active{background:var(--cream-dark);}
+  .sr-edit{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;
+    border:1px solid var(--border);background:var(--cream);color:var(--text-muted);cursor:pointer;
+    border-radius:50%;transition:border-color 0.15s ease,color 0.15s ease;}
+  .sr-edit:active{background:var(--cream-dark);border-color:var(--gold);color:var(--gold);}
   .sr-edit .icon{width:15px;height:15px;}
-  .summary-tally{display:flex;justify-content:center;gap:1.2rem;margin:0 0 0.9rem;padding-top:0.7rem;
-    border-top:1px solid var(--border);font-family:var(--serif-display);font-size:0.78rem;}
+  .summary-tally{display:flex;justify-content:center;gap:1.4rem;margin:0.3rem 0 0.2rem;padding-top:0.9rem;
+    border-top:1px solid var(--border);font-family:var(--serif-display);font-size:0.82rem;}
   .summary-tally .st-blue{color:var(--baber-text);}
   .summary-tally .st-green{color:var(--weff-text);}
   .bb-log-delete{color:var(--text-muted);font-size:1.1rem;line-height:1;cursor:pointer;padding:0 0.25rem;flex-shrink:0;}
@@ -261,21 +265,6 @@
       animation:none;opacity:1;transform:none;filter:none;}
   }
 
-  .live-strip{display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.15rem 0 0.6rem;}
-  .live-tile{flex:0 0 104px;width:104px;background:var(--card-bg);border:1px solid var(--border);border-top:3px solid var(--text-muted);border-radius:6px;padding:0.5rem 0.55rem;cursor:pointer;transition:transform 0.15s;}
-  .live-tile:active{transform:scale(0.96);}
-  .live-tile.leads-baber{border-top-color:var(--baber-text);}
-  .live-tile.leads-weff{border-top-color:var(--weff-text);}
-  .live-tile .lt-match{font-family:var(--serif-display);font-size:0.56rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;gap:4px;margin-bottom:3px;}
-  .live-tile .lt-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;animation:lt-pulse 1.6s ease-in-out infinite;}
-  @keyframes lt-pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-  .live-tile .lt-team{font-family:var(--serif-display);font-size:0.58rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:1px;}
-  .live-tile.leads-baber .lt-team{color:var(--baber-text);}
-  .live-tile.leads-weff .lt-team{color:var(--weff-text);}
-  .live-tile .lt-score{font-family:var(--serif-display);font-size:0.95rem;font-weight:700;color:var(--text-dark);}
-  .live-tile.leads-baber .lt-score{color:var(--baber-text);}
-  .live-tile.leads-weff .lt-score{color:var(--weff-text);}
-  .live-tile .lt-thru{font-family:var(--serif-body);font-size:0.6rem;color:var(--text-muted);margin-top:1px;}
   .score-team{padding:0.85rem 1rem;text-align:center;}
   .team-crest{width:44px;height:53px;display:block;margin:0 auto 0.35rem;}
   .score-team.baber{background:rgba(30,90,140,0.5);}
@@ -306,7 +295,7 @@
     .day-tab-indicator{transition:none;}
   }
 
-  .hole-legend{display:flex;justify-content:center;gap:1.25rem;margin-bottom:0.6rem;font-family:var(--serif-display);font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
+  .hole-legend{display:flex;justify-content:center;gap:1.25rem;margin:0.1rem 0 1rem;font-family:var(--serif-display);font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
   .hole-legend span{display:flex;align-items:center;gap:5px;}
   .legend-sq{width:11px;height:11px;border-radius:2px;border:1px solid var(--border);display:inline-block;}
   .legend-sq.b{background:var(--baber-bg);border-color:var(--baber-border);}
@@ -599,18 +588,34 @@
     </div>
     <div class="rc-bar" id="rc-bar-fills"></div>
     <div class="rc-footer" id="rc-footer"></div>
+    <div class="win-note" id="win-note"></div>
     <button class="rc-share-btn" id="rc-share-btn">
       <svg class="icon" aria-hidden="true"><use href="#i-share"/></svg>
       Share Standings
     </button>
   </div>
 
-  <div class="live-strip" id="live-strip" style="display:none;"></div>
 
   <div class="day-tabs">
     <div class="day-tab-indicator" id="day-tab-indicator"></div>
     <div class="day-tab active" id="tab-1">Day 1 &middot; Pairs<div class="day-tab-sub">Quinta do Vale</div></div>
     <div class="day-tab" id="tab-2">Day 2 &middot; Singles<div class="day-tab-sub">Isla Canela</div></div>
+  </div>
+
+  <div class="summary-table">
+    <div class="summary-head">
+      <svg class="icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>
+      <span>Matches</span>
+    </div>
+    <div class="summary-panel visible" id="summary-panel">
+      <div id="summary-rows"></div>
+      <div class="summary-tally" id="summary-tally"></div>
+      <div class="hole-legend">
+        <span><span class="legend-sq b"></span>Blue</span>
+        <span><span class="legend-sq h"></span>Halved</span>
+        <span><span class="legend-sq w"></span>Green</span>
+      </div>
+    </div>
   </div>
 
   <button class="day-recap-btn" id="day-recap-btn" style="display:none;">
@@ -632,26 +637,7 @@
     </div>
   </div>
 
-  <div class="summary-table">
-    <div class="summary-head">
-      <svg class="icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>
-      <span>Matches</span>
-    </div>
-    <div class="summary-panel visible" id="summary-panel">
-      <div id="summary-rows"></div>
-      <div class="summary-tally" id="summary-tally"></div>
-    </div>
-  </div>
-
-  <div class="hole-legend">
-    <span><span class="legend-sq b"></span>Blue</span>
-    <span><span class="legend-sq h"></span>Halved</span>
-    <span><span class="legend-sq w"></span>Green</span>
-  </div>
-
   <div class="offline-banner" id="offline-banner" style="display:none;"></div>
-
-  <div class="win-note" id="win-note"></div>
 
   <div class="scorer-section">
     <div class="scorer-toggle" id="scorer-toggle" role="button" aria-label="Admin" title="Admin">
@@ -868,7 +854,7 @@
 
     return {
       played:real.length,total:finals.length,baberPts:baberPts,weffPts:weffPts,
-      closest:closest,biggest:biggest,inForm:inForm
+      closest:closest,biggest:biggest,inForm:inForm,matches:real
     };
   }
 
@@ -991,9 +977,36 @@
     if(willOpen)loadBirdieBoard();
   });
 
+  function loadImage(url){
+    return new Promise(function(resolve){
+      if(!url){resolve(null);return;}
+      var img=new Image();
+      img.crossOrigin='anonymous';
+      var done=false;
+      img.onload=function(){if(!done){done=true;resolve(img);}};
+      img.onerror=function(){if(!done){done=true;resolve(null);}};
+      img.src=url;
+      // A single slow or unreachable photo should never hold up the whole
+      // recap — fall back to the initials treatment for that one player
+      // rather than leaving the person waiting indefinitely for a share.
+      setTimeout(function(){if(!done){done=true;resolve(null);}},4000);
+    });
+  }
+
   function drawDayRecap(day){
-    return document.fonts.ready.then(function(){
-      var data=dayRecapData(day);
+    var data=dayRecapData(day);
+    var neededNames={};
+    data.matches.forEach(function(m){
+      namesFrom(m.baber_players).concat(namesFrom(m.weff_players)).forEach(function(n){neededNames[n]=true;});
+    });
+    var names=Object.keys(neededNames);
+    return Promise.all([
+      document.fonts.ready,
+      Promise.all(names.map(function(n){return loadImage(PLAYER_PHOTOS[n]);}))
+    ]).then(function(results){
+      var photoImgs={};
+      names.forEach(function(n,i){photoImgs[n]=results[1][i];});
+
       var W=1080;
       var maxWidth=W-280;
 
@@ -1013,6 +1026,79 @@
         });
         if(current)lines.push(current);
         return lines;
+      }
+
+      function drawCircle(ctx,name,cx,cy,r){
+        var img=photoImgs[name];
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx,cy,r,0,Math.PI*2);
+        ctx.closePath();
+        ctx.clip();
+        if(img){
+          var side=Math.min(img.width,img.height);
+          var sx=(img.width-side)/2,sy=(img.height-side)/2;
+          ctx.drawImage(img,sx,sy,side,side,cx-r,cy-r,r*2,r*2);
+        } else {
+          ctx.fillStyle='#16291d';
+          ctx.fillRect(cx-r,cy-r,r*2,r*2);
+          ctx.fillStyle='#c9a84c';
+          ctx.font='700 '+Math.round(r*0.85)+'px "Lora"';
+          ctx.textAlign='center';
+          ctx.textBaseline='middle';
+          ctx.fillText(initials(name),cx,cy+1);
+          ctx.textBaseline='alphabetic';
+        }
+        ctx.restore();
+        ctx.strokeStyle='rgba(201,168,76,0.5)';
+        ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+      }
+
+      // Draws one finished match's row: each side's player photo(s),
+      // their names, and the result in the middle — mirroring the same
+      // compact match-row layout now used on the leaderboard itself,
+      // just rendered onto canvas with real photos rather than <img> tags.
+      function matchRow(ctx,y,m){
+        var r=26;
+        var spacing=46;
+        var leftNames=namesFrom(m.baber_players);
+        var rightNames=namesFrom(m.weff_players);
+        var leftX=210,rightX=W-210;
+
+        leftNames.forEach(function(n,i){
+          drawCircle(ctx,n,leftX-(leftNames.length-1-i)*spacing,y,r);
+        });
+        rightNames.forEach(function(n,i){
+          drawCircle(ctx,n,rightX+i*spacing,y,r);
+        });
+
+        ctx.textAlign='left';
+        ctx.fillStyle=m.leader==='baber'?'#ffffff':'rgba(255,255,255,0.55)';
+        ctx.font=(m.leader==='baber'?'700 ':'400 ')+'26px "Public Sans"';
+        ctx.fillText(lastNamesPlain(m.baber_players),leftX+50,y+9);
+
+        ctx.textAlign='right';
+        ctx.fillStyle=m.leader==='weff'?'#ffffff':'rgba(255,255,255,0.55)';
+        ctx.font=(m.leader==='weff'?'700 ':'400 ')+'26px "Public Sans"';
+        ctx.fillText(lastNamesPlain(m.weff_players),rightX-50,y+9);
+
+        ctx.textAlign='center';
+        ctx.fillStyle='#c9a84c';
+        ctx.font='700 26px "Lora"';
+        ctx.fillText(m.leader==='tie'?'AS':m.score,W/2,y-6);
+        ctx.fillStyle='rgba(255,255,255,0.4)';
+        ctx.font='400 18px "Public Sans"';
+        ctx.fillText('FINAL',W/2,y+22);
+
+        return y+82;
+      }
+
+      function lastNamesPlain(str){
+        return namesFrom(str).map(function(n){
+          var parts=n.split(' ');
+          return parts[parts.length-1];
+        }).join(' & ');
       }
 
       // Draws the whole card onto whatever canvas/context is passed in,
@@ -1059,7 +1145,24 @@
         ctx.fillStyle='rgba(255,255,255,0.45)';
         ctx.fillText(data.played+' of '+data.total+' matches finished',W/2,475);
 
-        var y=580;
+        var y=560;
+
+        if(data.matches.length){
+          ctx.textAlign='left';
+          ctx.fillStyle='#c9a84c';
+          ctx.font='600 24px "Lora"';
+          ctx.fillText('MATCH RESULTS',140,y);
+          y+=50;
+          data.matches.forEach(function(m){
+            y=matchRow(ctx,y,m);
+          });
+          y+=20;
+          ctx.strokeStyle='rgba(201,168,76,0.3)';
+          ctx.lineWidth=1;
+          ctx.beginPath();ctx.moveTo(140,y);ctx.lineTo(W-140,y);ctx.stroke();
+          y+=50;
+        }
+
         function section(label,value,sub){
           ctx.textAlign='left';
           ctx.fillStyle='#c9a84c';
@@ -1109,8 +1212,8 @@
       }
 
       var scratch=document.createElement('canvas');
-      scratch.width=W;scratch.height=2000;
-      var finalH=draw(scratch.getContext('2d'),2000);
+      scratch.width=W;scratch.height=3000;
+      var finalH=draw(scratch.getContext('2d'),3000);
 
       var canvas=document.createElement('canvas');
       canvas.width=W;canvas.height=finalH;
@@ -1247,7 +1350,6 @@
         state.lastData=fresh;
         state.matches=res.data||[];
         renderBanner();
-        renderLiveStrip();
         renderMatches();
         renderScorer(true);
         if(state.scoringId)renderScoreView();
@@ -1301,27 +1403,6 @@
     el.textContent='Offline \u2014 showing scores as of '+(state.lastFetchSuccess?fmtTimeAgo(state.lastFetchSuccess):'last connection');
   }
 
-  function renderLiveStrip(){
-    var el=document.getElementById('live-strip');
-    var live=state.matches.filter(function(m){return calc(m).status==='live';});
-    if(!live.length){el.style.display='none';el.innerHTML='';return;}
-    el.style.display='flex';
-    el.innerHTML=live.map(function(m){
-      var c=calc(m);
-      var leadClass=c.leader==='baber'?'leads-baber':(c.leader==='weff'?'leads-weff':'');
-      var scoreText=c.leader==='tie'?'AS':esc(c.score);
-      var teamLabel=c.leader==='baber'?'Blue':(c.leader==='weff'?'Green':'Tied');
-      return '<div class="live-tile '+leadClass+'" data-id="'+esc(m.id)+'">'
-        +'<div class="lt-match"><span class="lt-dot"></span>Match '+esc(m.match_no)+'</div>'
-        +'<div class="lt-team">'+teamLabel+'</div>'
-        +'<div class="lt-score">'+scoreText+'</div>'
-        +'<div class="lt-thru">Thru '+esc(c.thru)+'</div>'
-      +'</div>';
-    }).join('');
-    Array.prototype.forEach.call(el.querySelectorAll('.live-tile'),function(tile){
-      tile.addEventListener('click',function(){goToMatch(tile.dataset.id);});
-    });
-  }
 
   /* ---------- match day sheet — auto-generated graphic once a day's lineup is complete ---------- */
   var ROSTER=[

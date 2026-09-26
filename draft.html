@@ -51,6 +51,7 @@
   .teams-row{display:flex;gap:1rem;margin-bottom:1.5rem;}
   .team-col{flex:1;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
   .team-col-head{padding:1rem 1.1rem;text-align:center;}
+  .team-crest{width:40px;height:48px;display:block;margin:0 auto 0.3rem;}
   .team-col.blue .team-col-head{background:var(--blue-bg);border-bottom:1px solid var(--blue-border);}
   .team-col.green .team-col-head{background:var(--green-team-bg);border-bottom:1px solid var(--green-team-border);}
   .team-col-name{font-family:var(--serif-display);font-weight:700;font-size:1.05rem;}
@@ -103,6 +104,28 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="crest-blue" viewBox="0 0 140 170">
+      <path d="M10 8 L70 2 L130 8 L130 90 C130 130 100 155 70 168 C40 155 10 130 10 90 Z" fill="#1e5a8c" stroke="#c9a84c" stroke-width="4"/>
+      <path d="M14 12 L70 6 L126 12 L126 90 C126 126 98 150 70 163 C42 150 14 126 14 90 Z" fill="none" stroke="#c9a84c" stroke-width="1.5" opacity="0.55"/>
+      <g stroke="#c9a84c" stroke-width="4.5" stroke-linecap="round" fill="none">
+        <line x1="46" y1="90" x2="80" y2="34"/><line x1="94" y1="90" x2="60" y2="34"/>
+      </g>
+      <circle cx="46" cy="90" r="4.5" fill="#c9a84c" stroke="none"/>
+      <circle cx="94" cy="90" r="4.5" fill="#c9a84c" stroke="none"/>
+      <circle cx="70" cy="105" r="18" fill="none" stroke="#c9a84c" stroke-width="2" opacity="0.7"/>
+      <text x="70" y="113" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="19" fill="#c9a84c">B</text>
+    </symbol>
+    <symbol id="crest-green" viewBox="0 0 140 170">
+      <path d="M10 8 L70 2 L130 8 L130 90 C130 130 100 155 70 168 C40 155 10 130 10 90 Z" fill="#2f7d4f" stroke="#c9a84c" stroke-width="4"/>
+      <path d="M14 12 L70 6 L126 12 L126 90 C126 126 98 150 70 163 C42 150 14 126 14 90 Z" fill="none" stroke="#c9a84c" stroke-width="1.5" opacity="0.55"/>
+      <g stroke="#c9a84c" stroke-width="4.5" stroke-linecap="round" fill="none">
+        <line x1="46" y1="90" x2="80" y2="34"/><line x1="94" y1="90" x2="60" y2="34"/>
+      </g>
+      <circle cx="46" cy="90" r="4.5" fill="#c9a84c" stroke="none"/>
+      <circle cx="94" cy="90" r="4.5" fill="#c9a84c" stroke="none"/>
+      <circle cx="70" cy="105" r="18" fill="none" stroke="#c9a84c" stroke-width="2" opacity="0.7"/>
+      <text x="70" y="113" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="19" fill="#c9a84c">G</text>
+    </symbol>
   </defs>
 </svg>
 
@@ -124,6 +147,7 @@
   <div class="teams-row">
     <div class="team-col blue">
       <div class="team-col-head">
+        <svg class="team-crest" viewBox="0 0 140 170" aria-hidden="true"><use href="#crest-blue"/></svg>
         <div class="team-col-name">Blue Team</div>
         <div class="team-col-captain" id="blue-captain-label">Captain: TBC</div>
       </div>
@@ -131,6 +155,7 @@
     </div>
     <div class="team-col green">
       <div class="team-col-head">
+        <svg class="team-crest" viewBox="0 0 140 170" aria-hidden="true"><use href="#crest-green"/></svg>
         <div class="team-col-name">Green Team</div>
         <div class="team-col-captain" id="green-captain-label">Captain: TBC</div>
       </div>
@@ -181,6 +206,12 @@
   var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
   var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
   window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    /* If the Supabase library script itself failed to load — a blocked
+       CDN, no connection, a restrictive preview sandbox — window.supabase
+       won't exist at all. Fail quietly here rather than throwing, so the
+       rest of the page can fall back to its "not connected" state instead
+       of a script error stopping everything else on the page too. */
+    if(!window.supabase||typeof window.supabase.createClient!=='function')return null;
     if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
     return window.__bciSbClient;
   };

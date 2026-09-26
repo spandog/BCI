@@ -116,6 +116,33 @@
   .bb-log-row .bb-log-what{color:var(--text-muted);font-size:0.72rem;}
   .bb-log-row .bb-log-amt{color:var(--gold-light);background:var(--green-dark);border-radius:10px;padding:0.1rem 0.5rem;font-family:var(--serif-display);font-size:0.72rem;flex-shrink:0;margin-left:0.5rem;}
   .bb-empty{text-align:center;font-style:italic;color:var(--text-muted);font-size:0.82rem;padding:0.75rem;}
+
+  /* ---------- Day Summary — every match in the current day at a
+     glance, one compact row each, collapsible like the Birdie Board. */
+  .summary-table{margin-bottom:0.9rem;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--card-bg);}
+  .summary-toggle{display:flex;align-items:center;gap:0.6rem;padding:0.8rem 1rem;cursor:pointer;}
+  .summary-toggle span{flex:1;font-family:var(--serif-display);font-size:0.82rem;letter-spacing:1px;color:var(--text-dark);}
+  .summary-toggle .icon:first-child{color:var(--gold);width:16px;height:16px;}
+  .summary-toggle .arrow{width:14px;height:14px;color:var(--text-muted);transition:transform 0.2s;}
+  .summary-toggle.open .arrow{transform:rotate(180deg);}
+  .summary-panel{display:none;padding:0 0.9rem 0.9rem;border-top:1px solid var(--border);}
+  .summary-panel.visible{display:block;}
+  .summary-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0.5rem;
+    padding:0.55rem 0.3rem;border-bottom:1px solid var(--border);font-size:0.76rem;}
+  .summary-row:last-of-type{border-bottom:none;}
+  .summary-row .sr-pairing{line-height:1.3;color:var(--text-muted);}
+  .summary-row .sr-pairing.leading{color:var(--text-dark);font-weight:600;}
+  .summary-row .sr-mid{text-align:center;white-space:nowrap;}
+  .summary-row .sr-thru{font-size:0.66rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+  .summary-row .sr-margin{font-family:var(--serif-display);font-weight:700;font-size:0.78rem;padding:0.1rem 0.4rem;border-radius:4px;}
+  .summary-row .sr-margin.baber{background:var(--baber-bg);color:var(--baber-text);}
+  .summary-row .sr-margin.weff{background:var(--weff-bg);color:var(--weff-text);}
+  .summary-row .sr-margin.tie{background:var(--halve-bg);color:var(--halve-text);}
+  .summary-row .sr-right{text-align:right;}
+  .summary-tally{display:flex;justify-content:center;gap:1.2rem;margin-top:0.7rem;padding-top:0.7rem;
+    border-top:1px solid var(--border);font-family:var(--serif-display);font-size:0.78rem;}
+  .summary-tally .st-blue{color:var(--baber-text);}
+  .summary-tally .st-green{color:var(--weff-text);}
   .bb-log-delete{color:var(--text-muted);font-size:1.1rem;line-height:1;cursor:pointer;padding:0 0.25rem;flex-shrink:0;}
   .bb-log-delete:hover{color:#b0532b;}
 
@@ -240,6 +267,7 @@
   .live-tile.leads-weff .lt-score{color:var(--weff-text);}
   .live-tile .lt-thru{font-family:var(--serif-body);font-size:0.6rem;color:var(--text-muted);margin-top:1px;}
   .score-team{padding:0.85rem 1rem;text-align:center;}
+  .team-crest{width:44px;height:53px;display:block;margin:0 auto 0.35rem;}
   .score-team.baber{background:rgba(30,90,140,0.5);}
   .score-team.weff{background:rgba(47,125,79,0.35);}
   .score-team.score-flash{animation:bci-score-flash 900ms ease;}
@@ -479,6 +507,28 @@
     <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M15.7 3.5 20 5.6a1.5 1.5 0 0 1 .8 1.8l-1 3a1 1 0 0 1-1.3.6L17 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19v-8.7l-1.5.7a1 1 0 0 1-1.3-.6l-1-3a1.5 1.5 0 0 1 .8-1.8l4.3-2.1a3.6 3.6 0 0 0 7.4 0z"/></symbol>
     <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1"/></symbol>
     <symbol id="i-flag" viewBox="0 0 24 24"><path d="M12 17.5V3.5l7 3.3-7 3.3"/><path d="M4.5 20.5c1.8-1.2 4.4-1.9 7.5-1.9s5.7.7 7.5 1.9"/></symbol>
+    <symbol id="crest-blue" viewBox="0 0 140 170">
+      <path d="M10 8 L70 2 L130 8 L130 90 C130 130 100 155 70 168 C40 155 10 130 10 90 Z" fill="#1e5a8c" stroke="#c9a84c" stroke-width="4"/>
+      <path d="M14 12 L70 6 L126 12 L126 90 C126 126 98 150 70 163 C42 150 14 126 14 90 Z" fill="none" stroke="#c9a84c" stroke-width="1.5" opacity="0.55"/>
+      <g stroke="#c9a84c" stroke-width="4.5" stroke-linecap="round" fill="none">
+        <line x1="46" y1="90" x2="80" y2="34"/><line x1="94" y1="90" x2="60" y2="34"/>
+      </g>
+      <circle cx="46" cy="90" r="4.5" fill="#c9a84c" stroke="none"/>
+      <circle cx="94" cy="90" r="4.5" fill="#c9a84c" stroke="none"/>
+      <circle cx="70" cy="105" r="18" fill="none" stroke="#c9a84c" stroke-width="2" opacity="0.7"/>
+      <text x="70" y="113" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="19" fill="#c9a84c">B</text>
+    </symbol>
+    <symbol id="crest-green" viewBox="0 0 140 170">
+      <path d="M10 8 L70 2 L130 8 L130 90 C130 130 100 155 70 168 C40 155 10 130 10 90 Z" fill="#2f7d4f" stroke="#c9a84c" stroke-width="4"/>
+      <path d="M14 12 L70 6 L126 12 L126 90 C126 126 98 150 70 163 C42 150 14 126 14 90 Z" fill="none" stroke="#c9a84c" stroke-width="1.5" opacity="0.55"/>
+      <g stroke="#c9a84c" stroke-width="4.5" stroke-linecap="round" fill="none">
+        <line x1="46" y1="90" x2="80" y2="34"/><line x1="94" y1="90" x2="60" y2="34"/>
+      </g>
+      <circle cx="46" cy="90" r="4.5" fill="#c9a84c" stroke="none"/>
+      <circle cx="94" cy="90" r="4.5" fill="#c9a84c" stroke="none"/>
+      <circle cx="70" cy="105" r="18" fill="none" stroke="#c9a84c" stroke-width="2" opacity="0.7"/>
+      <text x="70" y="113" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="19" fill="#c9a84c">G</text>
+    </symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
     <symbol id="i-bar-chart" viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></symbol>
@@ -520,12 +570,14 @@
   <div id="board-view">
   <div class="score-banner">
     <div class="score-team baber" id="banner-baber">
+      <svg class="team-crest" viewBox="0 0 140 170" aria-hidden="true"><use href="#crest-blue"/></svg>
       <div class="t-label">Captain: TBC</div>
       <div class="t-name">BLUE TEAM</div>
       <div class="t-score" id="score-baber">0</div>
     </div>
     <div class="score-divider"><span class="vs">vs</span></div>
     <div class="score-team weff" id="banner-weff">
+      <svg class="team-crest" viewBox="0 0 140 170" aria-hidden="true"><use href="#crest-green"/></svg>
       <div class="t-label">Captain: TBC</div>
       <div class="t-name">GREEN TEAM</div>
       <div class="t-score" id="score-weff">0</div>
@@ -576,6 +628,18 @@
       <div id="bb-tally"><div class="bb-empty">Nothing logged yet.</div></div>
       <div class="bb-section-label" style="margin-top:1rem;">Recent</div>
       <div id="bb-log"><div class="bb-empty">Nothing logged yet.</div></div>
+    </div>
+  </div>
+
+  <div class="summary-table">
+    <div class="summary-toggle" id="summary-toggle">
+      <svg class="icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>
+      <span>Day Summary</span>
+      <svg class="icon arrow" aria-hidden="true"><use href="#i-chevron"/></svg>
+    </div>
+    <div class="summary-panel" id="summary-panel">
+      <div id="summary-rows"></div>
+      <div class="summary-tally" id="summary-tally"></div>
     </div>
   </div>
 
@@ -649,6 +713,12 @@
      idempotent pattern, safe regardless of which script actually runs
      first. See live-tracker.js for the full explanation. */
   window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    /* If the Supabase library script itself failed to load — a blocked
+       CDN, no connection, a restrictive preview sandbox — window.supabase
+       won't exist at all. Fail quietly here rather than throwing, so the
+       rest of the page can fall back to its "not connected" state instead
+       of a script error stopping everything else on the page too. */
+    if(!window.supabase||typeof window.supabase.createClient!=='function')return null;
     if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
     return window.__bciSbClient;
   };
@@ -681,6 +751,10 @@
   var configured=SUPABASE_URL.indexOf('http')===0;
   if(configured){
     sb=window.bciGetSupabase(SUPABASE_URL,SUPABASE_ANON_KEY);
+    if(!sb){
+      configured=false;
+      document.getElementById('config-warning').classList.add('visible');
+    }
   } else {
     document.getElementById('config-warning').classList.add('visible');
   }
@@ -807,6 +881,54 @@
   function namesFrom(str){
     return (str||'').split('&').map(function(s){return s.trim();}).filter(Boolean);
   }
+
+  function lastNames(str){
+    return namesFrom(str).map(function(n){
+      var parts=n.split(' ');
+      return esc(parts[parts.length-1]);
+    }).join(' &amp; ');
+  }
+
+  function renderSummaryTable(){
+    var list=dayMatches();
+    var rowsEl=document.getElementById('summary-rows');
+    var tallyEl=document.getElementById('summary-tally');
+    if(!list.length){
+      rowsEl.innerHTML='<div class="bb-empty">No matches yet for Day '+state.day+'.</div>';
+      tallyEl.innerHTML='';
+      return;
+    }
+    var blueLeading=0,greenLeading=0;
+    rowsEl.innerHTML=list.map(function(m){
+      var c=calc(m);
+      var mid;
+      if(c.status==='upcoming'){
+        mid='<div class="sr-thru">'+(m.tee_time?'Tee '+esc(m.tee_time):'Upcoming')+'</div>';
+      } else if(c.status==='final'){
+        mid='<div class="sr-margin '+(c.leader==='tie'?'tie':c.leader)+'">'+(c.leader==='tie'?'AS':esc(c.score))+'</div><div class="sr-thru">Final</div>';
+        if(c.leader==='baber')blueLeading++;else if(c.leader==='weff')greenLeading++;
+      } else if(c.leader==='tie'){
+        mid='<div class="sr-margin tie">AS</div><div class="sr-thru">Thru '+esc(c.thru)+'</div>';
+      } else {
+        mid='<div class="sr-margin '+c.leader+'">'+esc(c.score)+'</div><div class="sr-thru">Thru '+esc(c.thru)+'</div>';
+        if(c.leader==='baber')blueLeading++;else greenLeading++;
+      }
+      var baberLead=c.status!=='upcoming'&&c.leader==='baber';
+      var weffLead=c.status!=='upcoming'&&c.leader==='weff';
+      return '<div class="summary-row">'
+        +'<div class="sr-pairing'+(baberLead?' leading':'')+'">'+lastNames(m.baber_players)+'</div>'
+        +'<div class="sr-mid">'+mid+'</div>'
+        +'<div class="sr-pairing sr-right'+(weffLead?' leading':'')+'">'+lastNames(m.weff_players)+'</div>'
+        +'</div>';
+    }).join('');
+    tallyEl.innerHTML='<span class="st-blue">Blue leading '+blueLeading+'</span><span class="st-green">Green leading '+greenLeading+'</span>';
+  }
+
+  document.getElementById('summary-toggle').addEventListener('click',function(){
+    var willOpen=!document.getElementById('summary-panel').classList.contains('visible');
+    document.getElementById('summary-panel').classList.toggle('visible',willOpen);
+    this.classList.toggle('open',willOpen);
+  });
 
   /* ---------- Birdie Board — open to everyone, no admin needed. Shows
      the running tally and recent log for every birdie/eagle/hole in one
@@ -1839,10 +1961,12 @@
     var el=document.getElementById('match-list');
     if(!configured){
       el.innerHTML='<div class="empty-note">Leaderboard not connected yet.</div>';
+      renderSummaryTable();
       return;
     }
     if(list.length===0){
       el.innerHTML='<div class="empty-note"><svg class="empty-illo" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="32" cy="54" rx="22" ry="4"/><line x1="32" y1="54" x2="32" y2="14" class="flag-part"/><path d="M32 14 48 20 32 26Z" class="flag-part" fill="currentColor"/><circle cx="46" cy="48" r="4"/></svg>No matches yet for Day '+state.day+' &mdash; '+COURSES[state.day]+'.</div>';
+      renderSummaryTable();
       return;
     }
     var changedIds=[];
@@ -1902,6 +2026,7 @@
     Array.prototype.forEach.call(el.querySelectorAll('.enter-score'),function(btn){
       btn.addEventListener('click',function(){openScoreView(btn.dataset.id);});
     });
+    renderSummaryTable();
   }
 
   /* ---------- admin panel: match management only ---------- */

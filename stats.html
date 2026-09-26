@@ -190,6 +190,12 @@
      see live-tracker.js for the full explanation. Identical, idempotent
      definition, safe regardless of which file actually loads first. */
   window.bciGetSupabase=window.bciGetSupabase||function(url,key){
+    /* If the Supabase library script itself failed to load — a blocked
+       CDN, no connection, a restrictive preview sandbox — window.supabase
+       won't exist at all. Fail quietly here rather than throwing, so the
+       rest of the page can fall back to its "not connected" state instead
+       of a script error stopping everything else on the page too. */
+    if(!window.supabase||typeof window.supabase.createClient!=='function')return null;
     if(!window.__bciSbClient)window.__bciSbClient=window.supabase.createClient(url,key);
     return window.__bciSbClient;
   };

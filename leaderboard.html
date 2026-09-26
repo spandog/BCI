@@ -128,7 +128,7 @@
   .summary-head span{flex:1;font-family:var(--serif-display);font-size:0.85rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dark);}
   .summary-head .icon{color:var(--gold);width:16px;height:16px;}
   .summary-panel{padding:0 1.1rem;}
-  .summary-row{display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:0.7rem;
+  .summary-row{display:grid;grid-template-columns:auto 1fr auto 1fr auto;align-items:center;gap:0.5rem;
     padding:0.9rem 0.2rem;border-bottom:1px solid var(--border);font-size:0.82rem;
     transition:box-shadow 0.3s ease,background-color 0.15s ease;}
   .summary-row:last-of-type{border-bottom:none;}
@@ -150,11 +150,12 @@
   .summary-row .sr-margin.baber{background:var(--baber-bg);color:var(--baber-text);}
   .summary-row .sr-margin.weff{background:var(--weff-bg);color:var(--weff-text);}
   .summary-row .sr-margin.tie{background:var(--halve-bg);color:var(--halve-text);}
-  .sr-edit{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;
+  .sr-spacer{width:24px;height:1px;flex-shrink:0;}
+  .sr-edit{display:flex;align-items:center;justify-content:center;width:24px;height:24px;flex-shrink:0;
     border:1px solid var(--border);background:var(--cream);color:var(--text-muted);cursor:pointer;
     border-radius:50%;transition:border-color 0.15s ease,color 0.15s ease;}
   .sr-edit:active{background:var(--cream-dark);border-color:var(--gold);color:var(--gold);}
-  .sr-edit .icon{width:15px;height:15px;}
+  .sr-edit .icon{width:11px;height:11px;}
   .summary-tally{display:flex;justify-content:center;gap:1.4rem;margin:0.3rem 0 0.2rem;padding-top:0.9rem;
     border-top:1px solid var(--border);font-family:var(--serif-display);font-size:0.82rem;}
   .summary-tally .st-blue{color:var(--baber-text);}
@@ -904,6 +905,7 @@
       var baberLead=c.status!=='upcoming'&&c.leader==='baber';
       var weffLead=c.status!=='upcoming'&&c.leader==='weff';
       return '<div class="summary-row" data-id="'+esc(m.id)+'">'
+        +'<div class="sr-spacer" aria-hidden="true"></div>'
         +'<div class="sr-pairing'+(baberLead?' leading lead-baber':'')+'">'+lastNames(m.baber_players)+'</div>'
         +'<div class="sr-mid">'+mid+'</div>'
         +'<div class="sr-pairing sr-right'+(weffLead?' leading lead-weff':'')+'">'+lastNames(m.weff_players)+'</div>'

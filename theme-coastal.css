@@ -197,3 +197,27 @@ a,button,.link-row,.player-card,.kit-card,.result-team,.comp-card,
   #bci-toast{transition:none;}
 }
 
+
+/* ---------- Page transitions ----------
+   Supported browsers (Safari 18.2+, Chrome 126+) cross-fade between
+   pages instead of flashing white. The nav and the bottom bar are named
+   so they stay put while the content changes under them. Browsers that
+   don't support this just load pages normally. */
+@view-transition{navigation:auto;}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.32s;animation-timing-function:cubic-bezier(.4,0,.2,1);}
+body > nav{view-transition-name:bci-nav;}
+#bci-bottom-fixed-wrap{view-transition-name:bci-bottom;}
+/* The old per-page fade would make the incoming snapshot start
+   transparent, so it's switched off wherever transitions exist. */
+@supports (view-transition-name:none){html body{animation:none;}}
+@media (prefers-reduced-motion:reduce){
+  @view-transition{navigation:none;}
+}
+
+/* ---------- Image fade-in ----------
+   Gallery and shop photos ease in once loaded rather than popping in.
+   Only active once bci-features.js has run, so nothing can get stuck
+   hidden if the script fails. */
+.bci-fade-ready img.bci-fade{transition:opacity .5s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);}
+.bci-fade-ready img.bci-fade:not(.is-loaded){opacity:0;transform:scale(1.02);}
+@media (prefers-reduced-motion:reduce){.bci-fade-ready img.bci-fade{transition:none;}}

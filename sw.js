@@ -6,11 +6,13 @@
    Everything else (css/js/images) is stale-while-revalidate: served
    from cache first for speed, updated in the background.
    ============================================================ */
-var CACHE_NAME='bci-cache-v183';
+var CACHE_NAME='bci-cache-v184';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
   'leaderboard.html',
+  'leaderboard.css',
+  'leaderboard.js',
   'theme-coastal.css',
   'bci-features.js',
   'live-tracker.js',

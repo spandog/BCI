@@ -703,3 +703,22 @@
     },2600);
   };
 })();
+
+/* Image fade-in for img.bci-fade (gallery and shop photos). Anything
+   already loaded or failed is marked straight away, later loads are
+   caught with a capturing listener, and a timeout makes sure no image
+   can ever stay hidden. */
+(function(){
+  function done(img){img.classList.add('is-loaded');}
+  function handle(e){
+    var t=e.target;
+    if(t&&t.tagName==='IMG'&&t.classList&&t.classList.contains('bci-fade'))done(t);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('img.bci-fade'),function(i){if(i.complete)done(i);});
+  document.addEventListener('load',handle,true);
+  document.addEventListener('error',handle,true);
+  document.documentElement.classList.add('bci-fade-ready');
+  setTimeout(function(){
+    Array.prototype.forEach.call(document.querySelectorAll('img.bci-fade'),done);
+  },6000);
+})();

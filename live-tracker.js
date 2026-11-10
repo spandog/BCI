@@ -44,8 +44,8 @@
       'font-family:"Public Sans",Arial,sans-serif;overflow:hidden;}'+
     '#bci-tracker-bar.visible{display:flex;}'+
     '#bci-tracker-bar .bt-status{font-family:"Lora",Georgia,serif;'+
-      'font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;'+
-      'color:#16291d;background:#c9a84c;padding:0 14px;flex-shrink:0;'+
+      'font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;'+
+      'color:#c9a84c;background:transparent;border-right:1px solid rgba(201,168,76,0.3);padding:0 14px;flex-shrink:0;'+
       'display:flex;align-items:center;white-space:nowrap;}'+
     '#bci-tracker-bar .bt-status.pulsing{animation:bci-pulse 1.6s ease-in-out infinite;}'+
     '@keyframes bci-pulse{0%,100%{opacity:1;}50%{opacity:0.55;}}'+
@@ -53,10 +53,10 @@
       'display:flex;align-items:center;}'+
     '#bci-tracker-bar .bt-track{position:absolute;left:0;top:0;height:100%;'+
       'display:flex;align-items:center;white-space:nowrap;will-change:transform;}'+
-    '#bci-tracker-bar .bt-item{display:inline-flex;align-items:center;color:rgba(255,255,255,0.85);'+
-      'font-size:0.85rem;padding:0 1.5rem;white-space:nowrap;}'+
+    '#bci-tracker-bar .bt-item{display:inline-flex;align-items:center;color:rgba(255,255,255,0.78);'+
+      'font-family:\"Lora\",Georgia,serif;font-size:0.7rem;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;font-variant-numeric:tabular-nums lining-nums;padding:0 1.5rem;white-space:nowrap;}'+
     '#bci-tracker-bar .bt-item .gold{color:#ddc27e;font-weight:600;}'+
-    '#bci-tracker-bar .bt-item .dot{color:#c9a84c;margin-right:1.5rem;}'+
+    '#bci-tracker-bar .bt-item .dot{color:#c9a84c;font-size:0.5rem;opacity:0.85;margin-right:1.5rem;}'+'#bci-tracker-bar .bt-status:empty{display:none;}'+
     '#bci-tracker-bar a.bt-link{color:inherit;text-decoration:none;flex-shrink:0;'+
       'display:flex;align-items:center;padding:0 14px;border-left:1px solid rgba(201,168,76,0.25);'+
       'font-family:"Lora",Georgia,serif;font-size:0.6rem;letter-spacing:2px;'+
@@ -66,14 +66,14 @@
     '#bci-toast-stack{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:600;'+
       'display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;'+
       'width:100%;padding:0 1rem;box-sizing:border-box;}'+
-    '.bci-toast{background:#16291d;border:1px solid rgba(201,168,76,0.4);border-radius:6px;'+
+    '.bci-toast{background:#16291d;border:1px solid rgba(201,168,76,0.4);border-radius:var(--r-md);'+
       'padding:0.7rem 1.1rem;font-family:"Public Sans",Arial,sans-serif;font-size:0.85rem;'+
       'color:rgba(255,255,255,0.9);box-shadow:0 8px 24px rgba(0,0,0,0.28);'+
       'opacity:0;transform:translateY(-14px);transition:opacity 0.35s ease,transform 0.35s ease;'+
       'max-width:400px;margin:0 auto;text-align:center;}'+
     '.bci-toast.show{opacity:1;transform:translateY(0);}'+
     '.bci-toast .gold{color:#ddc27e;font-weight:600;font-family:"Lora",Georgia,serif;'+
-      'letter-spacing:1px;}';
+      'letter-spacing:1.5px;}';
   document.head.appendChild(style);
 
   /* ---------- shared fixed wrap, also used by bci-features.js's bottom-nav ---------- */

@@ -6,7 +6,7 @@
    Everything else (css/js/images) is stale-while-revalidate: served
    from cache first for speed, updated in the background.
    ============================================================ */
-var CACHE_NAME='bci-cache-v189';
+var CACHE_NAME='bci-cache-v192';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
@@ -112,7 +112,7 @@ self.addEventListener('push',function(e){
     body:body,
     icon:'icon-192.png',
     badge:'icon-192.png',
-    data:{url:(payload&&(payload.click_action||payload.url))||'leaderboard.html'}
+    data:{url:(payload&&(payload.click_action||payload.url))||'leaderboard.html',title:title,body:body}
   };
   e.waitUntil(self.registration.showNotification(title,options));
 
@@ -120,7 +120,20 @@ self.addEventListener('push',function(e){
 
 self.addEventListener('notificationclick',function(e){
   e.notification.close();
-  var url=(e.notification.data&&e.notification.data.url)||'leaderboard.html';
+  var d=e.notification.data||{};
+  var url=d.url||'leaderboard.html';
+  var title=d.title||e.notification.title||'';
+  var body=d.body||e.notification.body||'';
+  /* The page that opens shows the notification as a message card. When the
+     site has to be opened fresh, the text travels in the address and the
+     page removes it again straight after reading it. */
+  var withMsg;
+  try{
+    var u=new URL(url,self.location.origin);
+    if(title)u.searchParams.set('mt',title);
+    if(body)u.searchParams.set('mb',body);
+    withMsg=u.href;
+  }catch(err){withMsg=url;}
   var targetPath;
   try{targetPath=new URL(url,self.location.origin).origin+new URL(url,self.location.origin).pathname;}
   catch(err){targetPath=url.split('?')[0].split('#')[0];}
@@ -131,11 +144,21 @@ self.addEventListener('notificationclick',function(e){
         var client=list[i];
         var clientPath=client.url.split('?')[0].split('#')[0];
         if(clientPath===targetPath&&'focus' in client){
-          client.postMessage({type:'bci-notification-click',url:url});
+          client.postMessage({type:'bci-notification-click',url:url,title:title,body:body});
           return client.focus();
         }
       }
-      if(clients.openWindow)return clients.openWindow(url);
+      // The site is open on a different page: take that window to the
+      // right page rather than opening a second one.
+      for(var j=0;j<list.length;j++){
+        if('navigate' in list[j]){
+          var c=list[j];
+          return c.navigate(withMsg).then(function(nc){return (nc||c).focus();}).catch(function(){
+            if(clients.openWindow)return clients.openWindow(withMsg);
+          });
+        }
+      }
+      if(clients.openWindow)return clients.openWindow(withMsg);
     })
   );
 });

@@ -242,3 +242,23 @@ body > nav{view-transition-name:bci-nav;}
 .stat-section-title::after,body .section-title::after{content:"";display:block;width:76px;height:8px;margin:0.5rem 0 0.15rem;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 76 8'%3E%3Cline x1='0' y1='4' x2='31' y2='4' stroke='%23c9a84c' stroke-width='1'/%3E%3Crect x='35' y='1.2' width='5.6' height='5.6' transform='rotate(45 37.8 4)' fill='%23c9a84c'/%3E%3Cline x1='45' y1='4' x2='76' y2='4' stroke='%23c9a84c' stroke-width='1'/%3E%3C/svg%3E") no-repeat left center/contain;}
 body .section-title{border-bottom:none;padding-bottom:0;}
+
+/* ---------- Notification message card ---------- */
+#bci-msg{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:1.5rem;
+  background:rgba(10,18,12,0.55);opacity:0;transition:opacity .3s ease;}
+#bci-msg.open{opacity:1;}
+.bci-msg-card{width:100%;max-width:360px;background:var(--card-bg,#fff);border:1px solid rgba(201,168,76,0.45);border-radius:var(--r-lg,14px);
+  box-shadow:var(--shadow-lg);padding:1.6rem 1.4rem 1.3rem;text-align:center;transform:translateY(10px) scale(.98);
+  transition:transform .35s cubic-bezier(.16,1,.3,1);}
+#bci-msg.open .bci-msg-card{transform:none;}
+.bci-msg-eyebrow{font-family:var(--serif-display,Georgia,serif);font-size:.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold,#c9a84c);margin-bottom:.7rem;}
+.bci-msg-title{font-family:var(--serif-display,Georgia,serif);font-weight:700;font-size:1.25rem;color:var(--green-dark,#16291d);line-height:1.3;}
+.bci-msg-orn{width:76px;height:8px;margin:.75rem auto .8rem;background:center/contain no-repeat
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 76 8'%3E%3Cline x1='0' y1='4' x2='31' y2='4' stroke='%23c9a84c'/%3E%3Crect x='35' y='1.2' width='5.6' height='5.6' transform='rotate(45 37.8 4)' fill='%23c9a84c'/%3E%3Cline x1='45' y1='4' x2='76' y2='4' stroke='%23c9a84c'/%3E%3C/svg%3E");}
+.bci-msg-body{font-family:var(--serif-body,Arial,sans-serif);font-size:.95rem;line-height:1.55;color:var(--text-dark,#16291d);white-space:pre-wrap;overflow-wrap:anywhere;}
+.bci-msg-close{margin-top:1.3rem;width:100%;padding:.8rem;border:none;border-radius:var(--r-sm,4px);background:var(--green-dark,#16291d);
+  color:var(--gold,#c9a84c);font-family:var(--serif-display,Georgia,serif);font-size:.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+@media (prefers-reduced-motion:reduce){#bci-msg,.bci-msg-card{transition:none;}}
+
+/* No double-tap zoom, so the fixed bottom bar can never be zoomed off screen. */
+html{touch-action:manipulation;}

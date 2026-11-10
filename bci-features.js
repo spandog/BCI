@@ -722,3 +722,61 @@
     Array.prototype.forEach.call(document.querySelectorAll('img.bci-fade'),done);
   },6000);
 })();
+
+
+/* ---------- Notification message card ----------
+   Tapping a push notification opens the site and shows that notification
+   as a message card, so announcements can be read in full. The text comes
+   either from the address (site opened fresh) or from the service worker
+   (site already open on that page). Shown with textContent only. */
+(function(){
+  function show(title,body){
+    if(!title&&!body)return;
+    var old=document.getElementById('bci-msg');if(old)old.remove();
+    var wrap=document.createElement('div');wrap.id='bci-msg';wrap.setAttribute('role','dialog');wrap.setAttribute('aria-modal','true');
+    wrap.innerHTML='<div class="bci-msg-card"><div class="bci-msg-eyebrow">Book Club Invitational</div>'+
+      '<div class="bci-msg-title"></div><div class="bci-msg-orn"></div><div class="bci-msg-body"></div>'+
+      '<button class="bci-msg-close" type="button">Close</button></div>';
+    wrap.querySelector('.bci-msg-title').textContent=title||'';
+    wrap.querySelector('.bci-msg-body').textContent=body||'';
+    document.body.appendChild(wrap);
+    requestAnimationFrame(function(){wrap.classList.add('open');});
+    function close(){wrap.classList.remove('open');setTimeout(function(){wrap.remove();},350);document.removeEventListener('keydown',esc);}
+    function esc(e){if(e.key==='Escape')close();}
+    wrap.querySelector('.bci-msg-close').addEventListener('click',close);
+    wrap.addEventListener('click',function(e){if(e.target===wrap)close();});
+    document.addEventListener('keydown',esc);
+    wrap.querySelector('.bci-msg-close').focus({preventScroll:true});
+  }
+  window.bciShowMessage=show;
+  try{
+    var u=new URL(window.location.href);
+    var t=u.searchParams.get('mt'),b=u.searchParams.get('mb');
+    if(t||b){
+      u.searchParams.delete('mt');u.searchParams.delete('mb');
+      history.replaceState(history.state,'',u.pathname+u.search+u.hash);
+      setTimeout(function(){show(t,b);},250);
+    }
+  }catch(e){}
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.addEventListener('message',function(e){
+      if(e.data&&e.data.type==='bci-notification-click'&&(e.data.title||e.data.body))show(e.data.title,e.data.body);
+    });
+  }
+})();
+
+/* ---------- Lock the page at normal size ----------
+   iOS can't keep anything fixed to the screen while a page is pinch-zoomed,
+   so the bottom bar zooms off screen with everything else. The only reliable
+   fix is to stop the page zooming: pinch gestures and double-tap zoom are
+   blocked here, and the viewport tag stops iOS auto-zooming into form
+   fields. The iPhone's own Accessibility Zoom still works if anyone needs it. */
+(function(){
+  function block(e){e.preventDefault();}
+  document.addEventListener('gesturestart',block,{passive:false});
+  document.addEventListener('gesturechange',block,{passive:false});
+  document.addEventListener('gestureend',block,{passive:false});
+  document.addEventListener('touchmove',function(e){
+    if((e.touches&&e.touches.length>1)||(typeof e.scale==='number'&&e.scale!==1))e.preventDefault();
+  },{passive:false});
+})();

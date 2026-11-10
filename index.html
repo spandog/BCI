@@ -119,6 +119,13 @@
 .welcome-overlay.dismissed{opacity:0;visibility:hidden;pointer-events:none;transform:scale(1.05);filter:blur(8px);}
 .welcome-overlay{background-color:#0b120c;}
 .welcome-overlay.gone{display:none;}
+/* A permanent dark strip behind the status bar. While the welcome screen
+   was showing, iOS took the top bar colour from it and the band was dark;
+   once it was removed iOS fell back to something pale. This gives iOS the
+   same solid dark element to read for the rest of the visit. It sits
+   exactly where the nav is already dark, so it can't be seen. */
+.status-strip{position:fixed;top:0;left:0;right:0;height:max(1px,env(safe-area-inset-top,0px));
+  background-color:#16291d;z-index:250;pointer-events:none;}
 
 .welcome-glow{position:absolute;top:50%;left:50%;width:60px;height:60px;
   transform:translate(-50%,-50%);border-radius:50%;
@@ -206,6 +213,7 @@
 </style>
 </head>
 <body>
+<div class="status-strip" aria-hidden="true"></div>
 <div id="welcome-overlay" class="welcome-overlay">
   <div class="welcome-glow" aria-hidden="true"></div>
   <div class="welcome-vignette" aria-hidden="true"></div>
@@ -352,7 +360,12 @@
        the status bar area from whatever fixed element sits at the top of
        the screen, and a faded but still present full-screen overlay was
        being picked up instead of the dark nav, leaving a pale band. */
-    setTimeout(function(){overlay.classList.add('gone');},950);
+    setTimeout(function(){
+      overlay.classList.add('gone');
+      /* Nudge the theme colour so iOS re-reads it after the overlay goes. */
+      var tc=document.querySelector('meta[name="theme-color"]');
+      if(tc){tc.setAttribute('content','#16291e');requestAnimationFrame(function(){tc.setAttribute('content','#16291d');});}
+    },950);
   });
 })();
 (function(){

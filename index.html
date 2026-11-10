@@ -117,6 +117,8 @@
   overflow:hidden;transform:scale(1);filter:blur(0);
 }
 .welcome-overlay.dismissed{opacity:0;visibility:hidden;pointer-events:none;transform:scale(1.05);filter:blur(8px);}
+.welcome-overlay{background-color:#0b120c;}
+.welcome-overlay.gone{display:none;}
 
 .welcome-glow{position:absolute;top:50%;left:50%;width:60px;height:60px;
   transform:translate(-50%,-50%);border-radius:50%;
@@ -224,7 +226,7 @@
   if(sessionStorage.getItem('bci-welcomed')){
     var w=document.getElementById('welcome-overlay');
     w.style.transition='none';
-    w.classList.add('dismissed');
+    w.classList.add('dismissed','gone');
   } else {
     /* The whole sequence stays paused at its opening frame until the
        Lora font has actually finished loading — otherwise, on a slow
@@ -346,6 +348,11 @@
     sessionStorage.setItem('bci-welcomed','1');
     overlay.classList.add('dismissed');
     document.body.style.overflow='';
+    /* Once faded, take the overlay out of the page entirely. iOS colours
+       the status bar area from whatever fixed element sits at the top of
+       the screen, and a faded but still present full-screen overlay was
+       being picked up instead of the dark nav, leaving a pale band. */
+    setTimeout(function(){overlay.classList.add('gone');},950);
   });
 })();
 (function(){

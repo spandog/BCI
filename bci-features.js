@@ -733,7 +733,7 @@
    service worker writes, which the page checks whenever it opens or comes
    back to the foreground. Each message has an id so it is only shown once
    whichever route gets there first. Shown with textContent only. */
-window.BCI_BUILD='v198';
+window.BCI_BUILD='v199';
 window.bciPageLog=function(ev,extra){
   try{var l=JSON.parse(localStorage.getItem('bci-page-log')||'[]');
     l.push({t:new Date().toISOString().slice(11,19),ev:ev,page:location.pathname.replace(/^\//,'')||'index',x:extra||''});
@@ -747,6 +747,11 @@ window.bciPageLog=function(ev,extra){
   function show(title,body,id,url){
     if(!title&&!body)return;
     window.bciPageLog('show',id||'');
+    var sig=(title||'')+'|'+(body||'');
+    try{var seen=JSON.parse(localStorage.getItem('bci-msg-seen')||'{}');var now=Date.now();
+      Object.keys(seen).forEach(function(k){if(now-seen[k]>30*60*1000)delete seen[k];});
+      if(seen[sig]){localStorage.setItem('bci-msg-seen',JSON.stringify(seen));return;}
+      seen[sig]=now;localStorage.setItem('bci-msg-seen',JSON.stringify(seen));}catch(e){}
     if(id){if(shown[id])return;shown[id]=1;try{sessionStorage.setItem('bci-msg-last',id);}catch(e){}}
     clearPending();
     var old=document.getElementById('bci-msg');if(old)old.remove();
@@ -891,4 +896,45 @@ window.bciPageLog=function(ev,extra){
       setTimeout(function(){if(!document.getElementById('bci-notify-banner'))window.bciAskPushName(null,null,false);},2500);
     }
   }catch(e){}
+})();
+
+
+/* ---------- Announcements from the database ----------
+   The diagnostics showed iPhone never runs the service worker when an
+   announcement arrives or is tapped, so nothing can be handed to the page
+   that way. Instead every announcement sent from the leaderboard is also
+   saved in the database, and the app checks for a recent one each time it
+   opens or comes back to the front. A message only shows if it was sent
+   in the last 30 minutes, is newer than the last one this phone showed,
+   and is either for everyone or for this phone's linked name. */
+(function(){
+  var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+  function loadScript(src){return new Promise(function(res,rej){var s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+  function client(){
+    return (window.supabase?Promise.resolve():loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js'))
+      .then(function(){return window.bciGetSupabase?window.bciGetSupabase(SB_URL,SB_KEY):window.supabase.createClient(SB_URL,SB_KEY);});
+  }
+  var busy=false;
+  function check(){
+    if(busy||document.visibilityState==='hidden')return;
+    busy=true;
+    var since=new Date(Date.now()-30*60*1000).toISOString();
+    var last=0;try{last=parseInt(localStorage.getItem('bci-last-ann')||'0',10)||0;}catch(e){}
+    var me='';try{me=localStorage.getItem('bci_push_name')||'';}catch(e){}
+    client().then(function(sb){
+      if(!sb)return null;
+      return sb.from('bci_announcements').select('id,title,body,recipients,created_at').gt('id',last).gte('created_at',since).order('id',{ascending:false}).limit(5);
+    }).then(function(r){
+      busy=false;
+      var rows=(r&&r.data)||[];
+      var row=rows.filter(function(x){return !x.recipients||!x.recipients.length||(me&&x.recipients.indexOf(me)!==-1);})[0];
+      if(window.bciPageLog)window.bciPageLog('ann-check',row?('found '+row.id):('none ('+rows.length+' recent)'));
+      if(rows.length){try{localStorage.setItem('bci-last-ann',String(rows[0].id));}catch(e){}}
+      if(row&&window.bciShowMessage)window.bciShowMessage(row.title,row.body,'ann-'+row.id);
+    }).catch(function(err){busy=false;if(window.bciPageLog)window.bciPageLog('ann-check','error '+String(err).slice(0,40));});
+  }
+  setTimeout(check,600);
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')setTimeout(check,300);});
+  window.addEventListener('pageshow',function(){setTimeout(check,300);});
 })();

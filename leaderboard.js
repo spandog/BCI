@@ -1595,6 +1595,13 @@
       return;
     }
 
+    /* Save the announcement too, so the app can show it as a card when
+       someone opens it after the notification. Sending still goes ahead
+       if this fails. */
+    if(sb){
+      sb.from('bci_announcements').insert({title:title,body:body,recipients:audience.mode==='some'?Object.keys(audience.picked):null})
+        .then(function(r){if(r&&r.error)console.warn('announcement not saved',r.error);},function(){});
+    }
     fetch(PUSH_ENDPOINT,{
       method:'POST',
       headers:{'Content-Type':'application/json','X-BCI-Push-Secret':PUSH_SHARED_SECRET},

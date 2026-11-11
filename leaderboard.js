@@ -1621,6 +1621,32 @@
     });
   });
 
+  document.getElementById('diag-btn').addEventListener('click',function(){
+    var out=document.getElementById('diag-out');out.style.display='';out.textContent='Reading\u2026';
+    var lines=[];
+    lines.push('Page build: '+(window.BCI_BUILD||'old (before diagnostics)'));
+    lines.push('Installed app: '+(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone?'yes':'no'));
+    lines.push('Permission: '+(('Notification' in window)?Notification.permission:'n/a'));
+    lines.push('Service worker in control: '+(navigator.serviceWorker&&navigator.serviceWorker.controller?'yes':'no'));
+    lines.push('Linked name: '+(localStorage.getItem('bci_push_name')||'none'));
+    var keysP=('caches' in window)?caches.keys():Promise.resolve([]);
+    keysP.then(function(keys){
+      lines.push('Caches: '+keys.join(', '));
+      return caches.open('bci-msg').then(function(c){
+        return Promise.all([c.match('/__bci-log'),c.match('/__bci-pending-msg')]);
+      });
+    }).then(function(r){
+      return Promise.all([r[0]?r[0].json():[],r[1]?r[1].json():null]);
+    }).then(function(r){
+      lines.push('Waiting message: '+(r[1]?(r[1].id+' '+r[1].title):'none'));
+      lines.push('');lines.push('SERVICE WORKER LOG');
+      (r[0]||[]).forEach(function(x){lines.push(JSON.stringify(x));});
+      lines.push('');lines.push('PAGE LOG');
+      JSON.parse(localStorage.getItem('bci-page-log')||'[]').forEach(function(x){lines.push(x.t+' '+x.page+' '+x.ev+' '+x.x);});
+      out.textContent=lines.join('\n');
+    }).catch(function(err){lines.push('Error reading: '+err);out.textContent=lines.join('\n');});
+  });
+
   document.getElementById('reset-btn').addEventListener('click',function(){
     if(state.role!=='admin')return;
     if(!confirm('Reset ALL scoring on both days? Every hole result will be wiped and all matches set back to upcoming. Players and tee times are kept.'))return;
@@ -1829,6 +1855,7 @@
     document.getElementById('scorer-panel').classList.add('visible');
     document.getElementById('scorer-toggle').classList.add('open');
     document.getElementById('announce-card').style.display='';
+    document.getElementById('diag-card').style.display='';
     document.getElementById('reset-card').style.display='';
     document.getElementById('day-recap-btn').style.display='';
     renderScorer(true);

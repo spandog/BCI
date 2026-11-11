@@ -6,7 +6,7 @@
    Everything else (css/js/images) is stale-while-revalidate: served
    from cache first for speed, updated in the background.
    ============================================================ */
-var CACHE_NAME='bci-cache-v194';
+var CACHE_NAME='bci-cache-v197';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
@@ -82,6 +82,17 @@ self.addEventListener('fetch',function(e){
 });
 
 /* ---------- push notifications ---------- */
+/* Small rolling log of what happens when notifications arrive and are
+   tapped, readable from the leaderboard admin's diagnostics panel. */
+function swLog(entry){
+  entry.t=new Date().toISOString().slice(11,19);entry.v=CACHE_NAME;
+  return caches.open('bci-msg').then(function(c){
+    return c.match('/__bci-log').then(function(r){return r?r.json():[];}).catch(function(){return [];}).then(function(list){
+      list.push(entry);list=list.slice(-15);
+      return c.put('/__bci-log',new Response(JSON.stringify(list),{headers:{'Content-Type':'application/json'}}));
+    });
+  }).catch(function(){});
+}
 self.addEventListener('push',function(e){
   var raw=e.data?e.data.text():'[[no e.data]]';
   var parsed=null;
@@ -114,7 +125,7 @@ self.addEventListener('push',function(e){
     badge:'icon-192.png',
     data:{url:(payload&&(payload.click_action||payload.url))||'leaderboard.html',title:title,body:body}
   };
-  e.waitUntil(self.registration.showNotification(title,options));
+  e.waitUntil(Promise.all([self.registration.showNotification(title,options),swLog({ev:'push',title:String(title).slice(0,40)})]));
 
 });
 
@@ -140,27 +151,28 @@ self.addEventListener('notificationclick',function(e){
      reopening the app doesn't always pass the address through, so this is
      the route that always arrives. */
   var store=caches.open('bci-msg').then(function(c){
-    return c.put('/__bci-pending-msg',new Response(JSON.stringify({id:id,title:title,body:body,t:Date.now()}),{headers:{'Content-Type':'application/json'}}));
+    return c.put('/__bci-pending-msg',new Response(JSON.stringify({id:id,title:title,body:body,url:url,t:Date.now()}),{headers:{'Content-Type':'application/json'}}));
   }).catch(function(){});
 
+  /* If the app is already running on any page, tell every open window and
+     bring it forward. The page shows the card wherever it is, with a
+     button through to the right page. Moving the window to another page
+     from here isn't reliable on iPhone, so it is no longer attempted. */
   e.waitUntil(store.then(function(){
     return clients.matchAll({type:'window',includeUncontrolled:true});
   }).then(function(list){
-    for(var i=0;i<list.length;i++){
-      var client=list[i];
-      if(client.url.split('?')[0].split('#')[0]===targetPath&&'focus' in client){
-        client.postMessage({type:'bci-notification-click',url:url,title:title,body:body,id:id});
-        return client.focus();
-      }
+    var info={ev:'tap',id:id,clients:list.map(function(c){return c.url.replace(self.location.origin,'')+' '+(c.visibilityState||'?')+(c.focused?' focused':'');})};
+    if(list.length){
+      var msg={type:'bci-notification-click',url:url,title:title,body:body,id:id};
+      var sentTo=0;
+      list.forEach(function(c){try{c.postMessage(msg);sentTo++;}catch(err){info.postError=String(err).slice(0,60);}});
+      info.posted=sentTo;
+      var best=list.filter(function(c){return c.url.split('?')[0].split('#')[0]===targetPath;})[0]||list[0];
+      if(!('focus' in best)){info.focus='n/a';return swLog(info);}
+      return best.focus().then(function(){info.focus='ok';},function(err){info.focus='failed: '+String(err).slice(0,50);}).then(function(){return swLog(info);});
     }
-    for(var j=0;j<list.length;j++){
-      if('navigate' in list[j]&&'focus' in list[j]){
-        var c=list[j];
-        return c.navigate(withMsg).then(function(nc){return (nc||c).focus();}).catch(function(){
-          return c.focus();
-        });
-      }
-    }
-    if(clients.openWindow)return clients.openWindow(withMsg);
+    info.route='openWindow';
+    var p=clients.openWindow?clients.openWindow(withMsg):Promise.resolve();
+    return Promise.resolve(p).then(function(){return swLog(info);},function(err){info.openError=String(err).slice(0,60);return swLog(info);});
   }));
 });

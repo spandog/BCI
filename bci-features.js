@@ -733,13 +733,20 @@
    service worker writes, which the page checks whenever it opens or comes
    back to the foreground. Each message has an id so it is only shown once
    whichever route gets there first. Shown with textContent only. */
+window.BCI_BUILD='v197';
+window.bciPageLog=function(ev,extra){
+  try{var l=JSON.parse(localStorage.getItem('bci-page-log')||'[]');
+    l.push({t:new Date().toISOString().slice(11,19),ev:ev,page:location.pathname.replace(/^\//,'')||'index',x:extra||''});
+    localStorage.setItem('bci-page-log',JSON.stringify(l.slice(-25)));}catch(e){}
+};
 (function(){
   var shown={};
   function clearPending(){
     if('caches' in window)caches.open('bci-msg').then(function(c){return c.delete('/__bci-pending-msg');}).catch(function(){});
   }
-  function show(title,body,id){
+  function show(title,body,id,url){
     if(!title&&!body)return;
+    window.bciPageLog('show',id||'');
     if(id){if(shown[id])return;shown[id]=1;try{sessionStorage.setItem('bci-msg-last',id);}catch(e){}}
     clearPending();
     var old=document.getElementById('bci-msg');if(old)old.remove();
@@ -748,6 +755,7 @@
       '<div class="bci-msg-title"></div><div class="bci-msg-orn"></div><div class="bci-msg-body"></div>'+
       '<button class="bci-msg-close" type="button">Close</button></div>';
     wrap.querySelector('.bci-msg-title').textContent=title||'';
+
     wrap.querySelector('.bci-msg-body').textContent=body||'';
     document.body.appendChild(wrap);
     requestAnimationFrame(function(){wrap.classList.add('open');});
@@ -764,9 +772,10 @@
     caches.open('bci-msg').then(function(c){return c.match('/__bci-pending-msg');})
       .then(function(r){return r?r.json():null;})
       .then(function(d){
+        window.bciPageLog('check',d?('found '+d.id):'none');
         if(!d)return;
         if(Date.now()-d.t>15*60*1000){clearPending();return;}
-        show(d.title,d.body,d.id);
+        show(d.title,d.body,d.id,d.url);
       }).catch(function(){});
   }
   try{
@@ -779,12 +788,17 @@
     }
   }catch(e){}
   setTimeout(checkPending,300);
-  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')setTimeout(checkPending,150);});
-  window.addEventListener('pageshow',function(){setTimeout(checkPending,150);});
-  window.addEventListener('focus',function(){setTimeout(checkPending,150);});
+  /* When the app comes back to the front because a notification was tapped,
+     the service worker may still be writing the message, so look a few
+     times over the next few seconds rather than once. */
+  function checkSoon(){[150,900,2500,5000].forEach(function(ms){setTimeout(checkPending,ms);});}
+  document.addEventListener('visibilitychange',function(){window.bciPageLog('visibility',document.visibilityState);if(document.visibilityState==='visible')checkSoon();});
+  window.addEventListener('pageshow',checkSoon);
+  window.addEventListener('focus',checkSoon);
   if('serviceWorker' in navigator){
     navigator.serviceWorker.addEventListener('message',function(e){
-      if(e.data&&e.data.type==='bci-notification-click'&&(e.data.title||e.data.body))show(e.data.title,e.data.body,e.data.id);
+      if(e.data&&e.data.type)window.bciPageLog('sw-message',e.data.type+' '+(e.data.id||''));
+      if(e.data&&e.data.type==='bci-notification-click'&&(e.data.title||e.data.body))show(e.data.title,e.data.body,e.data.id,e.data.url);
     });
   }
 })();

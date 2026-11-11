@@ -733,12 +733,7 @@
    service worker writes, which the page checks whenever it opens or comes
    back to the foreground. Each message has an id so it is only shown once
    whichever route gets there first. Shown with textContent only. */
-window.BCI_BUILD='v199';
-window.bciPageLog=function(ev,extra){
-  try{var l=JSON.parse(localStorage.getItem('bci-page-log')||'[]');
-    l.push({t:new Date().toISOString().slice(11,19),ev:ev,page:location.pathname.replace(/^\//,'')||'index',x:extra||''});
-    localStorage.setItem('bci-page-log',JSON.stringify(l.slice(-25)));}catch(e){}
-};
+try{localStorage.removeItem('bci-page-log');}catch(e){}
 (function(){
   var shown={};
   function clearPending(){
@@ -746,7 +741,6 @@ window.bciPageLog=function(ev,extra){
   }
   function show(title,body,id,url){
     if(!title&&!body)return;
-    window.bciPageLog('show',id||'');
     var sig=(title||'')+'|'+(body||'');
     try{var seen=JSON.parse(localStorage.getItem('bci-msg-seen')||'{}');var now=Date.now();
       Object.keys(seen).forEach(function(k){if(now-seen[k]>30*60*1000)delete seen[k];});
@@ -777,7 +771,6 @@ window.bciPageLog=function(ev,extra){
     caches.open('bci-msg').then(function(c){return c.match('/__bci-pending-msg');})
       .then(function(r){return r?r.json():null;})
       .then(function(d){
-        window.bciPageLog('check',d?('found '+d.id):'none');
         if(!d)return;
         if(Date.now()-d.t>15*60*1000){clearPending();return;}
         show(d.title,d.body,d.id,d.url);
@@ -797,12 +790,11 @@ window.bciPageLog=function(ev,extra){
      the service worker may still be writing the message, so look a few
      times over the next few seconds rather than once. */
   function checkSoon(){[150,900,2500,5000].forEach(function(ms){setTimeout(checkPending,ms);});}
-  document.addEventListener('visibilitychange',function(){window.bciPageLog('visibility',document.visibilityState);if(document.visibilityState==='visible')checkSoon();});
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')checkSoon();});
   window.addEventListener('pageshow',checkSoon);
   window.addEventListener('focus',checkSoon);
   if('serviceWorker' in navigator){
     navigator.serviceWorker.addEventListener('message',function(e){
-      if(e.data&&e.data.type)window.bciPageLog('sw-message',e.data.type+' '+(e.data.id||''));
       if(e.data&&e.data.type==='bci-notification-click'&&(e.data.title||e.data.body))show(e.data.title,e.data.body,e.data.id,e.data.url);
     });
   }
@@ -929,10 +921,9 @@ window.bciPageLog=function(ev,extra){
       busy=false;
       var rows=(r&&r.data)||[];
       var row=rows.filter(function(x){return !x.recipients||!x.recipients.length||(me&&x.recipients.indexOf(me)!==-1);})[0];
-      if(window.bciPageLog)window.bciPageLog('ann-check',row?('found '+row.id):('none ('+rows.length+' recent)'));
       if(rows.length){try{localStorage.setItem('bci-last-ann',String(rows[0].id));}catch(e){}}
       if(row&&window.bciShowMessage)window.bciShowMessage(row.title,row.body,'ann-'+row.id);
-    }).catch(function(err){busy=false;if(window.bciPageLog)window.bciPageLog('ann-check','error '+String(err).slice(0,40));});
+    }).catch(function(){busy=false;});
   }
   setTimeout(check,600);
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')setTimeout(check,300);});

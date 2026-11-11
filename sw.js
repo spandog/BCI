@@ -6,7 +6,7 @@
    Everything else (css/js/images) is stale-while-revalidate: served
    from cache first for speed, updated in the background.
    ============================================================ */
-var CACHE_NAME='bci-cache-v199';
+var CACHE_NAME='bci-cache-v200';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
@@ -43,6 +43,7 @@ self.addEventListener('activate',function(e){
       .then(function(keys){
         return Promise.all(keys.filter(function(k){return k!==CACHE_NAME&&k!=='bci-msg';}).map(function(k){return caches.delete(k);}));
       })
+      .then(function(){return caches.open('bci-msg').then(function(c){return c.delete('/__bci-log');}).catch(function(){});})
       .then(function(){return self.clients.claim();})
   );
 });
@@ -111,17 +112,6 @@ self.addEventListener('fetch',function(e){
 });
 
 /* ---------- push notifications ---------- */
-/* Small rolling log of what happens when notifications arrive and are
-   tapped, readable from the leaderboard admin's diagnostics panel. */
-function swLog(entry){
-  entry.t=new Date().toISOString().slice(11,19);entry.v=CACHE_NAME;
-  return caches.open('bci-msg').then(function(c){
-    return c.match('/__bci-log').then(function(r){return r?r.json():[];}).catch(function(){return [];}).then(function(list){
-      list.push(entry);list=list.slice(-15);
-      return c.put('/__bci-log',new Response(JSON.stringify(list),{headers:{'Content-Type':'application/json'}}));
-    });
-  }).catch(function(){});
-}
 self.addEventListener('push',function(e){
   var raw=e.data?e.data.text():'[[no e.data]]';
   var parsed=null;
@@ -154,7 +144,7 @@ self.addEventListener('push',function(e){
     badge:'icon-192.png',
     data:{url:(payload&&(payload.click_action||payload.url))||'leaderboard.html',title:title,body:body}
   };
-  e.waitUntil(Promise.all([self.registration.showNotification(title,options),swLog({ev:'push',title:String(title).slice(0,40)})]));
+  e.waitUntil(self.registration.showNotification(title,options));
 
 });
 
@@ -190,18 +180,12 @@ self.addEventListener('notificationclick',function(e){
   e.waitUntil(store.then(function(){
     return clients.matchAll({type:'window',includeUncontrolled:true});
   }).then(function(list){
-    var info={ev:'tap',id:id,clients:list.map(function(c){return c.url.replace(self.location.origin,'')+' '+(c.visibilityState||'?')+(c.focused?' focused':'');})};
     if(list.length){
       var msg={type:'bci-notification-click',url:url,title:title,body:body,id:id};
-      var sentTo=0;
-      list.forEach(function(c){try{c.postMessage(msg);sentTo++;}catch(err){info.postError=String(err).slice(0,60);}});
-      info.posted=sentTo;
+      list.forEach(function(c){try{c.postMessage(msg);}catch(err){}});
       var best=list.filter(function(c){return c.url.split('?')[0].split('#')[0]===targetPath;})[0]||list[0];
-      if(!('focus' in best)){info.focus='n/a';return swLog(info);}
-      return best.focus().then(function(){info.focus='ok';},function(err){info.focus='failed: '+String(err).slice(0,50);}).then(function(){return swLog(info);});
+      return 'focus' in best?best.focus():undefined;
     }
-    info.route='openWindow';
-    var p=clients.openWindow?clients.openWindow(withMsg):Promise.resolve();
-    return Promise.resolve(p).then(function(){return swLog(info);},function(err){info.openError=String(err).slice(0,60);return swLog(info);});
+    if(clients.openWindow)return clients.openWindow(withMsg);
   }));
 });

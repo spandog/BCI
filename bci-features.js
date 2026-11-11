@@ -733,7 +733,7 @@
    service worker writes, which the page checks whenever it opens or comes
    back to the foreground. Each message has an id so it is only shown once
    whichever route gets there first. Shown with textContent only. */
-window.BCI_BUILD='v197';
+window.BCI_BUILD='v198';
 window.bciPageLog=function(ev,extra){
   try{var l=JSON.parse(localStorage.getItem('bci-page-log')||'[]');
     l.push({t:new Date().toISOString().slice(11,19),ev:ev,page:location.pathname.replace(/^\//,'')||'index',x:extra||''});

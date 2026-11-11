@@ -6,7 +6,7 @@
    Everything else (css/js/images) is stale-while-revalidate: served
    from cache first for speed, updated in the background.
    ============================================================ */
-var CACHE_NAME='bci-cache-v197';
+var CACHE_NAME='bci-cache-v198';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
@@ -21,10 +21,19 @@ var CORE_ASSETS=[
 ];
 
 self.addEventListener('install',function(e){
+  /* Each file is fetched fresh from the server, skipping the phone's own
+     browser cache. Previously the install could pick up a copy the phone
+     had stored minutes earlier, so a new service worker started life with
+     an old bci-features.js and kept serving it. One missing file no longer
+     stops the whole install either. */
   e.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache){return cache.addAll(CORE_ASSETS);})
-      .then(function(){return self.skipWaiting();})
+    caches.open(CACHE_NAME).then(function(cache){
+      return Promise.all(CORE_ASSETS.map(function(url){
+        return fetch(new Request(url,{cache:'reload'})).then(function(resp){
+          if(resp&&resp.ok)return cache.put(url,resp);
+        }).catch(function(){});
+      }));
+    }).then(function(){return self.skipWaiting();})
   );
 });
 
@@ -60,6 +69,26 @@ self.addEventListener('fetch',function(e){
         return caches.match(e.request).then(function(cached){
           return cached||caches.match('2027.html');
         });
+      })
+    );
+    return;
+  }
+
+  /* The site's own scripts, styles and manifest are network-first, checked
+     against the server on every load (a quick "not modified" when nothing
+     has changed), with the cached copy only used offline. Cache-first here
+     is what kept phones running old code after an upload. */
+  var u=new URL(e.request.url);
+  if(u.origin===self.location.origin&&/\.(js|css|json)$/.test(u.pathname)){
+    e.respondWith(
+      fetch(new Request(e.request,{cache:'no-cache'})).then(function(resp){
+        if(resp&&resp.status===200&&resp.type==='basic'){
+          var copy=resp.clone();
+          caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,copy);});
+        }
+        return resp;
+      }).catch(function(){
+        return caches.open(CACHE_NAME).then(function(cache){return cache.match(e.request);});
       })
     );
     return;

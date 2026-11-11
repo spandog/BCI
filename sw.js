@@ -6,7 +6,7 @@
    Everything else (css/js/images) is stale-while-revalidate: served
    from cache first for speed, updated in the background.
    ============================================================ */
-var CACHE_NAME='bci-cache-v189';
+var CACHE_NAME='bci-cache-v194';
 var CORE_ASSETS=[
   '2027.html',
   'index.html',
@@ -32,7 +32,7 @@ self.addEventListener('activate',function(e){
   e.waitUntil(
     caches.keys()
       .then(function(keys){
-        return Promise.all(keys.filter(function(k){return k!==CACHE_NAME;}).map(function(k){return caches.delete(k);}));
+        return Promise.all(keys.filter(function(k){return k!==CACHE_NAME&&k!=='bci-msg';}).map(function(k){return caches.delete(k);}));
       })
       .then(function(){return self.clients.claim();})
   );
@@ -112,7 +112,7 @@ self.addEventListener('push',function(e){
     body:body,
     icon:'icon-192.png',
     badge:'icon-192.png',
-    data:{url:(payload&&(payload.click_action||payload.url))||'leaderboard.html'}
+    data:{url:(payload&&(payload.click_action||payload.url))||'leaderboard.html',title:title,body:body}
   };
   e.waitUntil(self.registration.showNotification(title,options));
 
@@ -120,22 +120,47 @@ self.addEventListener('push',function(e){
 
 self.addEventListener('notificationclick',function(e){
   e.notification.close();
-  var url=(e.notification.data&&e.notification.data.url)||'leaderboard.html';
-  var targetPath;
-  try{targetPath=new URL(url,self.location.origin).origin+new URL(url,self.location.origin).pathname;}
-  catch(err){targetPath=url.split('?')[0].split('#')[0];}
+  var d=e.notification.data||{};
+  var title=d.title||e.notification.title||'';
+  var body=d.body||e.notification.body||'';
+  var id=String(Date.now());
+  /* Always open the site's own address. Notifications can carry the bare
+     domain while the app runs on www (or the other way round), and a
+     mismatch made iOS treat it as a different site. */
+  var url;
+  try{var u0=new URL(d.url||'leaderboard.html',self.location.origin);url=self.location.origin+u0.pathname+u0.search+u0.hash;}
+  catch(err){url=self.location.origin+'/leaderboard.html';}
+  var withMsg;
+  try{var u=new URL(url);u.searchParams.set('mt',title);u.searchParams.set('mb',body);u.searchParams.set('mi',id);withMsg=u.href;}
+  catch(err){withMsg=url;}
+  var targetPath=url.split('?')[0].split('#')[0];
+  /* The message is also left in a small cache that the page checks
+     whenever it opens or comes back to the foreground. On iPhone a
+     suspended app can miss a direct message from the service worker, and
+     reopening the app doesn't always pass the address through, so this is
+     the route that always arrives. */
+  var store=caches.open('bci-msg').then(function(c){
+    return c.put('/__bci-pending-msg',new Response(JSON.stringify({id:id,title:title,body:body,t:Date.now()}),{headers:{'Content-Type':'application/json'}}));
+  }).catch(function(){});
 
-  e.waitUntil(
-    clients.matchAll({type:'window',includeUncontrolled:true}).then(function(list){
-      for(var i=0;i<list.length;i++){
-        var client=list[i];
-        var clientPath=client.url.split('?')[0].split('#')[0];
-        if(clientPath===targetPath&&'focus' in client){
-          client.postMessage({type:'bci-notification-click',url:url});
-          return client.focus();
-        }
+  e.waitUntil(store.then(function(){
+    return clients.matchAll({type:'window',includeUncontrolled:true});
+  }).then(function(list){
+    for(var i=0;i<list.length;i++){
+      var client=list[i];
+      if(client.url.split('?')[0].split('#')[0]===targetPath&&'focus' in client){
+        client.postMessage({type:'bci-notification-click',url:url,title:title,body:body,id:id});
+        return client.focus();
       }
-      if(clients.openWindow)return clients.openWindow(url);
-    })
-  );
+    }
+    for(var j=0;j<list.length;j++){
+      if('navigate' in list[j]&&'focus' in list[j]){
+        var c=list[j];
+        return c.navigate(withMsg).then(function(nc){return (nc||c).focus();}).catch(function(){
+          return c.focus();
+        });
+      }
+    }
+    if(clients.openWindow)return clients.openWindow(withMsg);
+  }));
 });

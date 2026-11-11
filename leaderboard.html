@@ -204,7 +204,7 @@
     <div class="scorer-panel" id="scorer-panel">
       <div class="entry-card" id="announce-card" style="display:none;">
         <h4>Send Announcement</h4>
-        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">Sends a push notification to everyone who's got notifications turned on, right now. Use for anything that isn't an automatic score or tee-time update.</p>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">Sends a push notification right now, to everyone or just the people you pick. Use for anything that isn't an automatic score or tee-time update.</p>
         <div class="entry-row">
           <div class="entry-group full">
             <label>Title</label>
@@ -214,6 +214,15 @@
             <label>Message</label>
             <input type="text" id="announce-body" placeholder="e.g. Tee times moved to 9am">
           </div>
+        </div>
+        <div class="entry-group full aud-group">
+          <label>Send to</label>
+          <div class="aud-toggle">
+            <button type="button" class="aud-opt active" data-aud="all">Everyone</button>
+            <button type="button" class="aud-opt" data-aud="some">Choose people</button>
+          </div>
+          <div class="aud-people" id="aud-people" style="display:none;"></div>
+          <div class="aud-note" id="aud-note" style="display:none;"></div>
         </div>
         <button class="entry-btn" id="announce-btn">Send Now</button>
       </div>

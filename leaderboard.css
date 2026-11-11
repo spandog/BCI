@@ -467,3 +467,13 @@
 .day-welcome .dw-odiamond{width:4px;height:4px;background:var(--gold);transform:rotate(45deg);opacity:0.6;flex-shrink:0;}
 .day-welcome .dw-sub{font-family:var(--serif-body);font-size:0.78rem;letter-spacing:1.5px;color:rgba(255,255,255,0.6);text-transform:uppercase;}
 @media(prefers-reduced-motion:reduce){.day-welcome,.day-welcome .dw-title{transition:none;opacity:1;filter:none;}}
+
+/* ---------- Announcement audience ---------- */
+.aud-group{margin-top:0.2rem;}
+.aud-toggle{display:flex;border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;}
+.aud-opt{flex:1;padding:0.6rem;border:none;background:var(--card-bg);color:var(--text-muted);font-family:var(--serif-display);
+  font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;}
+.aud-opt.active{background:var(--green-dark);color:var(--gold);}
+.aud-people{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.7rem;}
+.aud-chip.has-device::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#3fae6a;margin-left:6px;vertical-align:middle;}
+.aud-note{font-size:0.75rem;color:var(--text-muted);margin-top:0.6rem;line-height:1.45;}

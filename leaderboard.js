@@ -1541,11 +1541,51 @@
     });
   }
 
+  /* ---------- announcement audience: everyone, or picked players ---------- */
+  var audience={mode:'all',picked:{},devices:{}};
+  function renderAudience(){
+    var box=document.getElementById('aud-people');
+    var roster=window.BCI_ROSTER||[];
+    box.innerHTML=roster.map(function(n){
+      return '<button type="button" class="kitty-chip aud-chip'+(audience.picked[n]?' selected':'')+(audience.devices[n]?' has-device':'')+'" data-name="'+esc(n)+'">'+esc(n)+'</button>';
+    }).join('');
+    Array.prototype.forEach.call(box.querySelectorAll('.aud-chip'),function(c){
+      c.addEventListener('click',function(){
+        var n=c.dataset.name;
+        if(audience.picked[n])delete audience.picked[n];else audience.picked[n]=1;
+        c.classList.toggle('selected',!!audience.picked[n]);
+      });
+    });
+    var linked=Object.keys(audience.devices).length;
+    var note=document.getElementById('aud-note');
+    note.style.display='';
+    note.textContent='A green dot means that person has linked their phone. '+linked+' of '+roster.length+' so far. Anyone without one won\u2019t receive a message sent only to them.';
+  }
+  function loadAudienceDevices(){
+    if(!sb||!sb.rpc)return Promise.resolve();
+    return sb.rpc('bci_push_names').then(function(r){
+      audience.devices={};
+      (r.data||[]).forEach(function(row){if(row.player_name)audience.devices[row.player_name]=row.devices||1;});
+    }).catch(function(){});
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.aud-opt'),function(b){
+    b.addEventListener('click',function(){
+      audience.mode=b.dataset.aud;
+      Array.prototype.forEach.call(document.querySelectorAll('.aud-opt'),function(x){x.classList.toggle('active',x===b);});
+      var some=audience.mode==='some';
+      document.getElementById('aud-people').style.display=some?'':'none';
+      if(!some){document.getElementById('aud-note').style.display='none';return;}
+      renderAudience();
+      loadAudienceDevices().then(renderAudience);
+    });
+  });
+
   document.getElementById('announce-btn').addEventListener('click',function(){
     if(state.role!=='admin')return;
     var title=document.getElementById('announce-title').value.trim();
     var body=document.getElementById('announce-body').value.trim();
     if(!title||!body){alert('Add both a title and a message before sending.');return;}
+    if(audience.mode==='some'&&!Object.keys(audience.picked).length){alert('Pick at least one person, or switch to Everyone.');return;}
     var btn=this;
     btn.disabled=true;btn.textContent='Sending...';
 
@@ -1558,7 +1598,7 @@
     fetch(PUSH_ENDPOINT,{
       method:'POST',
       headers:{'Content-Type':'application/json','X-BCI-Push-Secret':PUSH_SHARED_SECRET},
-      body:JSON.stringify({type:'manual-announcement',payload:{title:title,body:body}})
+      body:JSON.stringify({type:'manual-announcement',payload:audience.mode==='some'?{title:title,body:body,recipients:Object.keys(audience.picked)}:{title:title,body:body}})
     }).then(function(res){
       return res.json().catch(function(){return {};}).then(function(data){return {ok:res.ok,status:res.status,data:data};});
     }).then(function(result){
@@ -1566,7 +1606,12 @@
       if(result.ok){
         document.getElementById('announce-title').value='';
         document.getElementById('announce-body').value='';
-        alert('Sent to '+(result.data.sent||0)+' of '+(result.data.total||0)+' subscribed device(s).');
+        var who=audience.mode==='some'?Object.keys(audience.picked).join(', '):'everyone';
+        if(audience.mode==='some'&&!(result.data.total>0)){
+          alert('Nobody you picked has linked their phone yet, so nothing was sent. They\u2019ll be asked to pick their name next time they open the app.');
+        } else {
+          alert('Sent to '+(result.data.sent||0)+' of '+(result.data.total||0)+' device(s) for '+who+'.');
+        }
       } else {
         alert('Send failed (status '+result.status+'): '+JSON.stringify(result.data));
       }

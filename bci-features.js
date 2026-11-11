@@ -355,7 +355,7 @@
           }
           loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js')
             .then(function(){return loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');})
-            .then(function(){return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');})
+            .then(function(){return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js');})
             .then(function(){
               if(!window.firebase.apps.length)window.firebase.initializeApp(FIREBASE_CONFIG);
               var messaging=window.firebase.messaging();
@@ -367,11 +367,13 @@
               var sb=window.bciGetSupabase(SB_URL,SB_KEY);
               return sb.from('bci_push_subscriptions').upsert({token:token},{onConflict:'token'}).then(function(result){
                 if(result.error)throw new Error(result.error.message||JSON.stringify(result.error));
-                return result;
+                try{localStorage.setItem('bci_push_token',token);}catch(e){}
+                return token;
               });
             })
-            .then(function(){
+            .then(function(token){
               localStorage.setItem('bci_notify_dismissed','1');
+              if(window.bciAskPushName){window.bciAskPushName(el,token,true);return;}
               el.innerHTML='<span>Notifications on \u2014 you\u2019re all set.</span>';
               setTimeout(function(){el.remove();},2500);
             })
@@ -407,7 +409,7 @@
       });
     }
 
-    var readyPromise=window.supabase?Promise.resolve():loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+    var readyPromise=window.supabase?Promise.resolve():loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js');
 
     readyPromise.then(function(){
       if(!window.supabase)return;
@@ -721,4 +723,158 @@
   setTimeout(function(){
     Array.prototype.forEach.call(document.querySelectorAll('img.bci-fade'),done);
   },6000);
+})();
+
+
+/* ---------- Notification message card ----------
+   Tapping a push notification opens the site and shows that notification
+   as a message card. The text can arrive three ways: in the address, as a
+   direct message from the service worker, or from a small cache the
+   service worker writes, which the page checks whenever it opens or comes
+   back to the foreground. Each message has an id so it is only shown once
+   whichever route gets there first. Shown with textContent only. */
+(function(){
+  var shown={};
+  function clearPending(){
+    if('caches' in window)caches.open('bci-msg').then(function(c){return c.delete('/__bci-pending-msg');}).catch(function(){});
+  }
+  function show(title,body,id){
+    if(!title&&!body)return;
+    if(id){if(shown[id])return;shown[id]=1;try{sessionStorage.setItem('bci-msg-last',id);}catch(e){}}
+    clearPending();
+    var old=document.getElementById('bci-msg');if(old)old.remove();
+    var wrap=document.createElement('div');wrap.id='bci-msg';wrap.setAttribute('role','dialog');wrap.setAttribute('aria-modal','true');
+    wrap.innerHTML='<div class="bci-msg-card"><div class="bci-msg-eyebrow">Book Club Invitational</div>'+
+      '<div class="bci-msg-title"></div><div class="bci-msg-orn"></div><div class="bci-msg-body"></div>'+
+      '<button class="bci-msg-close" type="button">Close</button></div>';
+    wrap.querySelector('.bci-msg-title').textContent=title||'';
+    wrap.querySelector('.bci-msg-body').textContent=body||'';
+    document.body.appendChild(wrap);
+    requestAnimationFrame(function(){wrap.classList.add('open');});
+    function close(){wrap.classList.remove('open');setTimeout(function(){wrap.remove();},350);document.removeEventListener('keydown',esc);}
+    function esc(e){if(e.key==='Escape')close();}
+    wrap.querySelector('.bci-msg-close').addEventListener('click',close);
+    wrap.addEventListener('click',function(e){if(e.target===wrap)close();});
+    document.addEventListener('keydown',esc);
+  }
+  window.bciShowMessage=show;
+  try{var last=sessionStorage.getItem('bci-msg-last');if(last)shown[last]=1;}catch(e){}
+  function checkPending(){
+    if(!('caches' in window))return;
+    caches.open('bci-msg').then(function(c){return c.match('/__bci-pending-msg');})
+      .then(function(r){return r?r.json():null;})
+      .then(function(d){
+        if(!d)return;
+        if(Date.now()-d.t>15*60*1000){clearPending();return;}
+        show(d.title,d.body,d.id);
+      }).catch(function(){});
+  }
+  try{
+    var u=new URL(window.location.href);
+    var t=u.searchParams.get('mt'),b=u.searchParams.get('mb'),i=u.searchParams.get('mi');
+    if(t||b){
+      ['mt','mb','mi'].forEach(function(k){u.searchParams.delete(k);});
+      history.replaceState(history.state,'',u.pathname+u.search+u.hash);
+      setTimeout(function(){show(t,b,i);},250);
+    }
+  }catch(e){}
+  setTimeout(checkPending,300);
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')setTimeout(checkPending,150);});
+  window.addEventListener('pageshow',function(){setTimeout(checkPending,150);});
+  window.addEventListener('focus',function(){setTimeout(checkPending,150);});
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.addEventListener('message',function(e){
+      if(e.data&&e.data.type==='bci-notification-click'&&(e.data.title||e.data.body))show(e.data.title,e.data.body,e.data.id);
+    });
+  }
+})();
+
+/* ---------- Lock the page at normal size ----------
+   iOS can't keep anything fixed to the screen while a page is pinch-zoomed,
+   so the bottom bar zooms off screen with everything else. The only reliable
+   fix is to stop the page zooming: pinch gestures and double-tap zoom are
+   blocked here, and the viewport tag stops iOS auto-zooming into form
+   fields. The iPhone's own Accessibility Zoom still works if anyone needs it. */
+(function(){
+  function block(e){e.preventDefault();}
+  document.addEventListener('gesturestart',block,{passive:false});
+  document.addEventListener('gesturechange',block,{passive:false});
+  document.addEventListener('gestureend',block,{passive:false});
+  document.addEventListener('touchmove',function(e){
+    if((e.touches&&e.touches.length>1)||(typeof e.scale==='number'&&e.scale!==1))e.preventDefault();
+  },{passive:false});
+})();
+
+
+/* ---------- Who's this phone? ----------
+   Each phone with notifications on can be linked to a player's name, so
+   the admin can send a message to particular people. New subscribers are
+   asked straight after turning notifications on; phones that already had
+   them on are asked once. Skipping is fine, they still get messages sent
+   to everyone. */
+(function(){
+  window.BCI_ROSTER=["Aaron Davies", "Aaron Sonatun", "Alex Tinawi", "Angus Killin", "Brian Hinojosa", "Dan Burr", "Dan Simkin", "Emory Garrett", "Jack Brown", "Jack Taggart", "James Baber", "Joe Hollinworth", "Kane Bailey", "Louis Kelly", "Luke Clark", "Mark Brackenridge", "Matt Higgins", "Matt Wreford", "Oscar Hinojosa", "Phil Smith", "Rich Horsley", "Sean Mongan", "Ted Keeling", "Will Dodgson", "Will Reed"];
+  var SB_URL='https://ccczckdewwlpofgjigdi.supabase.co';
+  var SB_KEY='sb_publishable_9ZVOAL9qqv8uaLBq-DM_iA_ODMnweui';
+  var FIREBASE_CONFIG={apiKey:'AIzaSyBHslzaSiXjCubkxoM5lQRIMaBeDM3r-h8',authDomain:'bci-notifications.firebaseapp.com',
+    projectId:'bci-notifications',storageBucket:'bci-notifications.firebasestorage.app',messagingSenderId:'593261387998',
+    appId:'1:593261387998:web:70eab1be9b6931873c624f'};
+  var VAPID_KEY='BNMlGuHnlfoBjvJQHjAEL7WZXGIKeGwNpDwN7gVZPB8Ve-1yvoUPTBTjtZpgh51M67RWeA7olu9xQq1SWF3S2Mw';
+  function loadScript(src){return new Promise(function(res,rej){var s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+  function getToken(){
+    var stored=null;try{stored=localStorage.getItem('bci_push_token');}catch(e){}
+    if(stored)return Promise.resolve(stored);
+    return (window.firebase&&window.firebase.messaging?Promise.resolve():loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js')
+      .then(function(){return loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');}))
+      .then(function(){
+        if(!window.firebase.apps.length)window.firebase.initializeApp(FIREBASE_CONFIG);
+        var messaging=window.firebase.messaging();
+        var ready=Promise.race([navigator.serviceWorker.ready,new Promise(function(_,rej){setTimeout(function(){rej(new Error('the app is still setting up, close and reopen it, then try again'));},8000);})]);
+        return ready.then(function(reg){return messaging.getToken({vapidKey:VAPID_KEY,serviceWorkerRegistration:reg});});
+      });
+  }
+  function client(){
+    return (window.supabase?Promise.resolve():loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js'))
+      .then(function(){return window.bciGetSupabase?window.bciGetSupabase(SB_URL,SB_KEY):window.supabase.createClient(SB_URL,SB_KEY);});
+  }
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+  window.bciAskPushName=function(el,knownToken,justEnabled){
+    if(!el){el=document.createElement('div');el.id='bci-notify-banner';document.body.appendChild(el);}
+    el.classList.add('with-picker');
+    el.innerHTML='<span>'+(justEnabled?'Notifications on. ':'')+'Who\u2019s this phone? Pick your name so messages can be sent just to you.</span>'+
+      '<select id="bci-name-select" aria-label="Your name"><option value="">Choose your name</option>'+
+      window.BCI_ROSTER.map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>';}).join('')+'</select>'+
+      '<button id="bci-name-save" type="button">Save</button><button id="bci-name-close" type="button" aria-label="Not now">&times;</button>';
+    el.querySelector('#bci-name-close').addEventListener('click',function(){
+      try{localStorage.setItem('bci_name_prompt_dismissed','1');}catch(e){}
+      el.remove();
+    });
+    el.querySelector('#bci-name-save').addEventListener('click',function(){
+      var name=el.querySelector('#bci-name-select').value;
+      if(!name){el.querySelector('#bci-name-select').focus();return;}
+      var btn=this;btn.disabled=true;btn.textContent='Saving\u2026';
+      (knownToken?Promise.resolve(knownToken):getToken()).then(function(token){
+        try{localStorage.setItem('bci_push_token',token);}catch(e){}
+        return client().then(function(sb){return sb.from('bci_push_subscriptions').upsert({token:token,player_name:name},{onConflict:'token'});});
+      }).then(function(r){
+        if(r&&r.error)throw new Error(r.error.message);
+        try{localStorage.setItem('bci_push_name',name);}catch(e){}
+        el.classList.remove('with-picker');
+        el.innerHTML='<span>Thanks '+esc(name.split(' ')[0])+', you\u2019re all set.</span>';
+        setTimeout(function(){el.remove();},2500);
+      }).catch(function(err){
+        btn.disabled=false;btn.textContent='Save';
+        alert('Could not save your name: '+(err&&err.message?err.message:'please try again'));
+      });
+    });
+  };
+
+  try{
+    if('Notification' in window&&Notification.permission==='granted'&&'serviceWorker' in navigator&&
+       !localStorage.getItem('bci_push_name')&&localStorage.getItem('bci_name_prompt_dismissed')!=='1'&&
+       !document.getElementById('bci-notify-banner')){
+      setTimeout(function(){if(!document.getElementById('bci-notify-banner'))window.bciAskPushName(null,null,false);},2500);
+    }
+  }catch(e){}
 })();

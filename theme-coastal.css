@@ -262,3 +262,13 @@ body .section-title{border-bottom:none;padding-bottom:0;}
 
 /* No double-tap zoom, so the fixed bottom bar can never be zoomed off screen. */
 html{touch-action:manipulation;}
+
+/* ---------- Name picker inside the notifications banner ---------- */
+#bci-notify-banner.with-picker{flex-wrap:wrap;row-gap:0.6rem;}
+#bci-notify-banner.with-picker span{flex-basis:calc(100% - 2rem);}
+#bci-notify-banner select{flex:1;min-width:0;padding:0.5rem 0.6rem;border-radius:var(--r-sm,4px);border:1px solid rgba(201,168,76,0.5);
+  background:rgba(255,255,255,0.08);color:#fff;font-family:var(--serif-body,Arial,sans-serif);font-size:16px;}
+#bci-notify-banner select option{color:#16291d;}
+#bci-notify-banner #bci-name-save{flex-shrink:0;background:var(--gold,#c9a84c);color:var(--green-dark,#16291d);border:none;border-radius:var(--r-sm,4px);
+  padding:0.5rem 0.9rem;font-family:var(--serif-display,inherit);font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;font-weight:700;cursor:pointer;}
+#bci-notify-banner #bci-name-close{flex-shrink:0;background:none;border:none;color:rgba(255,255,255,0.6);font-size:1.3rem;line-height:1;cursor:pointer;padding:0 0.2rem;}

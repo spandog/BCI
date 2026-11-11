@@ -405,7 +405,7 @@
   (function tryRealtime(){
     if(!window.supabase){
       var s=document.createElement('script');
-      s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js';
       s.onload=subscribeRealtime;
       document.head.appendChild(s);
     } else {
